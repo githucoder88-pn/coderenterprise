@@ -1,0 +1,83 @@
+{
+  "name": "coder-vscode",
+  "displayName": "CODER",
+  "description": "Enterprise AI coding assistant — provider-independent",
+  "version": "1.0.0",
+  "publisher": "coder",
+  "engines": { "vscode": "^1.96.0" },
+  "categories": ["AI", "Linters", "Programming Languages", "Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./dist/extension.js",
+  "icon": "resources/icon.png",
+  "contributes": {
+    "commands": [
+      { "command": "coder.chat", "title": "CODER: Open Chat", "icon": "$(comment-discussion)" },
+      { "command": "coder.plan", "title": "CODER: Generate Plan", "icon": "$(list-ordered)" },
+      { "command": "coder.explain", "title": "CODER: Explain Code", "icon": "$(info)" },
+      { "command": "coder.review", "title": "CODER: Review Code", "icon": "$(checklist)" },
+      { "command": "coder.refactor", "title": "CODER: Refactor Code", "icon": "$(wrench)" },
+      { "command": "coder.test", "title": "CODER: Generate Tests", "icon": "$(beaker)" },
+      { "command": "coder.commit", "title": "CODER: Generate Commit Message", "icon": "$(git-commit)" },
+      { "command": "coder.history", "title": "CODER: Conversation History", "icon": "$(history)" },
+      { "command": "coder.providers", "title": "CODER: Select Provider", "icon": "$(server)" },
+      { "command": "coder.models", "title": "CODER: Select Model", "icon": "$(cpu)" },
+      { "command": "coder.settings", "title": "CODER: Settings", "icon": "$(settings-gear)" },
+      { "command": "coder.workspace.index", "title": "CODER: Index Workspace", "icon": "$(database)" },
+      { "command": "coder.workspace.search", "title": "CODER: Semantic Search", "icon": "$(search)" },
+      { "command": "coder.memory.store", "title": "CODER: Store Memory", "icon": "$(bookmark)" },
+      { "command": "coder.memory.search", "title": "CODER: Search Memory", "icon": "$(search)" },
+      { "command": "coder.tools.list", "title": "CODER: List Tools", "icon": "$(tools)" },
+      { "command": "coder.tools.execute", "title": "CODER: Execute Tool", "icon": "$(play)" }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        { "id": "coder-sidebar", "title": "CODER", "icon": "resources/sidebar-icon.svg" }
+      ]
+    },
+    "views": {
+      "coder-sidebar": [
+        { "id": "coder.conversations", "name": "Conversations", "icon": "$(comment-discussion)" },
+        { "id": "coder.workspaces", "name": "Workspaces", "icon": "$(folder)" },
+        { "id": "coder.tools", "name": "Tools", "icon": "$(tools)" },
+        { "id": "coder.models", "name": "Models", "icon": "$(cpu)" },
+        { "id": "coder.providers", "name": "Providers", "icon": "$(server)" },
+        { "id": "coder.logs", "name": "Logs", "icon": "$(list-flat)" }
+      ]
+    },
+    "viewsWelcome": [
+      { "view": "coder.conversations", "contents": "No conversations yet.\n[Start Conversation](command:coder.chat)" }
+    ],
+    "configuration": {
+      "title": "CODER",
+      "properties": {
+        "coder.apiUrl": { "type": "string", "default": "http://localhost:3000/api/v1", "description": "CODER API URL" },
+        "coder.apiKey": { "type": "string", "default": "", "description": "API Key for authentication" },
+        "coder.defaultProvider": { "type": "string", "description": "Default AI provider" },
+        "coder.defaultModel": { "type": "string", "description": "Default model" },
+        "coder.inlineCompletions": { "type": "boolean", "default": true, "description": "Enable inline completions" },
+        "coder.telemetry": { "type": "boolean", "default": true, "description": "Enable telemetry" },
+        "coder.theme": { "type": "string", "enum": ["auto", "dark", "light"], "default": "auto" }
+      }
+    },
+    "keybindings": [
+      { "command": "coder.chat", "key": "ctrl+shift+c", "mac": "cmd+shift+c", "when": "editorTextFocus" }
+    ]
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "dev": "npm run build -- --watch",
+    "test": "vitest run",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "@vscode/vsce": "^3.2.0"
+  },
+  "dependencies": {
+    "zod": "^3.23.0"
+  }
+}
