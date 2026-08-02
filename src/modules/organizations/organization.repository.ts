@@ -31,12 +31,12 @@ export class OrganizationRepository extends BaseRepository<Organization> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Organization[]> {
-    const orgs: Organization[] = [];
-    for (const id of ids) {
-      const org = await this.findById(id);
-      if (org) orgs.push(org);
-    }
-    return orgs;
+    // ⚡ Bolt Performance Optimization:
+    // Replaced sequential for...of loop with Promise.all() to fetch all documents concurrently.
+    // Expected Impact: Reduces latency from O(n) to O(1) database round trips, significantly
+    // improving response times when resolving multiple IDs (e.g., fetching lists or related items).
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((item): item is Organization => item != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Organization[]> {
