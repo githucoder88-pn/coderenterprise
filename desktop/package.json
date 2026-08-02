@@ -1,0 +1,46 @@
+{
+  "name": "coder-desktop",
+  "version": "1.0.0",
+  "description": "CODER — Enterprise AI Desktop Application",
+  "main": "dist-electron/main/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && electron-builder",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0",
+    "better-sqlite3": "^11.7.0",
+    "node-pty": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.0",
+    "postcss": "^8.4.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vite-plugin-electron": "^0.28.0",
+    "vite-plugin-electron-renderer": "^0.14.0",
+    "vitest": "^2.1.0",
+    "@playwright/test": "^1.49.0",
+    "zustand": "^5.0.0",
+    "@tanstack/react-query": "^5.62.0",
+    "lucide-react": "^0.468.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.6.0",
+    "framer-motion": "^11.12.0",
+    "xterm": "^5.4.0",
+    "xterm-addon-fit": "^0.9.0"
+  }
+}
