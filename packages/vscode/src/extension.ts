@@ -16,10 +16,10 @@ import { LogService } from './services/log-service.js';
 
 let apiClient: ApiClient;
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   const config = vscode.workspace.getConfiguration('coder');
   const apiUrl = config.get<string>('apiUrl', 'http://localhost:3000/api/v1');
-  const apiKey = context.secrets.get('coder.apiKey') ?? config.get<string>('apiKey', '');
+  const apiKey = (await context.secrets.get('coder.apiKey')) ?? config.get<string>('apiKey', '');
 
   // Initialize core services
   apiClient = new ApiClient(apiUrl, apiKey);

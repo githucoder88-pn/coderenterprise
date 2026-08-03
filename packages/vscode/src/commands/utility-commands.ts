@@ -22,7 +22,7 @@ export function registerUtilityCommands(context: vscode.ExtensionContext, servic
   context.subscriptions.push(
     vscode.commands.registerCommand('coder.providers', async () => {
       const providers = await services.apiClient.getProviders();
-      const items = (providers ?? []).map((p: any) => ({
+      const items: vscode.QuickPickItem[] = (providers ?? []).map((p: any) => ({
         label: p.name,
         description: p.capabilities?.streaming ? 'Streaming' : '',
         detail: `Tools: ${p.capabilities?.toolCalling ? '✓' : '—'} | Vision: ${p.capabilities?.vision ? '✓' : '—'}`,
@@ -39,7 +39,7 @@ export function registerUtilityCommands(context: vscode.ExtensionContext, servic
   context.subscriptions.push(
     vscode.commands.registerCommand('coder.models', async () => {
       const models = await services.apiClient.getModels();
-      const items = (models ?? []).map((m: any) => ({
+      const items: vscode.QuickPickItem[] = (models ?? []).map((m: any) => ({
         label: m.displayName ?? m.name,
         description: m.provider,
         detail: `Context: ${(m.contextWindow / 1000).toFixed(0)}K | ${m.pricing ? `$${m.pricing.inputPerMillion}/$${m.pricing.outputPerMillion}` : '—'}`,

@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 // ─── Generic hook factory ───────────────────────────────────────────────────
 
-function useApiQuery<T>(key: string[], fetcher: () => Promise<T>, opts?: Partial<UseQueryOptions<T>>) {
+function useApiQuery<T>(key: unknown[], fetcher: () => Promise<T>, opts?: Partial<UseQueryOptions<T>>) {
   return useQuery({ queryKey: key, queryFn: fetcher, ...opts });
 }
 
@@ -19,7 +19,7 @@ export function useProfile() {
 // ─── Dashboard ──────────────────────────────────────────────────────────────
 
 export function useUsageSummary(period?: string) {
-  return useApiQuery(['usage', period], () => api.getUsageSummary(period));
+  return useApiQuery(['usage', period ?? 'current'], () => api.getUsageSummary(period));
 }
 
 export function useSpending() {
@@ -27,7 +27,7 @@ export function useSpending() {
 }
 
 export function useActivity(page = 1, limit = 20) {
-  return useApiQuery(['activity', page, limit], () => api.getActivity({ page: String(page), limit: String(limit) }));
+  return useApiQuery(['activity', String(page), String(limit)], () => api.getActivity({ page: String(page), limit: String(limit) }));
 }
 
 export function useNotifications(page = 1, unread = false) {

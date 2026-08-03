@@ -1,0 +1,18 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/dashboard/account/page": "app/dashboard/account/page.js",
+  "/dashboard/analytics/page": "app/dashboard/analytics/page.js",
+  "/dashboard/billing/page": "app/dashboard/billing/page.js",
+  "/dashboard/conversations/page": "app/dashboard/conversations/page.js",
+  "/dashboard/extensions/page": "app/dashboard/extensions/page.js",
+  "/dashboard/models/page": "app/dashboard/models/page.js",
+  "/dashboard/organizations/page": "app/dashboard/organizations/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/prompts/page": "app/dashboard/prompts/page.js",
+  "/dashboard/providers/page": "app/dashboard/providers/page.js",
+  "/dashboard/security/page": "app/dashboard/security/page.js",
+  "/dashboard/settings/page": "app/dashboard/settings/page.js",
+  "/dashboard/team/page": "app/dashboard/team/page.js",
+  "/dashboard/workspaces/page": "app/dashboard/workspaces/page.js"
+}

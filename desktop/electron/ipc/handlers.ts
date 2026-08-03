@@ -80,7 +80,7 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('terminal:stop', async (_, id) => terminalManager.stop(id));
 
   // ─── Settings ────────────────────────────────────────────────────────────
-  ipcMain.handle('settings:get', async () => db.getSettings());
+  ipcMain.handle('settings:get', async () => db.getSetting('all', {}));
   ipcMain.handle('settings:set', async (_, key, value) => { db.setSetting(key, value); return true; });
   ipcMain.handle('settings:reset', async () => { db.resetSettings(); return true; });
 

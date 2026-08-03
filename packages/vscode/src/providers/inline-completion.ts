@@ -20,7 +20,7 @@ export class CoderInlineCompletionProvider implements vscode.InlineCompletionIte
     token: vscode.CancellationToken,
   ): Promise<vscode.InlineCompletionItem[] | undefined> {
     // Skip on triggered by user explicitly selecting
-    if (context.triggerKind === vscode.InlineCompletionTriggerKind.Explicit) return undefined;
+    if (context.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) return undefined;
 
     const linePrefix = document.getText(new vscode.Range(new vscode.Position(Math.max(0, position.line - 5), 0), position));
     const lineSuffix = document.getText(new vscode.Range(position, new vscode.Position(Math.min(document.lineCount - 1, position.line + 5), 0)));
