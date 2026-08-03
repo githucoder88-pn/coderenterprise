@@ -67,8 +67,9 @@ describe('ApprovalManager', () => {
       const req = manager.requestApproval({
         workflowId: 'wf-1', type: 'human', title: 'Deploy', description: '', riskLevel: 'medium', requestedBy: 'a1',
       });
-      manager.escalate(req.id);
-      expect(manager.getPending()[0]!.riskLevel).toBe('critical');
+      const result = manager.escalate(req.id);
+      expect(result.success).toBe(true);
+      expect(result.data!.riskLevel).toBe('critical');
     });
   });
 

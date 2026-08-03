@@ -42,7 +42,14 @@ export class PolicyManager implements IPolicyManager {
   evaluate(domain: PolicyDomain, action: string, resource: string, _context?: Record<string, unknown>): PolicyEvaluation {
     const domainPolicies = [...this.policies.values()]
       .filter((p) => p.domain === domain && p.enabled)
-      .sort((a, b) => b.rules.length - a.rules.length); // More specific first
+      .sort((a, b) => {
+        // Prioritize deny rules, then by specificity (more rules first)
+        const aDeny = a.rules.some((r) => r.effect === 'deny');
+        const bDeny = b.rules.some((r) => r.effect === 'deny');
+        if (aDeny && !bDeny) return -1;
+        if (!aDeny && bDeny) return 1;
+        return b.rules.length - a.rules.length;
+      }); // Deny-first, then more specific
 
     for (const policy of domainPolicies) {
       for (const rule of policy.rules) {

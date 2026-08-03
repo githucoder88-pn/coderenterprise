@@ -71,7 +71,7 @@ export class RuntimeManager implements IRuntimeManager {
 
     // Generate plan
     const plan = this.generatePlan(wf.goal);
-    const tasks = this.createTasksFromPlan(id, plan);
+    const tasks = this.createTasksFromPlan(id, plan, wf.maxRetries);
 
     const updated = {
       ...wf, status: 'executing' as WorkflowStatus, plan, tasks,
@@ -168,11 +168,22 @@ export class RuntimeManager implements IRuntimeManager {
     if (!task) return { success: false, error: { code: ErrorCode.NOT_FOUND, message: 'Task not found', timestamp: new Date() } };
 
     const score = checks.filter((c) => c.passed).length / Math.max(1, checks.length);
-    this.tasks.set(taskId, {
-      ...task, status: passed ? 'completed' : 'correcting',
+    const updatedTask = {
+      ...task, status: passed ? 'completed' as RuntimeTaskStatus : 'correcting' as RuntimeTaskStatus,
       validation: { passed, checks, score, validatedAt: new Date() },
       updatedAt: new Date(),
-    });
+    };
+    this.tasks.set(taskId, updatedTask);
+
+    // Also update the task in the workflow's tasks array
+    for (const [wfId, wf] of this.workflows) {
+      const taskIndex = wf.tasks.findIndex((t) => t.id === taskId);
+      if (taskIndex !== -1) {
+        const newTasks = [...wf.tasks];
+        newTasks[taskIndex] = updatedTask;
+        this.workflows.set(wfId, { ...wf, tasks: newTasks, updatedAt: new Date() });
+      }
+    }
 
     return { success: true, data: undefined };
   }
@@ -224,14 +235,14 @@ export class RuntimeManager implements IRuntimeManager {
     };
   }
 
-  private createTasksFromPlan(workflowId: string, plan: ExecutionPlan): RuntimeTask[] {
+  private createTasksFromPlan(workflowId: string, plan: ExecutionPlan, maxCorrections = 3): RuntimeTask[] {
     const now = new Date();
     return plan.steps.map((step) => {
       const task: RuntimeTask = {
         id: `task-${++this.taskCounter}-${Math.random().toString(36).slice(2, 6)}`,
         workflowId, stepId: step.id, name: step.name, description: step.description,
         agentRole: step.agentRole, status: 'pending', input: step.description,
-        output: null, validation: null, correctionAttempts: 0, maxCorrections: 3,
+        output: null, validation: null, correctionAttempts: 0, maxCorrections,
         approvalId: null, checkpointId: null, toolInvocations: [], error: null,
         metadata: {}, createdAt: now, updatedAt: now,
       };

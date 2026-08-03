@@ -94,7 +94,7 @@ export class QueueManager implements IQueueManager {
     this.sortQueue(queue);
 
     this.logger.debug({ jobId: job.id, queue, name, priority: job.priority }, 'Job enqueued');
-    this.processQueue(queue);
+    void this.processQueue(queue);
 
     return job;
   }
@@ -124,7 +124,7 @@ export class QueueManager implements IQueueManager {
     const updated = { ...job, status: 'completed' as const, result, completedAt: new Date(), updatedAt: new Date() };
     this.jobs.set(jobId, updated);
     this.processing.set(job.queue, Math.max(0, (this.processing.get(job.queue) ?? 1) - 1));
-    this.processQueue(job.queue);
+    void this.processQueue(job.queue);
   }
 
   async fail(jobId: string, error: string): Promise<void> {
@@ -149,7 +149,7 @@ export class QueueManager implements IQueueManager {
     }
 
     this.processing.set(job.queue, Math.max(0, (this.processing.get(job.queue) ?? 1) - 1));
-    this.processQueue(job.queue);
+    void this.processQueue(job.queue);
   }
 
   async cancel(jobId: string): Promise<void> {
@@ -199,7 +199,7 @@ export class QueueManager implements IQueueManager {
   }
 
   async pause(queue: QueueName): Promise<void> { this.paused.add(queue); }
-  async resume(queue: QueueName): Promise<void> { this.paused.delete(queue); this.processQueue(queue); }
+  async resume(queue: QueueName): Promise<void> { this.paused.delete(queue); await this.processQueue(queue); }
 
   async clean(queue: QueueName, olderThanMs: number): Promise<number> {
     const cutoff = Date.now() - olderThanMs;
@@ -215,10 +215,10 @@ export class QueueManager implements IQueueManager {
 
   process(queue: QueueName, handler: (job: Job) => Promise<unknown>): void {
     this.handlers.set(queue, handler);
-    this.processQueue(queue);
+    void this.processQueue(queue);
   }
 
-  private processQueue(queue: QueueName): void {
+  private async processQueue(queue: QueueName): Promise<void> {
     if (this.paused.has(queue)) return;
     const handler = this.handlers.get(queue);
     if (!handler) return;
@@ -226,9 +226,11 @@ export class QueueManager implements IQueueManager {
     const concurrency = this.config.maxConcurrency;
     const active = this.processing.get(queue) ?? 0;
 
-    while (active < concurrency) {
-      const job = this.dequeue(queue) as any;
+    let slots = concurrency - active;
+    while (slots > 0) {
+      const job = await this.dequeue(queue);
       if (!job) break;
+      slots--;
       this.executeJob(queue, job, handler);
     }
   }
