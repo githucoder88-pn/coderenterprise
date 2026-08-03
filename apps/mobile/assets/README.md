@@ -1,0 +1,4 @@
+# assets
+
+**Purpose:** Static assets.
+
