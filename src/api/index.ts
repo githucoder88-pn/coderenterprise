@@ -42,6 +42,16 @@ export function createApiRouter(
 ): Hono {
   const api = new Hono();
 
+  // Strict rate limit for auth endpoints to prevent brute-force attacks
+  api.use(
+    '/auth/*',
+    rateLimitMiddleware(redis, logger, {
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 10,     // 10 requests per minute
+      keyPrefix: 'rl:auth:',
+    })
+  );
+
   // Mount domain routers
   api.route('/auth', createAuthRouter(services.auth, services.audit, logger));
   api.route('/health', createHealthRouter(services.health));
