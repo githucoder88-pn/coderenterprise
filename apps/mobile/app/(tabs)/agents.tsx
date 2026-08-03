@@ -1,42 +1,87 @@
 /**
- * Agents Screen
+ * Agents Screen — agent dashboard with status, timelines, and quick actions.
  */
+import React from 'react';
+import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { useTheme } from '@/theme/theme';
+import { HPressable } from '@/components/common/Pressable';
+import { Icon } from '@/components/common/Icon';
+import { Card } from '@/components/common/Card';
+import { ScreenContainer } from '@/components/common/SafeLayout';
+import { useAgents } from '@/hooks/use-api';
+import { formatDistanceToNow } from 'date-fns';
 
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
-import { useAgents, useScheduleAgent } from '@/hooks/use-api';
-import { useAppStore } from '@/stores/app-store';
+const ROLE_ICONS: Record<string, string> = {
+  planner: '🎯', researcher: '🔎', architect: '🏗️', coder: '💻', reviewer: '👀',
+  tester: '🧪', debugger: '🐛', documenter: '📝',
+};
 
 const ROLES = ['planner', 'researcher', 'architect', 'coder', 'reviewer', 'tester', 'debugger', 'documenter'];
 
 export default function AgentsScreen() {
-  const { data } = useAgents();
-  const scheduleAgent = useScheduleAgent();
-  const isDark = useAppStore((s) => s.theme) === 'dark';
+  const { data, isLoading, refetch } = useAgents();
+  const { colors, typography, spacing } = useTheme();
   const agents = (data as any)?.data ?? [];
-  const c = isDark ? { bg: '#0a0a0a', card: '#171717', border: '#262626', text: '#fafafa', sub: '#a3a3a3', accent: '#3b82f6' }
-    : { bg: '#ffffff', card: '#fafafa', border: '#e5e5e5', text: '#0a0a0a', sub: '#737373', accent: '#2563eb' };
+  const list = agents.length > 0 ? agents : ROLES.map((r) => ({ id: r, role: r, lifecycle: 'available' }));
+  const [refreshing, setRefreshing] = React.useState(false);
+  const onRefresh = async () => { setRefreshing(true); await refetch?.(); setRefreshing(false); };
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <ScreenContainer bg={colors.bgGrouped} padded={false}>
       <FlatList
-        data={agents.length > 0 ? agents : ROLES.map((r) => ({ id: r, role: r, lifecycle: 'available' }))}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        ListHeaderComponent={<Text style={[s.header, { color: c.text }]}>Agent Types</Text>}
-        renderItem={({ item }) => (
-          <View style={[s.card, { backgroundColor: c.card, borderColor: c.border }]}>
-            <Text style={[s.name, { color: c.text }]}>{item.role}</Text>
-            <Text style={[s.meta, { color: c.sub }]}>Status: {item.lifecycle ?? 'available'}</Text>
+        data={list}
+        keyExtractor={(item: any) => item.id}
+        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+        ListHeaderComponent={
+          <View style={{ marginBottom: 16 }}>
+            <Text style={[typography.title2, { color: colors.text }]}>Agent Team</Text>
+            <Text style={[typography.callout, { color: colors.textSecondary }]}>
+              Orchestrate multi-agent workflows
+            </Text>
           </View>
-        )}
+        }
+        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        renderItem={({ item }: any) => {
+          const status = item.lifecycle ?? 'available';
+          const active = status === 'running' || status === 'active';
+          return (
+            <Card>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View style={styles.avatar}>
+                  <Text style={{ fontSize: 22 }}>{ROLE_ICONS[item.role] ?? '🤖'}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.name, { color: colors.text }]}>{item.role}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <View style={[styles.dot, { backgroundColor: active ? colors.success : colors.textTertiary }]} />
+                    <Text style={[styles.meta, { color: colors.textSecondary }]}>
+                      {active ? 'Working' : 'Available'}
+                      {item.startedAt ? ` · ${formatDistanceToNow(new Date(item.startedAt), { addSuffix: true })}` : ''}
+                    </Text>
+                  </View>
+                </View>
+                <HPressable
+                  haptic="light"
+                  onPress={() => {}}
+                  style={[styles.launch, { backgroundColor: colors.primarySoft }]}
+                >
+                  <Icon.Play size={14} color={colors.primary} />
+                  <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 12, marginLeft: 4 }}>Run</Text>
+                </HPressable>
+              </View>
+            </Card>
+          );
+        }}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 
-const s = StyleSheet.create({
-  header: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  card: { padding: 14, borderRadius: 10, borderWidth: 1, marginBottom: 8 },
-  name: { fontSize: 15, fontWeight: '600', marginBottom: 4, textTransform: 'capitalize' },
+const styles = StyleSheet.create({
+  avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' },
+  name: { fontSize: 15, fontWeight: '700', marginBottom: 4, textTransform: 'capitalize' },
   meta: { fontSize: 12 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  launch: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
 });

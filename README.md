@@ -1,8 +1,36 @@
-# CODER Enterprise Backend
+# CODER Enterprise
 
-Production-grade, enterprise backend foundation built with Domain-Driven Design.
+Production-grade, provider-independent AI development platform: backend, web
+dashboard, CLI, desktop app, VS Code extension, and mobile client — all sharing
+one REST + SSE API.
 
-## Architecture
+## Documentation
+
+Full documentation lives in [`docs/`](docs/). Start with:
+
+- [docs/README.md](docs/README.md) — documentation index
+- [docs/AI_CONTEXT.md](docs/AI_CONTEXT.md) — AI-agent bootstrap
+- [docs/SYSTEM_OVERVIEW.md](docs/SYSTEM_OVERVIEW.md) — system overview
+- [docs/ARCHITECTURE_INDEX.md](docs/ARCHITECTURE_INDEX.md) — deep architectural docs
+- [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md) — folder-by-folder map
+- [docs/FILE_RELATIONSHIPS.md](docs/FILE_RELATIONSHIPS.md) — import/layering rules
+
+Every source folder contains a `README.md`. See `docs/applications/` for per-app
+docs and `docs/backend/api/` for endpoint reference.
+
+## Repository layout
+
+| Path | Purpose |
+|------|---------|
+| [`src/`](src/) | Backend (Hono + Node 22) — [docs](docs/applications/backend/) |
+| [`dashboard/`](dashboard/) | Web console (Next.js 15) — [docs](docs/applications/dashboard/) |
+| [`desktop/`](desktop/) | Electron desktop app — [docs](docs/applications/desktop/) |
+| [`packages/cli/`](packages/cli/) | Terminal CLI — [docs](docs/applications/cli/) |
+| [`packages/vscode/`](packages/vscode/) | VS Code extension — [docs](docs/applications/vscode/) |
+| [`apps/mobile/`](apps/mobile/) | React Native / Expo mobile app — [docs](docs/applications/mobile/) |
+| [`docs/`](docs/) | This documentation |
+
+## Backend architecture (quick recap)
 
 ```
 src/

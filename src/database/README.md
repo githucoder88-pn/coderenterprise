@@ -1,0 +1,20 @@
+# database
+
+**Purpose:** Logical schema and seed scripts.
+
+## Subdirectories
+
+| Path | Purpose |
+|------|---------|
+| [seeds/](seeds/) | Seed scripts. |
+
+## Files
+
+| File | Responsibility |
+|------|----------------|
+| `schema.ts` | — |
+
+## Dependencies
+
+- Imports resolved via tsconfig path aliases (`@core/*`, `@modules/*`, …).
+- See `docs/FILE_RELATIONSHIPS.md` for layering rules.

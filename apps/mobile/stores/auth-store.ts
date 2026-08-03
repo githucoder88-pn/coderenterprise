@@ -1,10 +1,9 @@
 /**
  * Auth Store
  */
-
 import { create } from 'zustand';
 
-interface User {
+export interface User {
   uid: string;
   email: string;
   displayName: string;
