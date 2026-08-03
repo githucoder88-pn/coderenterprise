@@ -16,10 +16,9 @@ class ApiBridge {
 
   private getHeaders(): Record<string, string> {
     const apiKey = db.getSetting('apiKey', '');
-    return {
-      'Content-Type': 'application/json',
-      ...(apiKey ? { 'X-API-Key': apiKey } : {}),
-    };
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['X-API-Key'] = apiKey;
+    return headers;
   }
 
   async get<T>(path: string, params?: Record<string, any>): Promise<T> {

@@ -1,33 +1,41 @@
 # Fix Plan
 
-## Phase 0 — Release blockers
+## Phase 0: Stop the Bleeding
 
-| Order | Issue | Action | Exit criterion |
+| Task | Issues | Owner profile | Exit criteria |
 |---|---|---|---|
-| 1 | AUD-001 | Correct indexer return types. | `npm run build` passes syntax/type compilation. |
-| 2 | AUD-002 | Add ESLint flat config and parser rules. | `npm run lint` runs and reports actionable results. |
-| 3 | AUD-003 | Triage all failing tests and un-awaited assertions. | Backend test suite is green and deterministic. |
-| 4 | AUD-006 | Select npm or pnpm and normalize lock/install docs. | Clean install reproduces the same graph. |
+| Fix `WorkspaceIndexer` syntax | CODER-AUDIT-001 | Backend engineer | Root typecheck/build proceed past parser |
+| Add route inventory test | CODER-AUDIT-002 | Backend/QA | Every route file is either mounted or explicitly deprecated |
+| Add client endpoint inventory test | CODER-AUDIT-003 | Full-stack/QA | No client calls an absent backend endpoint |
 
-## Phase 1 — Integration completeness
+## Phase 1: Restore Core Product Flows
 
-| Issue | Action | Exit criterion |
-|---|---|---|
-| AUD-004 | Implement queues, processors, retries, DLQ, and graceful worker shutdown. | Job integration test proves retry and recovery. |
-| AUD-007 | Register supported services/routes or remove unsupported routes. | Route inventory test matches public API. |
-| AUD-011 | Define payment provider adapter and webhook verification. | Provider contract and replay tests pass. |
-| AUD-012 | Connect exporters or document local-only telemetry. | Collector receives traces/errors in integration test. |
-| AUD-016 | Add durable event delivery and failure handling. | Retry/DLQ/replay test passes. |
+1. Mount `/tools` and `/workspace` routers with real existing services.
+2. Restore `/conversations/:id/send` and `/send/stream` through the existing conversation engine/orchestrator.
+3. Normalize auth handling for dashboard/mobile/desktop/CLI/VS Code.
+4. Fix dashboard, CLI, mobile and VS Code typecheck failures.
+5. Stabilize backend tests and remove OOM.
 
-## Phase 2 — Security and client contracts
+## Phase 2: Production Readiness
 
-| Issue | Action | Exit criterion |
-|---|---|---|
-| AUD-017 | Separate, rotate, revoke, and validate token types. | Cross-token misuse tests fail safely. |
-| AUD-018 | Reject placeholder secrets in production. | Startup test rejects unsafe configuration. |
-| AUD-019 | Enforce tool sandbox and authorization boundaries. | Adversarial tool suite passes. |
-| AUD-014 | Add OpenAPI/client contract and Playwright smoke tests. | Dashboard, desktop, CLI, and extension API flows are exercised. |
+1. Wire queues/workers/schedulers and shutdown lifecycle.
+2. Mount or remove/feature-flag marketplace/extensions/orchestrator/knowledge/runtime/simulation routes.
+3. Add integration tests with Redis/Firebase emulator.
+4. Add dependency audit gates.
+5. Add desktop packaged smoke tests.
 
-## Phase 3 — Operational readiness
+## Phase 3: Documentation and Operations
 
-Add CI matrix, coverage thresholds for each package, dependency/security gates, Docker smoke tests, load/soak benchmarks, recovery drills, dashboards, runbooks, and rollback documentation. Re-run the complete audit after each phase.
+1. Generate OpenAPI docs and publish SDK.
+2. Write environment variable and deployment docs.
+3. Add runbooks for provider setup, indexing, recovery and incident response.
+4. Add architecture diagrams to onboarding docs.
+
+## Suggested Implementation Pattern
+
+```ts
+// Example route contract test direction
+const mountedRoutes = collectMountedRoutes(createApiRouter(...));
+const clientRoutes = collectClientEndpointStrings(['dashboard', 'desktop', 'cli', 'mobile', 'vscode']);
+expect(clientRoutes.missingFrom(mountedRoutes)).toEqual([]);
+```

@@ -1,37 +1,53 @@
-# Dead Code and Duplicate Implementation Report
+# Dead Code Report
 
-Static inspection found no safe basis for deleting code automatically; many apparently unused classes may be intended for future composition. The following are candidates requiring ownership confirmation.
+## Definition
 
-## Candidates
+This audit treats code as likely dead or disconnected when it is implemented but not reachable from an application entrypoint, route registry, command registration, or UI flow.
 
-### AUD-023 — Unreachable route implementations
-- **Severity:** High
-- **Location:** `src/api/routes/tools.routes.ts`, `orchestrator.routes.ts`, `intelligence.routes.ts`, `knowledge.routes.ts`, `extensions.routes.ts`, `marketplace.routes.ts`, `cluster.routes.ts`, `distributed.routes.ts`, `simulation.routes.ts`, `runtime.routes.ts`, `enterprise.routes.ts`
-- **Cause:** Route factories exist but are not mounted by `src/api/index.ts`.
-- **Affected components:** corresponding backend capabilities.
-- **Risk level:** Source appears complete while runtime is unreachable.
-- **Required fix:** Mount and test supported routes, or archive/remove intentionally unsupported routes.
-- **Dependencies:** Service provider composition and authorization.
-- **Estimated effort:** 1–3 days.
-- **Suggested implementation:** Generate a route inventory from the central registry and fail CI on unregistered route modules.
+## Likely Dead/Disconnected Backend Route Modules
 
-### AUD-024 — Duplicate/parallel domain surfaces
-- **Severity:** Medium
-- **Location:** `src/workspace/` and `src/modules/workspaces/`; `src/conversations/` and `src/modules/conversations/`; `src/analytics/` and `src/modules/analytics/`
-- **Cause:** Similar feature names exist in separate application layers.
-- **Affected components:** workspace, conversation, and analytics behavior.
-- **Risk level:** Fixes can land in one implementation while another is used at runtime.
-- **Required fix:** Define bounded-context ownership and deprecate duplicates.
-- **Dependencies:** Architecture decision records and route matrix.
-- **Estimated effort:** 2–5 days.
-- **Suggested implementation:** Trace imports from composition roots, mark canonical implementations, and add deprecation notices before deletion.
+- `src/api/routes/billing-analytics.routes.ts`
+- `src/api/routes/cluster.routes.ts`
+- `src/api/routes/conversation-engine.routes.ts`
+- `src/api/routes/distributed.routes.ts`
+- `src/api/routes/enterprise.routes.ts`
+- `src/api/routes/extensions.routes.ts`
+- `src/api/routes/intelligence.routes.ts`
+- `src/api/routes/knowledge.routes.ts`
+- `src/api/routes/marketplace.routes.ts`
+- `src/api/routes/orchestrator.routes.ts`
+- `src/api/routes/runtime.routes.ts`
+- `src/api/routes/simulation.routes.ts`
+- `src/api/routes/tools.routes.ts`
+- `src/api/routes/workspace.routes.ts`
 
-### AUD-025 — Placeholder integration code
-- **Severity:** High
-- **Location:** `src/queues/worker.ts`; telemetry integration classes
-- **Cause:** Logging/configuration substitutes for operational implementations.
-- **Affected components:** queue processing and telemetry.
-- **Risk level:** Silent loss of jobs or observability.
-- **Required fix:** Implement or explicitly label as development-only.
-- **Dependencies:** deployment requirements.
-- **Estimated effort:** 2–4 days.
+## Likely Dead/Disconnected Services and Engines
+
+- Workspace engine components under `src/workspace/*` are not reachable from mounted API routes.
+- Tool registry/model sync route integration exists under `src/tools/*` but is not mounted.
+- Orchestrator/checkpoint/runtime route modules exist but are not mounted.
+- Marketplace and extension runtime modules exist but are not mounted into the API router.
+- Cluster/distributed queue/event modules exist but are not started by `src/app.ts`.
+
+## Placeholder Markers
+
+Static scan found 29 TODO/FIXME/coming-soon/In-production markers. High-signal examples:
+
+- `packages/cli/src/commands/extensions.ts`: extension marketplace coming soon.
+- `src/tools/browser/browser.tool.ts`: production browser automation placeholder.
+- `src/tools/mcp/mcp.tool.ts`: production MCP connection placeholder.
+- `src/services/security/zero-trust.ts`: production GeoIP placeholder.
+- `src/queues/worker.ts`: production queue initialization placeholder.
+- `apps/mobile/notifications/service.ts`: production notification permissions/token registration placeholder.
+
+## Duplicate Implementations
+
+API client logic is duplicated in:
+
+- `dashboard/src/lib/api.ts`
+- `desktop/electron/services/api-bridge.ts`
+- `apps/mobile/services/api.ts`
+- `packages/cli/src/services/api.ts`
+- `packages/vscode/src/services/api-client.ts`
+
+This duplication is a direct cause of endpoint drift.

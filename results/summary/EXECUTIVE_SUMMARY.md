@@ -1,33 +1,60 @@
-# CODER Enterprise Ecosystem Audit — Executive Summary
+# Executive Summary
 
-**Audit date:** 2026-08-03  
-**Scope:** backend, dashboard, desktop, mobile, CLI, VS Code extension, providers, tools, orchestration, storage, events, telemetry, security, testing, and delivery configuration.
+Audit date: 2026-08-03  
+Branch: `arena/019fc671-coderenterprise`  
+Repository: `githucoder88-pn/coderenterprise`
 
-## Conclusion
+## Verdict
 
-The repository is a broad, well-organized platform foundation, but it is **not release-complete**. The ecosystem has substantial implementations and unit-test coverage, while the build and delivery path is currently blocked by a TypeScript syntax error, the configured linter cannot start, and the backend test suite has multiple failures. Several advertised subsystems are present as interfaces, in-memory implementations, configuration objects, or placeholders rather than verified production integrations.
+The CODER ecosystem is **not production complete**. It contains a large number of implemented modules and a polished multi-application surface, but the audit found severe integration gaps: the backend does not compile, many implemented API routers are not mounted, major client applications call endpoints that are not exposed, and CLI/mobile/VS Code/dashboard typechecks currently fail.
 
-## Highest-risk findings
+The platform **appears broad and feature-rich**, but multiple subsystems are only partially connected.
 
-| ID | Severity | Finding | Location |
-|---|---|---|---|
-| AUD-001 | Critical | Backend TypeScript compilation is blocked by an invalid return type (`>>`). | `src/workspace/indexing/indexer.ts:17,79` |
-| AUD-002 | Critical | No ESLint flat configuration exists; `npm run lint` exits before linting. | repository root |
-| AUD-003 | High | Backend tests fail in memory, runtime, approval, policy, index, and replay components. | `src/tests/unit/**` |
-| AUD-004 | High | Queue worker only logs queue names; BullMQ queues/workers and shutdown are not wired. | `src/queues/worker.ts:22-30` |
-| AUD-005 | High | No CI workflow, Playwright configuration, or cross-application release gate exists. | `.github/workflows/`, repository root |
-| AUD-006 | High | Root requires pnpm but only an npm lockfile is committed. | `package.json`, `package-lock.json` |
-| AUD-007 | High | Several advertised API routers/services are not mounted or composed. | `src/api/index.ts`, `src/providers/service.provider.ts` |
-| AUD-008 | Medium | Telemetry integrations are local logging/configuration facades; no exporter SDK is configured. | `src/telemetry/integrations.ts` |
+## Key Findings
 
-## Positive evidence
+- Backend TypeScript build is blocked by a syntax error in `src/workspace/indexing/indexer.ts`.
+- 14 API route modules exist but are not mounted in `src/api/index.ts`.
+- Dashboard, desktop, CLI, mobile, and VS Code clients call `/tools`, `/workspace`, `/billing-analytics`, `/orchestrator`, and `/extensions` endpoints that are absent from the mounted API router.
+- Chat clients call `/conversations/:id/send` and `/send/stream`, but the mounted conversation router exposes only CRUD/message archive endpoints.
+- Backend tests fail and then hit a JavaScript heap out-of-memory condition during the full suite.
+- Dashboard, CLI, mobile, and VS Code extension typechecks fail; desktop typecheck passes.
+- Dependency audits report vulnerabilities in every package area.
 
-- Separate backend, dashboard, desktop, mobile, CLI, and VS Code package manifests exist.
-- Backend has a clear Hono composition root, validated configuration, Firebase/Redis adapters, provider abstractions, middleware, and domain modules.
-- Six provider implementations and multiple tool implementations are present.
-- Root Vitest configuration defines 80% thresholds and the repository contains broad unit-test coverage.
-- Security primitives include JWT/Firebase auth, RBAC, encryption, rate limiting, CSRF/XSS defenses, audit logging, and security headers.
+## Static Inventory
 
-## Release recommendation
+| Metric | Count |
+|---|---:|
+| Source files audited | 509 |
+| Backend route files | 31 |
+| Mounted backend route prefixes | 17 |
+| Unmounted route modules | 14 |
+| Route handler-like calls | 1075 |
+| Service/class declarations | 216 |
+| Electron IPC handlers | 39 |
+| Event bus/emitter usages | 19 |
+| Placeholder/production-comment markers | 29 |
+| Security-sensitive call sites | 16 |
 
-Do not represent the platform as fully integrated or production-ready until AUD-001 through AUD-006 are closed and the critical paths are exercised end-to-end against real Firebase, Redis, provider, queue, and client environments.
+## Validation Results
+
+| Area | Command | Result |
+|---|---|---|
+| Backend typecheck | `npm run typecheck` | Failed |
+| Backend build | `npm run build` | Failed |
+| Backend unit tests | `npm test` | Failed / OOM |
+| Dashboard typecheck | `npx tsc -p tsconfig.json --noEmit` | Failed |
+| Dashboard build | `npm run build` | Failed due Google Fonts network fetch |
+| Mobile install/typecheck | `npm install --legacy-peer-deps`; `npx tsc` | Failed |
+| CLI typecheck | `npx tsc -p tsconfig.json --noEmit` | Failed |
+| VS Code extension typecheck | `npx tsc -p tsconfig.json --noEmit` | Failed |
+| Desktop typecheck | `npx tsc -p tsconfig.json --noEmit` | Passed |
+
+## Highest Priority Actions
+
+1. Fix backend compile blocker.
+2. Wire all route modules through a single composition root and align client endpoints to mounted routes.
+3. Restore chat streaming endpoint compatibility.
+4. Add contract tests that diff generated API routes against client SDK usage.
+5. Fix typechecks for dashboard, CLI, mobile, and VS Code extension.
+6. Stabilize backend tests and resolve OOM.
+7. Triage critical/high dependency vulnerabilities.

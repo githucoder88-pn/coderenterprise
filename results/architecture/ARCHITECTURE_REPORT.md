@@ -1,51 +1,63 @@
 # Architecture Report
 
-## Inventory
+## Current Architecture
 
-| Area | Evidence | Assessment |
-|---|---|---|
-| Backend | `src/index.ts`, `src/app.ts`, `src/api/`, `src/modules/` | Clear composition root and domain separation. |
-| Dashboard | `dashboard/`, Next.js manifest | Present; independent package and tests. |
-| Desktop | `desktop/electron/`, `desktop/renderer/` | Present; Electron/Vite architecture. |
-| Mobile | `apps/mobile/app/`, Expo manifest | Present; Expo Router entry. |
-| CLI | `packages/cli/src/` | Present; Commander/Ink application. |
-| VS Code | `packages/vscode/src/` | Present; activation, commands, views, API client. |
-| Infrastructure | `src/infrastructure/firebase`, `src/infrastructure/redis` | Adapter boundaries exist. |
-| Providers | `src/modules/providers/implementations/` | Six provider adapters exist. |
-| Orchestration | `src/orchestrator`, `src/runtime`, `src/cluster` | Broad code surface; production startup wiring is incomplete. |
+```mermaid
+flowchart LR
+  Dashboard[Dashboard / Next.js] --> API[Backend / Hono API]
+  Desktop[Desktop / Electron] --> IPC[Preload + IPC]
+  IPC --> APIBridge[API Bridge]
+  APIBridge --> API
+  CLI[CLI] --> API
+  Mobile[Mobile / Expo] --> API
+  VSCode[VS Code Extension] --> API
+  API --> Middleware[Middleware]
+  Middleware --> Mounted[Mounted Routers]
+  API --> ServiceProvider[Service Provider]
+  ServiceProvider --> Firebase[(Firebase)]
+  ServiceProvider --> Redis[(Redis)]
+  ServiceProvider --> Providers[Provider Platform]
+```
 
-## Runtime wiring
+## Intended-but-not-fully-connected Architecture
 
-`src/app.ts` creates logger, metrics, Redis, Firebase, service provider, middleware, API router, and HTTP server. Redis is connected on startup and disconnected on shutdown. Firebase clients are constructed but do not have an explicit startup connection phase. `src/providers/service.provider.ts` composes many services, but the API registry mounts only a subset of available routers.
+```mermaid
+flowchart TB
+  API --> ToolsRouter[tools.routes.ts - not mounted]
+  API --> WorkspaceEngineRouter[workspace.routes.ts - not mounted]
+  API --> OrchestratorRouter[orchestrator.routes.ts - not mounted]
+  API --> MarketplaceRouter[marketplace.routes.ts - not mounted]
+  API --> ExtensionsRouter[extensions.routes.ts - not mounted]
+  API --> KnowledgeRouter[knowledge.routes.ts - not mounted]
+  API --> RuntimeRouter[runtime.routes.ts - not mounted]
+  ToolsRouter --> ToolRegistry[Tool Registry - dependency absent in ServiceProvider]
+  WorkspaceEngineRouter --> FileService[Workspace File Service - dependency absent]
+  WorkspaceEngineRouter --> Indexer[Workspace Indexer - currently syntax-broken]
+  OrchestratorRouter --> Planner[Planner/Execution/Checkpoint services]
+```
 
-## Gaps
+## Architectural Risks
 
-- `src/api/index.ts` imports and mounts core routers, but does not mount the existing tools, orchestrator, intelligence, knowledge, cluster, distributed, simulation, runtime, extensions, enterprise, or marketplace route files.
-- `ServiceProvider` does not expose the orchestrator, intelligence, knowledge, cluster, simulation, runtime, or marketplace services required by those route files.
-- `src/queues/worker.ts` contains commented-out BullMQ initialization.
-- No root workspace manifest coordinates the six independent package manifests.
-- No documented dependency graph, deployment topology, or cross-app contract test exists.
+1. Multiple client API implementations duplicate endpoint strings instead of importing one generated SDK.
+2. Backend feature modules are file-present but not composition-root-present.
+3. Tool/workspace/orchestrator route dependencies are not created in `ServiceProvider`.
+4. Auth mode differs by client family.
+5. Eventing, queues, schedulers and workers are not part of app lifecycle.
 
-## Issue register
+## Recommended Target Architecture
 
-### AUD-007 — Unmounted application capabilities
-- **Severity:** High
-- **Location:** `src/api/index.ts:17-34,45-66`; `src/providers/service.provider.ts:44-66`
-- **Cause:** Route files and feature directories were added without completing composition-root registration.
-- **Affected components:** tools, agents/orchestrator, intelligence, knowledge, extensions, marketplace, cluster, distributed, simulation, runtime, enterprise.
-- **Risk:** Features appear available in source but are unreachable through the backend API.
-- **Required fix:** Define service ownership and explicitly compose and mount supported routes; remove or mark unsupported routes.
-- **Dependencies:** Service constructors, auth/RBAC policy, API contract tests.
-- **Estimated effort:** 3–5 days.
-- **Suggested implementation:** Create a route/service registration matrix, wire one bounded context at a time, and add route smoke tests.
-
-### AUD-009 — No cross-application architecture contract
-- **Severity:** Medium
-- **Location:** repository root; client package manifests
-- **Cause:** Applications are colocated but have no workspace orchestration or shared API schema generation.
-- **Affected components:** dashboard, desktop, mobile, CLI, VS Code.
-- **Risk:** Client URLs, auth headers, streaming behavior, and payloads can drift.
-- **Required fix:** Establish a supported workspace/release model and generated API contracts.
-- **Dependencies:** CI and package-manager decision.
-- **Estimated effort:** 2–4 days.
-- **Suggested implementation:** Publish a versioned OpenAPI/client contract and validate every client against it in CI.
+```mermaid
+flowchart LR
+  OpenAPI[Generated OpenAPI Contract] --> SDK[Shared Typed SDK]
+  SDK --> Dashboard
+  SDK --> Desktop
+  SDK --> CLI
+  SDK --> Mobile
+  SDK --> VSCode
+  Backend[Backend Composition Root] --> Routes[All Mounted Routers]
+  Backend --> Engines[Workspace/Tools/Orchestrator/Marketplace Engines]
+  Backend --> Infra[Redis/Firebase/Queues/Telemetry]
+  ContractTests[Contract Tests] --> OpenAPI
+  ContractTests --> Routes
+  ContractTests --> SDK
+```

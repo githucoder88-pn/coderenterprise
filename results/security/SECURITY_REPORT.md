@@ -1,44 +1,90 @@
 # Security Report
 
-## Implemented controls
+## Authentication and Authorization
 
-Firebase/JWT authentication, RBAC, audit services, API-key hashing, encrypted secrets, AES-256 encryption helpers, rate limiting, CSRF/XSS services, security headers, CORS, and abuse/anomaly service code are present.
+- Backend registers `authMiddleware` after public auth/health/providers routes.
+- Dashboard/mobile send Firebase Bearer tokens.
+- Desktop/CLI/VS Code send `X-API-Key` or store token as API key in some flows.
+- The audit did not find a single documented auth matrix proving which credential type each route accepts.
 
-## Findings
+## Supply Chain
 
-### AUD-017 — Access and refresh token separation
-- **Severity:** High
-- **Location:** `src/modules/auth/auth.service.ts`
-- **Cause:** Refresh flow appears to reuse the access token value.
-- **Affected components:** auth service, mobile/dashboard/CLI/VS Code clients.
-- **Risk:** Refresh-token compromise and access-token replay have the same scope and lifetime.
-- **Required fix:** Distinct token types, rotation, revocation, and audience/type validation.
-- **Dependencies:** client stores and API contract.
-- **Estimated effort:** 1–2 days.
-- **Suggested implementation:** Implement separate signing claims and negative tests for cross-use.
+Dependency vulnerability summaries:
 
-### AUD-018 — Development secrets are unsafe defaults
-- **Severity:** High
-- **Location:** `.env.example:23,33`
-- **Cause:** Example values use `change-me` secrets and configuration defaults permit demo Firebase.
-- **Affected components:** local deployments copied without replacement.
-- **Risk:** Accidental deployment with predictable signing/encryption keys.
-- **Required fix:** Fail closed in production and provide startup validation that rejects placeholders.
-- **Dependencies:** environment policy and deployment configuration.
-- **Estimated effort:** 0.5–1 day.
-- **Suggested implementation:** Reject known placeholders when `NODE_ENV=production`; document secret generation.
+```json
+{
+  "root": {
+    "info": 0,
+    "low": 0,
+    "moderate": 12,
+    "high": 1,
+    "critical": 2,
+    "total": 15
+  },
+  "dashboard": {
+    "info": 0,
+    "low": 0,
+    "moderate": 3,
+    "high": 4,
+    "critical": 1,
+    "total": 8
+  },
+  "desktop": {
+    "info": 0,
+    "low": 1,
+    "moderate": 4,
+    "high": 13,
+    "critical": 2,
+    "total": 20
+  },
+  "cli": {
+    "info": 0,
+    "low": 0,
+    "moderate": 3,
+    "high": 1,
+    "critical": 1,
+    "total": 5
+  },
+  "vscode": {
+    "info": 0,
+    "low": 0,
+    "moderate": 3,
+    "high": 1,
+    "critical": 1,
+    "total": 5
+  },
+  "mobile": {
+    "info": 0,
+    "low": 0,
+    "moderate": 7,
+    "high": 15,
+    "critical": 2,
+    "total": 24
+  }
+}
+```
 
-### AUD-019 — Tool execution requires boundary verification
-- **Severity:** High
-- **Location:** `src/tools/shell`, `filesystem`, `docker`, `mcp`
-- **Cause:** Powerful tools exist; complete production authorization, sandboxing, resource limits, and audit integration were not demonstrated by tests.
-- **Affected components:** agents, API tool routes, desktop/CLI clients.
-- **Risk:** Command execution, path traversal, container escape, or untrusted MCP behavior.
-- **Required fix:** Enforce per-tool permissions, workspace roots, timeouts, output limits, isolation, and immutable audit records.
-- **Dependencies:** RBAC and event/telemetry wiring.
-- **Estimated effort:** 3–7 days.
-- **Suggested implementation:** Add deny-by-default policy checks and adversarial integration tests.
+## Electron Security
 
-## Security validation limitations
+Security-sensitive calls were found by static scan: 16.
 
-No dynamic penetration test, dependency remediation, production Firebase rules review, secret rotation drill, or multi-tenant isolation test was available in this repository audit.
+Notable areas:
+
+- `shell.openExternal` is exposed through system IPC and should validate URL schemes/hosts.
+- Terminal PTY spawns local shells; this is expected but requires workspace trust boundaries.
+- BrowserWindow security policies should be enforced and tested, not only declared.
+
+## Backend Security Risks
+
+- Route modules that are not mounted also do not receive tested auth/RBAC behavior.
+- API-key and Firebase-token auth modes are inconsistent across clients.
+- Billing/payment placeholders should not be exposed as production features.
+- Tool execution route, once mounted, must enforce per-tool permission checks, input validation, timeouts and audit logging.
+
+## Required Security Work
+
+1. Auth matrix tests for bearer token, API key, expired token, revoked user and RBAC denial.
+2. IPC allowlist tests for desktop.
+3. Tool execution sandbox/permission tests.
+4. Dependency vulnerability triage.
+5. Secrets scanning and environment variable documentation.

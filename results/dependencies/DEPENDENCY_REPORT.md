@@ -1,35 +1,28 @@
 # Dependency Report
 
-## Findings
+## Package Areas
 
-- Six `package.json` files exist, but the root declares `pnpm >=9` while the committed lockfile is `package-lock.json`; no `pnpm-lock.yaml` exists.
-- The Dockerfile uses pnpm-oriented installation while local quick-start documentation says `npm install`.
-- `@playwright/test` is declared by multiple applications, but no Playwright configuration was found.
-- Root ESLint is version 9, but no `eslint.config.js|mjs|cjs` exists.
-- Prettier is declared but no repository configuration was found.
-- Multiple package manifests have independent versions of React, TypeScript, Vitest, and tooling without a workspace policy.
-- `npm ci` completed, but reported 15 dependency vulnerabilities (12 moderate, 1 high, 2 critical); the audit output also reported deprecated transitive packages.
+| Package | Install/build status | Vulnerabilities |
+|---|---|---|
+| Root backend | install succeeded with `--ignore-scripts`; build/typecheck fail | {'info': 0, 'low': 0, 'moderate': 12, 'high': 1, 'critical': 2, 'total': 15} |
+| Dashboard | install succeeded; build failed on Google Fonts; typecheck fails | {'info': 0, 'low': 0, 'moderate': 3, 'high': 4, 'critical': 1, 'total': 8} |
+| Desktop | typecheck and vite build pass; full electron-builder not validated | {'info': 0, 'low': 1, 'moderate': 4, 'high': 13, 'critical': 2, 'total': 20} |
+| CLI | install succeeds; typecheck fails | {'info': 0, 'low': 0, 'moderate': 3, 'high': 1, 'critical': 1, 'total': 5} |
+| VS Code | install succeeds; typecheck fails | {'info': 0, 'low': 0, 'moderate': 3, 'high': 1, 'critical': 1, 'total': 5} |
+| Mobile | normal install fails; legacy peer install succeeds; typecheck fails | {'info': 0, 'low': 0, 'moderate': 7, 'high': 15, 'critical': 2, 'total': 24} |
 
-## Issue register
+## Dependency Problems
 
-### AUD-006 — Package manager and lockfile mismatch
-- **Severity:** High
-- **Location:** `package.json:9`, `package-lock.json`, `Dockerfile`, `README.md:58`
-- **Cause:** Tooling and documentation select different package managers.
-- **Affected components:** backend image builds, reproducible installs, all package consumers.
-- **Risk:** Non-reproducible dependency graphs and divergent local/CI builds.
-- **Required fix:** Select npm or pnpm, remove contradictory instructions, and commit the matching lockfile.
-- **Dependencies:** CI design and package workspace decision.
-- **Estimated effort:** 0.5–1 day.
-- **Suggested implementation:** Use one package manager in Docker, docs, scripts, and CI; enforce it with `packageManager`.
+- Mobile React/React Native peer conflict.
+- Mobile missing `expo-status-bar`.
+- CLI missing `@inquirer/prompts`.
+- Dashboard missing `@testing-library/react` for tests.
+- Multiple independent app lockfiles are created when installing, while only root and desktop lockfiles are currently tracked.
+- Critical/high vulnerabilities exist in all audited package areas.
 
-### AUD-010 — Dependency vulnerability backlog
-- **Severity:** High
-- **Location:** root install audit output
-- **Cause:** Installed dependency graph contains 15 known advisories.
-- **Affected components:** backend and transitive tooling.
-- **Risk:** Known exploitable dependency paths may reach production artifacts.
-- **Required fix:** Triage each advisory, update compatible direct/transitive dependencies, and document accepted residual risk.
-- **Dependencies:** lockfile normalization.
-- **Estimated effort:** 1–2 days.
-- **Suggested implementation:** Run the package manager audit in CI, upgrade within semver first, then test before considering breaking upgrades.
+## Recommended Dependency Policy
+
+1. Adopt a monorepo workspace definition and one explicit lockfile strategy.
+2. Add `npm audit --audit-level=high` or equivalent to CI with documented exceptions.
+3. Align React versions per platform rather than globally using React 19.
+4. Require `typecheck` and `build` scripts for every app package.

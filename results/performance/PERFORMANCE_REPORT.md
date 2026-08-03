@@ -1,37 +1,27 @@
 # Performance Report
 
-## Current design observations
+## Observations
 
-- Redis cache and rate-limiter adapters are available.
-- Provider router includes circuit breaker, queue, fallback, and load-balancing code.
-- Workspace indexing loops files sequentially and indexes content in memory.
-- Distributed event bus retains up to 50,000 events in process memory.
-- Health aggregation runs additional checks serially.
+- Backend test suite hit V8 heap out-of-memory, indicating either heavy tests, leaks, or runaway concurrency.
+- Monaco adds large worker chunks in desktop Vite builds; this is expected but should be optimized via manual chunking and lazy loading.
+- Workspace indexer currently cannot compile; no performance confidence exists for indexing/search.
+- Dashboard build attempts external font fetch, adding deployment latency and fragility.
+- In-memory EventBus and in-memory indexing structures may not scale across multiple backend instances.
 
 ## Risks
 
-### AUD-021 — In-memory state limits horizontal scalability
-- **Severity:** High
-- **Location:** event bus and indexing implementations under `src/cluster/events/` and `src/workspace/indexing/`
-- **Cause:** event history and index maps are process-local.
-- **Affected components:** clustered deployments, recovery, memory usage, search freshness.
-- **Risk:** state divergence, unbounded per-process memory growth, and loss on restart.
-- **Required fix:** Define durable ownership and eviction/persistence policies.
-- **Dependencies:** Firestore/Redis schema and queue design.
-- **Estimated effort:** 3–5 days.
-- **Suggested implementation:** Bound memory by bytes/count, persist required state, and add load/restart tests.
+| Area | Risk | Recommendation |
+|---|---|---|
+| Backend tests/runtime | Heap exhaustion | Profile suite, isolate memory-heavy tests, cap Vitest workers |
+| Desktop editor | Large Monaco chunks | Lazy load languages/workers; manual chunk configuration |
+| Workspace indexing | Unknown due compile failure | Add benchmark tests and indexing limits/exclusions |
+| Search | Hybrid search route not mounted | Add integration and load tests once mounted |
+| Events/queues | In-memory local bus | Bridge to distributed queue/bus for cluster mode |
 
-### AUD-022 — Sequential indexing and health checks
-- **Severity:** Medium
-- **Location:** `src/workspace/indexing/indexer.ts:49-56`; `src/telemetry/integrations.ts:168-176`
-- **Cause:** files and additional health checks are processed one at a time.
-- **Affected components:** large workspaces and health endpoint latency.
-- **Risk:** slow startup/indexing and increased tail latency.
-- **Required fix:** Add bounded concurrency and per-check timeouts.
-- **Dependencies:** resource limits and cancellation semantics.
-- **Estimated effort:** 1–2 days.
-- **Suggested implementation:** Use a bounded worker pool, skip unchanged hashes, and enforce health-check deadlines.
+## Required Performance Tests
 
-## Missing evidence
-
-No benchmark, load, soak, memory, streaming-concurrency, queue-throughput, or failover result is committed. Performance claims remain unverified.
+- Workspace indexing benchmark by file count and repository size.
+- SSE streaming latency and backpressure tests.
+- Provider retry/rate-limit stress tests.
+- Terminal stream throughput tests.
+- Dashboard page load and API waterfall tests.

@@ -1,22 +1,110 @@
 # Missing Integrations
 
-This report distinguishes source presence from verified connectivity.
+## Unmounted Backend Routers
 
-| ID | Severity | Missing or unverified integration | Evidence |
-|---|---|---|---|
-| AUD-004 | High | BullMQ queues/workers, processors, retries, and dead-letter handling | `src/queues/worker.ts:22-30` is commented out |
-| AUD-007 | High | API exposure for existing tools, orchestrator, intelligence, knowledge, extensions, marketplace, cluster, runtime, and simulation routes | route files exist but are absent from `src/api/index.ts` |
-| AUD-011 | High | Payment processor integration | `src/modules/payments/payment.service.ts` exists; no Stripe/PayPal SDK or provider is configured |
-| AUD-012 | High | Real OpenTelemetry/Sentry exporters | `src/telemetry/integrations.ts` logs initialization and generates IDs but imports no exporter SDK |
-| AUD-013 | Medium | Push/email notification delivery | `NotificationService` exists, but no provider credentials or delivery worker is configured |
-| AUD-014 | Medium | Client E2E connectivity | client packages have API clients, but no Playwright config or environment-backed smoke test |
-| AUD-015 | Medium | Firebase startup verification | clients are constructed in `createApp`; only Redis has an explicit startup connect |
-| AUD-016 | Medium | Event delivery durability | in-process event bus exists; durable queue, retry, and dead-letter path are not wired |
+- `src/api/routes/billing-analytics.routes.ts`
+- `src/api/routes/cluster.routes.ts`
+- `src/api/routes/conversation-engine.routes.ts`
+- `src/api/routes/distributed.routes.ts`
+- `src/api/routes/enterprise.routes.ts`
+- `src/api/routes/extensions.routes.ts`
+- `src/api/routes/intelligence.routes.ts`
+- `src/api/routes/knowledge.routes.ts`
+- `src/api/routes/marketplace.routes.ts`
+- `src/api/routes/orchestrator.routes.ts`
+- `src/api/routes/runtime.routes.ts`
+- `src/api/routes/simulation.routes.ts`
+- `src/api/routes/tools.routes.ts`
+- `src/api/routes/workspace.routes.ts`
 
-## Verification notes
+## Client Endpoints That Depend on Missing Routers
 
-Provider adapters, Firebase adapters, Redis cache, route middleware, and client API wrappers are implemented. Their presence should not be interpreted as successful external integration because no CI-backed integration environment or end-to-end test proves credentials, streaming, retries, authorization, or shutdown behavior.
+### dashboard
 
-## Required integration matrix
+- `/billing-analytics/invoices?${new URLSearchParams(params ?? {})}`
+- `/billing-analytics/quotas`
+- `/billing-analytics/subscriptions`
+- `/conversations/${id}/send`
+- `/tools/models/sync`
+- `/tools/models?${new URLSearchParams(params ?? {})}`
+- `/tools/stats`
+- `/tools?category=${category ?? ''}`
+- `/workspace/search`
+- `/workspaces`
+- `/workspaces?${new URLSearchParams(params ?? {})}`
 
-For each client and backend capability, add a row covering endpoint, auth mechanism, request/response schema, streaming transport, timeout/retry policy, telemetry event, failure behavior, and an automated test environment.
+### desktop
+
+- `/conversations/${conversationId}/send`
+- `/conversations/${conversationId}/send/stream`
+- `/tools${category ? `
+- `/tools/${id}/execute`
+- `/tools/models`
+- `/tools/models/search?q=${encodeURIComponent(query)}`
+- `/tools/models/sync`
+- `/tools/stats`
+- `/workspace/files/read?path=${encodeURIComponent(path)}`
+- `/workspace/files/write`
+- `/workspace/index`
+- `/workspace/search`
+- `/workspaces`
+- `/workspaces/${id}/files`
+
+### mobile
+
+- `/billing-analytics/invoices`
+- `/billing-analytics/subscriptions`
+- `/billing-analytics/subscriptions/plans`
+- `/billing-analytics/usage`
+- `/conversations/${id}/send`
+- `/extensions`
+- `/orchestrator/agents`
+- `/orchestrator/goals`
+- `/tools/models/sync`
+- `/tools/models?${new URLSearchParams(params ?? {})}`
+- `/tools?category=${category ?? ''}`
+- `/workspace/index`
+- `/workspace/search`
+- `/workspaces`
+
+### cli
+
+- `/billing-analytics/subscriptions`
+- `/billing-analytics/subscriptions/plans`
+- `/billing-analytics/usage`
+- `/conversations/${id}/send`
+- `/tools/${id}/execute`
+- `/tools/models/search?q=${q}`
+- `/tools/models/sync`
+- `/tools/models?${new URLSearchParams(params ?? {})}`
+- `/tools?category=${category ?? ''}`
+- `/workspace/index`
+- `/workspace/search`
+- `/workspaces`
+
+### vscode
+
+- `/billing-analytics/usage`
+- `/conversations/${id}/send`
+- `/conversations/${id}/send/stream`
+- `/tools/${id}/execute`
+- `/tools/models/sync`
+- `/tools/models?${new URLSearchParams(params ?? {})}`
+- `/tools?category=${category ?? ''}`
+- `/workspace/files?workspaceId=vscode&recursive=true`
+- `/workspace/index`
+- `/workspace/search`
+
+
+## Integration Gaps by Feature
+
+| Feature | Current state | Required integration |
+|---|---|---|
+| Tools | Tool router exists but is not mounted; clients call `/tools` | Mount router and construct ToolRegistry/DynamicModelRegistry |
+| Workspace files/search/index | Engine router exists but is not mounted; indexer syntax broken | Fix indexer, construct FileService/Search/Indexer, mount `/workspace` |
+| Chat streaming | Clients call `/send/stream`; mounted router lacks handler | Mount conversation engine or add stream handler |
+| Agents/orchestrator | Route files exist but not mounted | Wire planner/execution/checkpoints/recovery services |
+| Billing analytics | Clients call `/billing-analytics`; route file unmounted | Mount analytics billing routes or map clients to `/billing` |
+| Extensions/marketplace | Backend route files exist; CLI says coming soon; mobile calls `/extensions` | Mount extension/marketplace routers and hide incomplete UX until ready |
+| Knowledge/memory | Multiple memory APIs in clients; route exposure inconsistent | Consolidate memory APIs and add contract tests |
+| Telemetry/events | Metrics endpoint exists; distributed event bus not started | Wire event bus/queue workers and telemetry spans |
