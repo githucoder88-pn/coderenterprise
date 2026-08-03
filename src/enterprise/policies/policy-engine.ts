@@ -4,7 +4,7 @@
  * Evaluates RBAC, ABAC, and resource policies for authorization decisions.
  */
 
-import type { Policy, PolicyRule, PolicyType } from '../types.js';
+import type { Policy, PolicyRule } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, type Result } from '../../types/index.js';
 

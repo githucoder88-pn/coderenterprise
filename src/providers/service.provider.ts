@@ -75,15 +75,15 @@ export function createServiceProvider(
   const eventBus = new EventBus();
 
   // Repositories
-  const userRepo = new UserRepository(firebase.firestore, logger);
-  const orgRepo = new OrganizationRepository(firebase.firestore, logger);
-  const apiKeyRepo = new ApiKeyRepository(firebase.firestore, logger);
-  const auditRepo = new AuditRepository(firebase.firestore, logger);
+  const userRepo = new UserRepository(firebase.firestore);
+  const orgRepo = new OrganizationRepository(firebase.firestore);
+  const apiKeyRepo = new ApiKeyRepository(firebase.firestore);
+  const auditRepo = new AuditRepository(firebase.firestore);
 
   // Services
   const rbac = new RBACService(logger, eventBus);
   const audit = new AuditService(auditRepo, logger, eventBus);
-  const analytics = new AnalyticsService(redis.cache, logger, metrics);
+  const analytics = new AnalyticsService(redis.cache, logger, eventBus, metrics);
   const billing = new BillingService(logger, eventBus, analytics);
   const secrets = new SecretsService(
     firebase.firestore,
@@ -94,31 +94,25 @@ export function createServiceProvider(
   );
   const auth = new AuthService(
     firebase.auth,
-    rbac,
     audit,
     logger,
     eventBus,
-    config.jwt,
   );
   const users = new UserService(
     userRepo,
     firebase.auth,
-    rbac,
     audit,
     logger,
     eventBus,
   );
   const organizations = new OrganizationService(
     orgRepo,
-    userRepo,
-    rbac,
     audit,
     logger,
     eventBus,
   );
   const apiKeys = new ApiKeyService(
     apiKeyRepo,
-    rbac,
     audit,
     logger,
     eventBus,
@@ -131,9 +125,9 @@ export function createServiceProvider(
   );
 
   // Additional repositories
-  const workspaceRepo = new WorkspaceRepository(firebase.firestore, logger);
-  const conversationRepo = new ConversationRepository(firebase.firestore, logger);
-  const modelRepo = new ModelRepository(firebase.firestore, logger);
+  const workspaceRepo = new WorkspaceRepository(firebase.firestore);
+  const conversationRepo = new ConversationRepository(firebase.firestore);
+  const modelRepo = new ModelRepository(firebase.firestore);
 
   // New services
   const workspaces = new WorkspaceService(workspaceRepo, audit, logger, eventBus);
@@ -144,7 +138,7 @@ export function createServiceProvider(
   const extensions = new ExtensionService(firebase.firestore, audit, logger, eventBus);
   const models = new ModelRegistryService(modelRepo, logger, eventBus);
   const webhooks = new WebhookService(firebase.firestore, audit, logger, eventBus);
-  const payments = new PaymentService(firebase.firestore, audit, logger, eventBus);
+  const payments = new PaymentService(firebase.firestore, logger, eventBus);
 
   // Provider platform — configure from environment
   const providerPlatform = createProviderPlatform({

@@ -18,7 +18,7 @@ export function createDistributedRouter(
   checkpointManager: DistributedCheckpointManager,
   memoryStore: DistributedMemoryStore,
   healthMonitor: HealthMonitor,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 

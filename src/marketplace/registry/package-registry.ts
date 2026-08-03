@@ -6,8 +6,8 @@
  */
 
 import type {
-  Package, PackageVersion, ArtifactKind, ArtifactStatus,
-  MonetizationConfig, PackageStats, SecurityScanResult, VersionDependency,
+  Package, PackageVersion, ArtifactKind,
+PackageStats,
 } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, type Result, type PaginationParams, type PaginatedResponse } from '../../types/index.js';
@@ -91,8 +91,8 @@ export class PackageRegistry implements IPackageRegistry {
     this.versions.set(id, fullVersion);
 
     // Auto-approve for now (production: run security scan)
-    fullVersion.status = 'published';
-    fullVersion.publishedAt = now;
+    const approvedVersion: PackageVersion = { ...fullVersion, status: 'published', publishedAt: now };
+    this.versions.set(id, approvedVersion);
 
     // Update package latest version
     this.packages.set(packageId, { ...pkg, latestVersion: version.version, updatedAt: now });
@@ -118,14 +118,14 @@ export class PackageRegistry implements IPackageRegistry {
     return { success: true, data: undefined };
   }
 
-  async rejectVersion(versionId: string, reason: string): Promise<Result<void>> {
+  async rejectVersion(versionId: string, _reason: string): Promise<Result<void>> {
     const ver = this.versions.get(versionId);
     if (!ver) return { success: false, error: { code: ErrorCode.NOT_FOUND, message: 'Version not found', timestamp: new Date() } };
     this.versions.set(versionId, { ...ver, status: 'rejected', updatedAt: new Date() });
     return { success: true, data: undefined };
   }
 
-  async recordDownload(packageId: string, versionId: string, userId: string): Promise<void> {
+  async recordDownload(packageId: string, _versionId: string, _userId: string): Promise<void> {
     const pkg = this.packages.get(packageId);
     if (!pkg) return;
     this.packages.set(packageId, {
@@ -153,7 +153,7 @@ export class PackageRegistry implements IPackageRegistry {
     }
 
     if (filters?.kind) results = results.filter((p) => p.kind === filters.kind);
-    if (filters?.category) results = results.filter((p) => p.categories.includes(filters.category));
+    if (filters?.category) results = results.filter((p) => p.categories.includes(filters.category!));
     if (filters?.monetization) results = results.filter((p) => p.monetization.type === filters.monetization);
 
     // Sort
@@ -205,7 +205,7 @@ export class PackageRegistry implements IPackageRegistry {
     return { totalPackages: pkgs.length, totalVersions: this.versions.size, totalDownloads, byKind };
   }
 
-  async suspend(id: string, reason: string): Promise<Result<void>> {
+  async suspend(id: string, _reason: string): Promise<Result<void>> {
     const pkg = this.packages.get(id);
     if (!pkg) return { success: false, error: { code: ErrorCode.NOT_FOUND, message: 'Package not found', timestamp: new Date() } };
     this.packages.set(id, { ...pkg, status: 'suspended', updatedAt: new Date() });

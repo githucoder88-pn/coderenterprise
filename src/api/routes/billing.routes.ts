@@ -6,7 +6,7 @@ import { Hono } from 'hono';
 import type { IBillingService } from '../../modules/billing/billing.service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
-export function createBillingRouter(billingService: IBillingService, logger: ILogger): Hono {
+export function createBillingRouter(billingService: IBillingService, _logger: ILogger): Hono {
   const router = new Hono();
 
   // GET /billing/plans

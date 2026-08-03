@@ -14,7 +14,7 @@ import { ErrorCode, createError } from '../../types/index.js';
 export function createProviderRouter(
   router: ProviderRouter,
   registry: ProviderRegistry,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 

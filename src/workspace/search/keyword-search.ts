@@ -5,11 +5,11 @@
  * Uses an inverted index for O(1) lookups.
  */
 
-import type { SearchQuery, SearchResult, SearchResponse, IndexEntry } from '../types.js';
+import type { SearchQuery, SearchResult, SearchResponse } from '../types.js';
 
 interface InvertedIndex {
   readonly term: string;
-  readonly entries: readonly { fileId: string; path: string; line: number; column: number }[];
+  entries: { fileId: string; path: string; line: number; column: number }[];
 }
 
 export class KeywordSearchEngine {

@@ -5,7 +5,7 @@
  */
 
 import type {
-  KnowledgeEntity, KnowledgeChunk, KnowledgeSource, IngestionRequest, IngestionResult, IndexEntry, IndexStats,
+  KnowledgeEntity, KnowledgeChunk, KnowledgeSource, IngestionRequest, IngestionResult, IndexStats,
 } from '../types.js';
 import type { IRetrievalEngine } from '../retrieval/retrieval-engine.js';
 import type { ILogger } from '../../telemetry/logger.js';

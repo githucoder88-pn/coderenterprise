@@ -4,7 +4,7 @@
  * Manages test scenarios for simulations.
  */
 
-import type { Scenario, ScenarioKind, ScenarioAssertion, ScenarioExpected } from '../types.js';
+import type { Scenario, ScenarioKind } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface IScenarioManager {

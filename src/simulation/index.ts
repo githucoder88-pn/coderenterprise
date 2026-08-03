@@ -3,7 +3,7 @@
  */
 
 export * from './types.js';
-export { SimulationManager, type ISimulationManager, type SimulationResult } from './environments/simulation-manager.js';
+export { SimulationManager, type ISimulationManager } from './environments/simulation-manager.js';
 export { ScenarioManager, type IScenarioManager } from './scenarios/scenario-manager.js';
 export { BenchmarkManager, type IBenchmarkManager } from './benchmarks/benchmark-manager.js';
 export { ReplayManager, type IReplayManager } from './replay/replay-manager.js';

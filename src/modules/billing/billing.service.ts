@@ -156,7 +156,7 @@ export class BillingService extends BaseService implements IBillingService {
   }
 
   async checkUsageLimits(
-    organizationId: string,
+    _organizationId: string,
   ): Promise<Result<{ allowed: boolean; remaining: Record<string, number> }>> {
     // In production, check against current plan limits
     return this.success({

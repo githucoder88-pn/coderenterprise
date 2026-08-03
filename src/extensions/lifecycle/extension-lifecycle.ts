@@ -5,11 +5,10 @@
  * Handles state transitions, error recovery, and event emission.
  */
 
-import type { InstalledExtension, ExtensionManifest, ExtensionStatus, ExtensionEvent, ExtensionEventName } from '../types.js';
+import type { InstalledExtension, ExtensionManifest, ExtensionEvent, ExtensionEventName } from '../types.js';
 import type { ExtensionRegistry } from '../registry/extension-registry.js';
 import type { PermissionManager } from '../permissions/permission-manager.js';
 import type { DependencyResolver } from '../dependencies/dependency-resolver.js';
-import type { IEventBus } from '../../core/event-bus.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, type Result } from '../../types/index.js';
 
@@ -34,7 +33,6 @@ export class ExtensionLifecycleManager implements IExtensionLifecycleManager {
     private readonly registry: ExtensionRegistry,
     private readonly permissions: PermissionManager,
     private readonly dependencies: DependencyResolver,
-    private readonly eventBus: IEventBus,
     private readonly logger: ILogger,
   ) {}
 

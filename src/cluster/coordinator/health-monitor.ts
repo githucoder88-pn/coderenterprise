@@ -4,10 +4,9 @@
  * Monitors node health, agent health, and region health across the distributed cluster.
  */
 
-import type { ClusterHealth, DistributedNode, DistributedAgent, RegionId } from './types.js';
+import type { ClusterHealth, RegionId } from './types.js';
 import type { ClusterManager } from './cluster-manager.js';
 import type { AgentScheduler } from './agent-scheduler.js';
-import type { ILogger } from '../../telemetry/logger.js';
 
 export interface IHealthMonitor {
   getClusterHealth(): ClusterHealth;
@@ -25,7 +24,6 @@ export class HealthMonitor implements IHealthMonitor {
   constructor(
     private readonly clusterManager: ClusterManager,
     private readonly agentScheduler: AgentScheduler,
-    private readonly logger: ILogger,
   ) {}
 
   getClusterHealth(): ClusterHealth {

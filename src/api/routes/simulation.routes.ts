@@ -18,7 +18,7 @@ export function createSimulationRouter(
   benchmarkManager: BenchmarkManager,
   experimentManager: ExperimentManager,
   replayManager: ReplayManager,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -46,7 +46,7 @@ export function createSimulationRouter(
     const body = await c.req.json();
     const parsed = CreateScenarioSchema.safeParse(body);
     if (!parsed.success) throw createError(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
-    const scenario = scenarioManager.create(parsed.data);
+    const scenario = scenarioManager.create({ ...parsed.data, input: { ...parsed.data.input, attachments: [] }, expectedOutput: parsed.data.expectedOutput ?? null, metadata: {} });
     return c.json({ success: true, data: scenario }, 201);
   });
 

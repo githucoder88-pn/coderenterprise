@@ -6,7 +6,7 @@
 
 import type {
   Organization, OrganizationSettings, Department, Team, Member, Project,
-  EnterpriseRole, RoleDefinition, DEFAULT_ROLE_PERMISSIONS,
+  EnterpriseRole,
 } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, type Result, type PaginationParams, type PaginatedResponse } from '../../types/index.js';

@@ -77,7 +77,7 @@ export function errorHandlerMiddleware(logger: ILogger) {
             version: '1.0.0',
           },
         },
-        status,
+        status as 200,
       );
     }
   });

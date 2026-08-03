@@ -68,7 +68,8 @@ export class MemoryService implements IMemoryService {
     );
 
     if (query.type) results = results.filter((m) => m.type === query.type);
-    if (query.minImportance) results = results.filter((m) => m.importance >= query.minImportance);
+    const minImportance = query.minImportance;
+    if (minImportance !== undefined) results = results.filter((m) => m.importance >= minImportance);
     if (query.tags?.length) results = results.filter((m) => query.tags!.some((t) => m.tags.includes(t)));
 
     // Filter expired
@@ -98,8 +99,8 @@ export class MemoryService implements IMemoryService {
 
     // Update access counts
     for (const m of sliced) {
-      m.accessCount++;
-      m.lastAccessedAt = new Date();
+      const updated = { ...m, accessCount: m.accessCount + 1, lastAccessedAt: new Date() };
+      this.memories.set(m.id, updated);
     }
 
     return sliced;
@@ -131,11 +132,8 @@ export class MemoryService implements IMemoryService {
 
     let consolidated = 0;
     for (const memory of shortTerm) {
-      await this.store({
-        ...memory, type: 'long_term',
-        id: undefined as any, createdAt: undefined as any, updatedAt: undefined as any,
-        accessCount: undefined as any, lastAccessedAt: undefined as any, embedding: undefined as any,
-      });
+      const { id: _id, createdAt: _ca, updatedAt: _ua, accessCount: _ac, lastAccessedAt: _la, embedding: _emb, ...rest } = memory;
+      await this.store({ ...rest, type: 'long_term' });
       await this.delete(memory.id);
       consolidated++;
     }

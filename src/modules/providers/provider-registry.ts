@@ -8,12 +8,12 @@
 import type {
   Provider,
   ProviderName,
-  ProviderConfig,
   ProviderCapabilities,
 } from './types.js';
 import type { CircuitBreakerConfig } from './types.js';
 import { CircuitBreaker } from './resilience/circuit-breaker.js';
-import { RequestQueue, type QueueConfig } from './resilience/request-queue.js';
+import { RequestQueue } from './resilience/request-queue.js';
+import type { QueueConfig } from './types.js';
 
 const DEFAULT_CIRCUIT_BREAKER: CircuitBreakerConfig = {
   failureThreshold: 5,

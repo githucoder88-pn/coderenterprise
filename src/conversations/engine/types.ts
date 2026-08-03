@@ -4,7 +4,7 @@
 
 import { z } from 'zod';
 import type { Timestamps } from '../../types/index.js';
-import type { ProviderName, StreamChunk, ToolCall as ProviderToolCall } from '../../modules/providers/types.js';
+import type { ProviderName, StreamChunk, ToolCall as _ProviderToolCall } from '../../modules/providers/types.js';
 
 // ─── Conversation ────────────────────────────────────────────────────────────
 

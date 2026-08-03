@@ -8,7 +8,7 @@
  * Organizational: org-wide knowledge (shared)
  */
 
-import type { MemoryLayer, RuntimeMemory, MemoryEntry } from '../types.js';
+import type { MemoryLayer, MemoryEntry } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface IRuntimeMemoryStore {
@@ -32,7 +32,7 @@ export class RuntimeMemoryStore implements IRuntimeMemoryStore {
     organizational: { maxEntries: 100_000, ttlMs: null },
   };
 
-  constructor(private readonly logger: ILogger) {
+  constructor(_logger: ILogger) {
     for (const layer of Object.keys(this.layerConfig) as MemoryLayer[]) {
       this.memories.set(layer, new Map());
     }

@@ -6,9 +6,8 @@
  * for 10 languages.
  */
 
-import type { SupportedLanguage, AstSymbol, ParseResult, AstNode } from '../types.js';
+import type { SupportedLanguage, AstSymbol, ParseResult } from '../types.js';
 
-type SymbolExtractor = (content: string, filePath: string) => ParseResult;
 
 const FUNCTION_PATTERNS: Record<SupportedLanguage, RegExp> = {
   typescript: /(?:export\s+)?(?:async\s+)?function\s+(\w+)|(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(/gm,
@@ -55,7 +54,7 @@ export class AstParser {
    */
   parse(content: string, language: SupportedLanguage, filePath: string): ParseResult {
     const symbols: AstSymbol[] = [];
-    const imports: ParseResult['imports'] = [];
+    const imports: { source: string; specifiers: readonly string[]; isDefault: boolean }[] = [];
     const errors: ParseResult['errors'] = [];
     const lines = content.split('\n');
 
@@ -144,7 +143,6 @@ export class AstParser {
   private extractWithPattern(
     content: string, pattern: RegExp, callback: (match: RegExpExecArray, lineNum: number) => void,
   ): void {
-    const lines = content.split('\n');
     const regex = new RegExp(pattern.source, pattern.flags);
     let match: RegExpExecArray | null;
 
@@ -210,7 +208,7 @@ export class AstParser {
     return null;
   }
 
-  private extractParameters(signature: string, language: SupportedLanguage): { name: string; type: string | null; defaultValue: string | null }[] {
+  private extractParameters(signature: string, _language: SupportedLanguage): { name: string; type: string | null; defaultValue: string | null }[] {
     const paramMatch = signature.match(/\(([^)]*)\)/);
     if (!paramMatch?.[1]) return [];
 
@@ -242,7 +240,7 @@ export class AstParser {
   }
 
   private extractExports(content: string, language: SupportedLanguage): ParseResult['exports'] {
-    const exports: ParseResult['exports'] = [];
+    const exports: { name: string; kind: string }[] = [];
     const patterns: RegExp[] = [];
 
     if (language === 'typescript' || language === 'javascript') {

@@ -107,7 +107,7 @@ export class AbuseDetectionService {
     return null;
   }
 
-  private async detectScraping(ip: string, path: string): Promise<AbuseAction | null> {
+  private async detectScraping(ip: string, _path: string): Promise<AbuseAction | null> {
     const key = `abuse:scrape:${ip}`;
     const count = await this.redis.incr(key);
     if (count === 1) await this.redis.expire(key, 60);
@@ -134,7 +134,7 @@ export class AbuseDetectionService {
     return null;
   }
 
-  private async analyzePattern(identifier: string, path: string, method: string): Promise<AbuseAction | null> {
+  private async analyzePattern(identifier: string, path: string, _method: string): Promise<AbuseAction | null> {
     const key = `abuse:pattern:${identifier}`;
     const patterns = await this.redis.get(key);
 

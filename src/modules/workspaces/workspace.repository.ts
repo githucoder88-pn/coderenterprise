@@ -3,7 +3,6 @@
  */
 
 import type { IFirestoreClient } from '../../infrastructure/firebase/firestore-client.js';
-import type { ILogger } from '../../telemetry/logger.js';
 import type { Workspace } from './workspace.types.js';
 import { BaseRepository, type FindOptions, type QueryFilter } from '../../core/base-repository.js';
 import type { PaginationParams, PaginatedResponse } from '../../types/index.js';
@@ -12,7 +11,7 @@ import { createPaginatedResponse } from '../../types/index.js';
 export class WorkspaceRepository extends BaseRepository<Workspace> {
   private readonly collection = 'workspaces';
 
-  constructor(private readonly firestore: IFirestoreClient, private readonly logger: ILogger) { super(); }
+  constructor(private readonly firestore: IFirestoreClient) { super(); }
 
   async findById(id: string): Promise<Workspace | null> {
     const doc = await this.firestore.getDocument<Record<string, unknown>>(this.collection, id);

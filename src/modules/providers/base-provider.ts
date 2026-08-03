@@ -15,7 +15,6 @@ import type {
   ProviderResponse,
   ProviderStream,
   ProviderMetadata,
-  TokenUsage,
   Message,
   EmbeddingRequest,
   EmbeddingResponse,

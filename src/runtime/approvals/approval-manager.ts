@@ -37,8 +37,8 @@ export class ApprovalManager implements IApprovalManager {
     if (this.checkAutoApproval(params.riskLevel, params.title)) {
       const now = new Date();
       const request: ApprovalRequest = {
-        id: crypto.randomUUID(), workflowId: params.workflowId, taskId: params.taskId,
-        type: 'automatic', status: 'approved', title: params.title, description: params.description,
+        id: crypto.randomUUID(), workflowId: params.workflowId, taskId: params.taskId ?? null,
+        type: 'automatic', status: 'approved', title: params.title, description: params.description ?? null,
         riskLevel: params.riskLevel, requestedBy: params.requestedBy, approvedBy: 'system',
         reason: 'Auto-approved by policy', expiresAt: new Date(now.getTime() + 3600_000),
         metadata: {}, createdAt: now, updatedAt: now,
@@ -50,8 +50,8 @@ export class ApprovalManager implements IApprovalManager {
 
     const now = new Date();
     const request: ApprovalRequest = {
-      id: crypto.randomUUID(), workflowId: params.workflowId, taskId: params.taskId,
-      type: params.type, status: 'pending', title: params.title, description: params.description,
+      id: crypto.randomUUID(), workflowId: params.workflowId, taskId: params.taskId ?? null,
+      type: params.type, status: 'pending', title: params.title, description: params.description ?? null,
       riskLevel: params.riskLevel, requestedBy: params.requestedBy, approvedBy: null,
       reason: null, expiresAt: new Date(now.getTime() + 86400_000),
       metadata: {}, createdAt: now, updatedAt: now,
@@ -90,7 +90,7 @@ export class ApprovalManager implements IApprovalManager {
     return { success: true, data: updated };
   }
 
-  getPending(userId?: string): readonly ApprovalRequest[] {
+  getPending(_userId?: string): readonly ApprovalRequest[] {
     return [...this.requests.values()].filter((r) => r.status === 'pending');
   }
 

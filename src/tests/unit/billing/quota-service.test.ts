@@ -20,7 +20,7 @@ describe('QuotaService', () => {
   let service: QuotaService;
 
   beforeEach(() => {
-    service = new QuotaService(createMockCache(), createMockLogger());
+    service = new QuotaService(createMockLogger());
   });
 
   describe('setQuota', () => {

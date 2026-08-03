@@ -6,9 +6,8 @@
  * system instructions, and tool outputs into a single context.
  */
 
-import type { ContextWindow, ContextMessage, Message, TokenUsage, MemoryEntry } from './types.js';
+import type { ContextWindow, ContextMessage, Message } from './types.js';
 import type { IMemoryService } from './memory-service.js';
-import type { ILogger } from '../../telemetry/logger.js';
 
 export interface ContextBuildOptions {
   readonly maxTokens: number;
@@ -34,7 +33,6 @@ export interface IContextEngine {
 export class ContextEngine implements IContextEngine {
   constructor(
     private readonly memoryService: IMemoryService,
-    private readonly logger: ILogger,
   ) {}
 
   async build(

@@ -8,7 +8,7 @@ import type { ILogger } from '../../telemetry/logger.js';
 import { CreateUserSchema, UpdateUserSchema } from '../../modules/users/user.types.js';
 import { ErrorCode, createError } from '../../types/index.js';
 
-export function createUserRouter(userService: IUserService, logger: ILogger): Hono {
+export function createUserRouter(userService: IUserService, _logger: ILogger): Hono {
   const router = new Hono();
 
   // GET /users

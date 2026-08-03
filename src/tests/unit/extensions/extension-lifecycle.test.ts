@@ -32,7 +32,7 @@ describe('ExtensionLifecycleManager', () => {
     const permissions = new PermissionManager(logger);
     const dependencies = new DependencyResolver(registry, logger);
     const eventBus = new EventBus();
-    lifecycle = new ExtensionLifecycleManager(registry, permissions, dependencies, eventBus, logger);
+    lifecycle = new ExtensionLifecycleManager(registry, permissions, dependencies, logger);
   });
 
   describe('install', () => {

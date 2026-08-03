@@ -19,7 +19,7 @@ export interface IEvaluationEngine {
 }
 
 export class EvaluationEngine implements IEvaluationEngine {
-  constructor(private readonly logger: ILogger) {}
+  constructor(_logger: ILogger) {}
 
   evaluatePlan(plan: Plan): EvaluationResult {
     const scores: EvaluationScore[] = [

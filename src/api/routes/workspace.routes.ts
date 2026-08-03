@@ -9,7 +9,7 @@ import type { SnapshotService } from '../../workspace/snapshots/snapshot-service
 import type { DiffEngine } from '../../workspace/diff/diff-engine.js';
 import type { AstParser } from '../../workspace/editors/ast-parser.js';
 import type { HybridSearchEngine } from '../../workspace/search/hybrid-search.js';
-import { SearchQuerySchema, WriteFileSchema, CreateSnapshotSchema } from '../../workspace/types.js';
+import { SearchQuerySchema, WriteFileSchema, CreateSnapshotSchema, type SupportedLanguage, type AstSymbol } from '../../workspace/types.js';
 import { ErrorCode, createError } from '../../types/index.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
@@ -17,7 +17,7 @@ export function createWorkspaceEngineRouter(
   fileService: FileService, indexer: WorkspaceIndexer,
   snapshotService: SnapshotService, diffEngine: DiffEngine,
   parser: AstParser, searchEngine: HybridSearchEngine,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -51,7 +51,7 @@ export function createWorkspaceEngineRouter(
     const body = await c.req.json();
     const parsed = WriteFileSchema.safeParse(body);
     if (!parsed.success) throw createError(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
-    const result = await fileService.writeFile(parsed.data.workspaceId ?? body.workspaceId, parsed.data.path, parsed.data.content, parsed.data);
+    const result = await fileService.writeFile(body.workspaceId, parsed.data.path, parsed.data.content, parsed.data);
     if (!result.success) throw result.error;
     return c.json({ success: true, data: result.data });
   });
@@ -78,7 +78,11 @@ export function createWorkspaceEngineRouter(
     const parsed = SearchQuerySchema.safeParse(body);
     if (!parsed.success) throw createError(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
 
-    const result = searchEngine.search(parsed.data);
+    const result = searchEngine.search({
+      ...parsed.data,
+      languages: parsed.data.languages as readonly SupportedLanguage[] | undefined,
+      symbolKind: parsed.data.symbolKind as AstSymbol['kind'] | undefined,
+    });
     return c.json({ success: true, data: result });
   });
 

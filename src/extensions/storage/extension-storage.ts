@@ -26,7 +26,7 @@ export class ExtensionStorage implements IExtensionStorage {
   private readonly maxEntriesPerExtension = 10_000;
   private readonly maxValueSizeBytes = 1024 * 1024; // 1MB
 
-  constructor(private readonly logger: ILogger) {}
+  constructor(_logger: ILogger) {}
 
   async get<T>(extensionId: string, key: string): Promise<T | null> {
     const store = this.stores.get(extensionId);

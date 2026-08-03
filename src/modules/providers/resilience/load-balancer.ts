@@ -6,7 +6,6 @@
 
 import type {
   ProviderName,
-  LoadBalancingStrategy,
   LoadBalancerConfig,
   Provider,
 } from '../types.js';
@@ -102,7 +101,7 @@ export class LoadBalancer {
   }
 
   private weightedRandom(providers: readonly Provider[]): Provider {
-    const weights = this.config.weights ?? {};
+    const weights: Record<string, number> = this.config.weights ?? {};
     const totalWeight = providers.reduce(
       (sum, p) => sum + (weights[p.name] ?? 1),
       0,

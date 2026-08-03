@@ -11,7 +11,7 @@ export function createHealthRouter(healthService: IHealthService): Hono {
   // GET /health
   router.get('/', async (c) => {
     const result = await healthService.shallow();
-    return c.json({ success: true, data: result.data }, 200);
+    return c.json({ success: true, data: result.success ? result.data : { status: 'unknown', uptime: 0 } }, 200);
   });
 
   // GET /health/deep

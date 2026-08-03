@@ -161,7 +161,7 @@ export class RuntimeManager implements IRuntimeManager {
   }
 
   validateTask(
-    workflowId: string, taskId: string, passed: boolean,
+    _workflowId: string, taskId: string, passed: boolean,
     checks: { name: string; passed: boolean; message: string }[],
   ): Result<void> {
     const task = this.tasks.get(taskId);
@@ -177,7 +177,7 @@ export class RuntimeManager implements IRuntimeManager {
     return { success: true, data: undefined };
   }
 
-  async correctTask(workflowId: string, taskId: string): Promise<Result<RuntimeTask>> {
+  async correctTask(_workflowId: string, taskId: string): Promise<Result<RuntimeTask>> {
     const task = this.tasks.get(taskId);
     if (!task) return { success: false, error: { code: ErrorCode.NOT_FOUND, message: 'Task not found', timestamp: new Date() } };
 
@@ -204,7 +204,7 @@ export class RuntimeManager implements IRuntimeManager {
 
   // ─── Private ─────────────────────────────────────────────────────────────
 
-  private generatePlan(goal: string): ExecutionPlan {
+  private generatePlan(_goal: string): ExecutionPlan {
     const steps: PlanStep[] = [
       { id: 's1', name: 'Analyze goal', description: 'Understand requirements and constraints', agentRole: 'planner', toolIds: [], dependencies: [], estimatedDurationMs: 5000, requiresApproval: false },
       { id: 's2', name: 'Research context', description: 'Gather relevant information from workspace and memory', agentRole: 'researcher', toolIds: ['search.search'], dependencies: ['s1'], estimatedDurationMs: 10000, requiresApproval: false },

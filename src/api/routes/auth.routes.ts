@@ -11,8 +11,8 @@ import { ErrorCode, createError } from '../../types/index.js';
 
 export function createAuthRouter(
   authService: IAuthService,
-  auditService: IAuditService,
-  logger: ILogger,
+  _auditService: IAuditService,
+  _logger: ILogger,
 ): Hono {
   const router = new Hono();
 

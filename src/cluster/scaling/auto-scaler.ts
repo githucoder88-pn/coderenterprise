@@ -58,7 +58,7 @@ export class AutoScaler implements IAutoScaler {
     const avgCpu = nodes.length > 0 ? nodes.reduce((sum, n) => sum + n.cpu.usage, 0) / nodes.length : 0;
     const avgMemory = nodes.length > 0 ? nodes.reduce((sum, n) => sum + n.memory.percent, 0) / nodes.length : 0;
 
-    for (const [key, policy] of this.policies) {
+    for (const [_key, policy] of this.policies) {
       let value = 0;
       switch (policy.metric) {
         case 'cpu': value = avgCpu; break;
@@ -92,7 +92,7 @@ export class AutoScaler implements IAutoScaler {
       this.cooldownTracker.set(policy.metric, new Date());
       this.lastScaleAction = new Date();
 
-      this.logger.info(decision, 'Scaling decision');
+      this.logger.info({ ...decision }, 'Scaling decision');
       return decision;
     }
 

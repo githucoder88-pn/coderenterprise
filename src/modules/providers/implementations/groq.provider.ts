@@ -8,14 +8,11 @@ import { nanoid } from 'nanoid';
 import { BaseProvider } from '../base-provider.js';
 import type {
   ProviderName,
-  ProviderConfig,
   ProviderCapabilities,
   ProviderRequest,
   ProviderResponse,
   ProviderStream,
   StreamChunk,
-  EmbeddingRequest,
-  EmbeddingResponse,
   ToolCall,
   TokenUsage,
 } from '../types.js';

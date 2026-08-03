@@ -6,7 +6,7 @@
 
 import type { ModerationAction, Package, SecurityScanResult } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
-import { ErrorCode, type Result } from '../../types/index.js';
+import { type Result } from '../../types/index.js';
 
 export interface IModerationService {
   submitForReview(packageId: string): Promise<Result<void>>;

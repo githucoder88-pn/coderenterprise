@@ -4,7 +4,7 @@
  * Manages ratings, reviews, and quality scoring for marketplace packages.
  */
 
-import type { Review, Rating, CreateReviewSchema } from '../types.js';
+import type { Review, Rating } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, type Result, type PaginationParams, type PaginatedResponse } from '../../types/index.js';
 import { createPaginatedResponse } from '../../types/index.js';

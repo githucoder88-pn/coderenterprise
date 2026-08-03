@@ -6,7 +6,7 @@
  */
 
 import type { ConversationStream, TokenUsage, MessageToolCall } from './types.js';
-import type { ProviderStream, StreamChunk, ProviderName } from '../../modules/providers/types.js';
+import type { ProviderStream, StreamChunk } from '../../modules/providers/types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface StreamingCallbacks {
@@ -57,7 +57,7 @@ export class StreamingEngine implements IStreamingEngine {
           const result = await providerStream[Symbol.asyncIterator]().next();
           if (result.done) {
             status = 'completed';
-            const completedAt = new Date();
+            
             const stream = getStream();
             callbacks?.onComplete?.(stream);
             return { done: true, value: undefined };
@@ -83,8 +83,10 @@ export class StreamingEngine implements IStreamingEngine {
                 });
               } else if (tc.function?.arguments) {
                 // Append to last tool call
-                const last = toolCalls[toolCalls.length - 1];
-                if (last) last.arguments += tc.function.arguments;
+                const lastIdx = toolCalls.length - 1;
+                if (lastIdx >= 0) {
+                  toolCalls[lastIdx] = { ...toolCalls[lastIdx]!, arguments: toolCalls[lastIdx]!.arguments + tc.function.arguments };
+                }
               }
             }
             callbacks?.onToolCall?.(toolCalls[toolCalls.length - 1]!);
@@ -135,13 +137,12 @@ export class StreamingEngine implements IStreamingEngine {
 
     // Auto-remove when completed
     const originalOnComplete = callbacks?.onComplete;
-    const wrappedCallbacks: StreamingCallbacks = {
-      ...callbacks,
-      onComplete: (s) => {
-        this.activeStreams.delete(id);
-        originalOnComplete?.(s);
-      },
+    // Wrap callbacks to auto-remove stream on completion
+    const wrappedOnComplete = (s: ConversationStream) => {
+      this.activeStreams.delete(id);
+      originalOnComplete?.(s);
     };
+    void wrappedOnComplete;
 
     this.logger.info({ streamId: id, conversationId, provider: providerStream.provider }, 'Stream created');
     return stream;

@@ -5,7 +5,7 @@
  * 4 strategies: round-robin, weighted, least-connections, failover.
  */
 
-import type { ClusterNode, LoadBalancingStrategy, LoadBalancerConfig } from '../types.js';
+import type { ClusterNode, LoadBalancerConfig } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface ILoadBalancer {

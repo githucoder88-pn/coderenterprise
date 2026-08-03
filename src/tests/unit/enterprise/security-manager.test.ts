@@ -24,7 +24,7 @@ function createMockRedis(): IRedisClient {
 describe('SecurityManager', () => {
   let manager: SecurityManager;
 
-  beforeEach(() => { manager = new SecurityManager(createMockRedis(), createMockLogger()); });
+  beforeEach(() => { manager = new SecurityManager(createMockLogger()); });
 
   describe('policy', () => {
     it('should create a security policy', () => {

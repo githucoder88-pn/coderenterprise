@@ -6,19 +6,11 @@
  */
 
 import type {
-  ReasoningStrategy, ReasoningStep, ReasoningResult, IntelligenceGoal, Constraint,
+  ReasoningStrategy, ReasoningStep, ReasoningResult, IntelligenceGoal,
 } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { nanoid } from 'nanoid';
 
-interface ReasonerContext {
-  readonly goal: string;
-  readonly strategy: ReasoningStrategy;
-  readonly constraints: readonly Constraint[];
-  readonly memory: Map<string, unknown>;
-  readonly maxTokens: number;
-  readonly maxDurationMs: number;
-}
 
 export interface IReasoningEngine {
   reason(goal: IntelligenceGoal, strategy?: ReasoningStrategy): Promise<ReasoningResult>;

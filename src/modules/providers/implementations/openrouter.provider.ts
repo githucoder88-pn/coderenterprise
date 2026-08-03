@@ -7,7 +7,6 @@
 import { BaseProvider } from '../base-provider.js';
 import type {
   ProviderName,
-  ProviderConfig,
   ProviderCapabilities,
   ProviderRequest,
   ProviderResponse,

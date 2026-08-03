@@ -5,7 +5,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import type { Backup, WorkspaceFile } from '../types.js';
+import type { Backup } from '../types.js';
 import type { FileService } from '../files/file-service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 

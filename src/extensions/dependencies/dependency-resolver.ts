@@ -6,7 +6,6 @@
 
 import type { ExtensionDependency, ResolvedDependency } from '../types.js';
 import type { ExtensionRegistry } from '../registry/extension-registry.js';
-import type { ILogger } from '../../telemetry/logger.js';
 
 export interface IDependencyResolver {
   resolve(dependencies: readonly ExtensionDependency[]): readonly ResolvedDependency[];
@@ -18,7 +17,6 @@ export interface IDependencyResolver {
 export class DependencyResolver implements IDependencyResolver {
   constructor(
     private readonly registry: ExtensionRegistry,
-    private readonly logger: ILogger,
   ) {}
 
   resolve(dependencies: readonly ExtensionDependency[]): readonly ResolvedDependency[] {

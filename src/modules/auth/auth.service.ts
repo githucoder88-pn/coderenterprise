@@ -6,11 +6,9 @@
 
 import { BaseService } from '../../core/base-service.js';
 import type { IAuthClient } from '../../infrastructure/firebase/auth-client.js';
-import type { IRBACService } from '../rbac/rbac.service.js';
 import type { IAuditService } from '../audit/audit.service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
-import type { AppConfig } from '../../config/index.js';
 import type { AuthSession, AuthTokens } from './auth.types.js';
 import type { SignInInput, SignUpInput } from './auth.types.js';
 import {
@@ -31,11 +29,9 @@ export interface IAuthService {
 export class AuthService extends BaseService implements IAuthService {
   constructor(
     private readonly authClient: IAuthClient,
-    private readonly rbac: IRBACService,
     private readonly audit: IAuditService,
     logger: ILogger,
     eventBus: IEventBus,
-    private readonly jwtConfig: AppConfig['jwt'],
   ) {
     super(logger, eventBus);
   }

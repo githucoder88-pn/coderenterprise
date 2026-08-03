@@ -17,8 +17,8 @@ export function createIntelligenceRouter(
   planning: PlanningEngine,
   evaluation: EvaluationEngine,
   reflection: ReflectionEngine,
-  optimization: OptimizationEngine,
-  logger: ILogger,
+  _optimization: OptimizationEngine,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -69,7 +69,7 @@ export function createIntelligenceRouter(
   });
 
   app.post('/plan/optimize', async (c) => {
-    const body = await c.req.json();
+    
     // In production: pass actual plan
     return c.json({ success: true, data: { message: 'Plan optimization requires a plan object' } });
   });

@@ -84,6 +84,7 @@ export class CircuitBreaker {
     failures: number;
     successes: number;
     nextAttempt: number;
+    lastFailure: number;
     provider: ProviderName;
   } {
     return {
@@ -91,6 +92,7 @@ export class CircuitBreaker {
       failures: this.getRecentFailureCount(),
       successes: this.successCount,
       nextAttempt: this.nextAttemptTime,
+      lastFailure: this.lastFailureTime,
       provider: this.provider,
     };
   }

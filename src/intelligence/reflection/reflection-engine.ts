@@ -70,7 +70,7 @@ export class ReflectionEngine implements IReflectionEngine {
     return entry;
   }
 
-  reflectOnFailure(goalId: string, error: string, context: Record<string, unknown>): ReflectionEntry {
+  reflectOnFailure(goalId: string, error: string, _context: Record<string, unknown>): ReflectionEntry {
     const observations = [`Failure: ${error}`];
     const lessons: string[] = [];
     const adjustments: string[] = [];
@@ -111,7 +111,7 @@ export class ReflectionEngine implements IReflectionEngine {
       .slice(0, limit);
   }
 
-  getAdjustments(strategy: string): readonly string[] {
+  getAdjustments(_strategy: string): readonly string[] {
     const allAdjustments: string[] = [];
     for (const entries of this.reflections.values()) {
       for (const entry of entries) {

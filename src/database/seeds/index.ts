@@ -4,11 +4,10 @@
  * Run with: pnpm db:seed
  */
 
-import { loadConfig } from '../../config/index.js';
 import { createLogger } from '../../telemetry/logger.js';
 
 async function main() {
-  const config = loadConfig();
+  
   const logger = createLogger({
     level: 'info',
     pretty: true,

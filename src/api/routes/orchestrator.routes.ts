@@ -16,7 +16,7 @@ export function createOrchestratorRouter(
   executionEngine: ExecutionEngine,
   checkpointManager: CheckpointManager,
   planner: TaskPlanner,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -33,7 +33,7 @@ export function createOrchestratorRouter(
       id: goalId, title: parsed.data.title, description: parsed.data.description,
       status: 'planning' as const, workflowPattern: parsed.data.workflowPattern,
       executionMode: parsed.data.executionMode, tasks: [], agents: [], checkpoints: [],
-      result: null, metadata: { workspaceId: parsed.data.workspaceId, conversationId: parsed.data.conversationId },
+      result: null, metadata: { workspaceId: parsed.data.workspaceId, conversationId: parsed.data.conversationId }, maxIterations: 10,
       createdAt: now, updatedAt: now,
     };
 
@@ -44,7 +44,7 @@ export function createOrchestratorRouter(
     // Execute
     const result = await executionEngine.execute(goalWithTasks);
 
-    return c.json({ success: true, data: { goalId, tasks: tasks.length, result: result.data ?? null } }, 201);
+    return c.json({ success: true, data: { goalId, tasks: tasks.length, result: result.success ? result.data : null } }, 201);
   });
 
   // ─── Agents ──────────────────────────────────────────────────────────────

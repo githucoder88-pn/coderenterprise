@@ -9,7 +9,7 @@ import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { Workspace, CreateWorkspaceInput, UpdateWorkspaceInput } from './workspace.types.js';
 import { CreateWorkspaceSchema, UpdateWorkspaceSchema } from './workspace.types.js';
-import { ErrorCode, type Result, type PaginationParams, type PaginatedResponse, type AuthenticatedUser, type DomainEvent } from '../../types/index.js';
+import { ErrorCode, type Result, type PaginationParams, type PaginatedResponse, type AuthenticatedUser } from '../../types/index.js';
 
 export interface IWorkspaceService {
   getById(id: string): Promise<Result<Workspace>>;
@@ -42,7 +42,7 @@ export class WorkspaceService extends BaseService implements IWorkspaceService {
     if (!parsed.success) return this.failure(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
     const existing = await this.repo.findBySlug(parsed.data.slug);
     if (existing) return this.failure(ErrorCode.CONFLICT, `Slug ${parsed.data.slug} already exists`);
-    const ws = await this.repo.create({ ...parsed.data, status: 'active', memberCount: 1, settings: parsed.data.settings ?? {}, metadata: {} });
+    const ws = await this.repo.create({ ...parsed.data, description: parsed.data.description ?? '', status: 'active', memberCount: 1, settings: parsed.data.settings ?? {}, metadata: {} });
     await this.audit.log({ action: 'workspace.created', actorId: actor.uid, targetId: ws.id, targetType: 'Workspace', data: { name: ws.name } });
     return this.success(ws);
   }

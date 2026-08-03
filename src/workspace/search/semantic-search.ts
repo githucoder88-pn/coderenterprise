@@ -4,7 +4,7 @@
  * Vector-based semantic search using cosine similarity over file embeddings.
  */
 
-import type { SearchQuery, SearchResult, SearchResponse, FileEmbedding, EmbeddingSearchResult } from '../types.js';
+import type { EmbeddingSearchResult } from '../types.js';
 
 interface IndexedChunk {
   readonly fileId: string;

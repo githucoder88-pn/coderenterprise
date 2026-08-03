@@ -6,7 +6,6 @@
 
 import type { MarketplaceExtension, Publisher, ExtensionReview, ExtensionManifest } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
-import type { ICacheService } from '../../infrastructure/redis/cache.js';
 import { ErrorCode, type Result, type PaginationParams, type PaginatedResponse } from '../../types/index.js';
 import { createPaginatedResponse } from '../../types/index.js';
 
@@ -29,7 +28,6 @@ export class ExtensionMarketplace implements IExtensionMarketplace {
   private readonly reviews = new Map<string, ExtensionReview[]>();
 
   constructor(
-    private readonly cache: ICacheService,
     private readonly logger: ILogger,
   ) {}
 

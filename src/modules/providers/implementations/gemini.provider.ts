@@ -8,7 +8,6 @@ import { nanoid } from 'nanoid';
 import { BaseProvider } from '../base-provider.js';
 import type {
   ProviderName,
-  ProviderConfig,
   ProviderCapabilities,
   ProviderRequest,
   ProviderResponse,
@@ -20,7 +19,6 @@ import type {
   ImageResponse,
   ToolCall,
   TokenUsage,
-  Message,
   MessageContent,
 } from '../types.js';
 

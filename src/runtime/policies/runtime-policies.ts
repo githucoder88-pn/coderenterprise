@@ -26,7 +26,7 @@ export interface IPolicyManager {
 export class PolicyManager implements IPolicyManager {
   private readonly policies = new Map<string, RuntimePolicy>();
 
-  constructor(private readonly logger: ILogger) {
+  constructor(_logger: ILogger) {
     this.initDefaultPolicies();
   }
 
@@ -39,7 +39,7 @@ export class PolicyManager implements IPolicyManager {
 
   removePolicy(id: string): void { this.policies.delete(id); }
 
-  evaluate(domain: PolicyDomain, action: string, resource: string, context?: Record<string, unknown>): PolicyEvaluation {
+  evaluate(domain: PolicyDomain, action: string, resource: string, _context?: Record<string, unknown>): PolicyEvaluation {
     const domainPolicies = [...this.policies.values()]
       .filter((p) => p.domain === domain && p.enabled)
       .sort((a, b) => b.rules.length - a.rules.length); // More specific first

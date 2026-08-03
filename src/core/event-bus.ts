@@ -59,14 +59,14 @@ export class EventBus implements IEventBus {
     event: DomainEvent,
     handler: EventHandler<T>,
   ): () => void {
-    return this.addListener(event, handler, false);
+    return this.addListener(event, handler as EventHandler<DomainEventPayload>, false);
   }
 
   once<T extends DomainEventPayload = DomainEventPayload>(
     event: DomainEvent,
     handler: EventHandler<T>,
   ): () => void {
-    return this.addListener(event, handler, true);
+    return this.addListener(event, handler as EventHandler<DomainEventPayload>, true);
   }
 
   off(event: DomainEvent, handler: EventHandler): void {

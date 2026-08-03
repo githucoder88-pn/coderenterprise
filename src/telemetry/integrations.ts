@@ -121,7 +121,7 @@ export interface GrafanaPanel {
   readonly position: { x: number; y: number; w: number; h: number };
 }
 
-export function generateDashboardConfig(metrics: IMetrics): GrafanaDashboard {
+export function generateDashboardConfig(_metrics: IMetrics): GrafanaDashboard {
   return {
     uid: 'coder-enterprise',
     title: 'CODER Enterprise Dashboard',

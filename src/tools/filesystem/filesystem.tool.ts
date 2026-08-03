@@ -5,7 +5,7 @@
  */
 
 import { readFile, writeFile, mkdir, rename, rm, copyFile, stat, readdir } from 'node:fs/promises';
-import { join, dirname, resolve, relative } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import type {
   Tool, ToolDefinition, ToolExecutionContext, ToolExecutionResult, ToolArtifact,
 } from '../types.js';
@@ -61,9 +61,9 @@ export class ReadFileTool implements Tool {
   async execute(input: unknown, ctx: ToolExecutionContext): Promise<ToolExecutionResult> {
     const parsed = ReadFileSchema.parse(input);
     const filePath = safePath(ctx.workingDirectory, parsed.path);
-    const content = await readFile(filePath, parsed.encoding);
+    const content = await readFile(filePath, { encoding: parsed.encoding as BufferEncoding });
     const fileStat = await stat(filePath);
-    const text = content.toString(parsed.encoding);
+    const text = content as string;
     const sliced = parsed.offset !== undefined || parsed.limit !== undefined
       ? text.slice(parsed.offset ?? 0, (parsed.offset ?? 0) + (parsed.limit ?? text.length))
       : text;

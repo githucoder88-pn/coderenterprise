@@ -11,7 +11,7 @@ import { ErrorCode, createError } from '../../types/index.js';
 export function createToolRouter(
   registry: ToolRegistry,
   modelRegistry: DynamicModelRegistry,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 

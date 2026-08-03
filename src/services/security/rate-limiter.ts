@@ -4,7 +4,6 @@
  * Multi-tier rate limiting with sliding windows, per-user, per-org, and global limits.
  */
 
-import type { ILogger } from '../../telemetry/logger.js';
 import type { IRedisClient } from '../../infrastructure/redis/redis-client.js';
 
 interface RateLimitTier {
@@ -35,7 +34,6 @@ export class DistributedRateLimiter {
 
   constructor(
     private readonly redis: IRedisClient,
-    private readonly logger: ILogger,
     tiers?: readonly RateLimitTier[],
   ) {
     this.tiers = tiers ?? DEFAULT_TIERS;
@@ -105,7 +103,7 @@ export class DistributedRateLimiter {
   private async checkTier(
     key: string,
     tier: RateLimitTier,
-    cost: number,
+    _cost: number,
   ): Promise<RateLimitResult> {
     const tierKey = `rl:${key}:${tier.name}`;
     const windowSeconds = Math.ceil(tier.windowMs / 1000);

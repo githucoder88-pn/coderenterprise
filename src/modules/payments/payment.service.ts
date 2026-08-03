@@ -10,8 +10,7 @@ import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { PaymentIntent, PaymentMethod, Invoice, CreatePaymentIntentInput } from './payment.types.js';
 import { CreatePaymentIntentSchema } from './payment.types.js';
-import type { IAuditService } from '../audit/audit.service.js';
-import { DomainEvent, ErrorCode, type Result, type PaginationParams, type PaginatedResponse } from '../../types/index.js';
+import { ErrorCode, type Result, type PaginationParams, type PaginatedResponse } from '../../types/index.js';
 import { createPaginatedResponse } from '../../types/index.js';
 
 export interface IPaymentService {
@@ -32,7 +31,7 @@ export class PaymentService extends BaseService implements IPaymentService {
   private readonly invoicesCollection = 'invoices';
 
   constructor(
-    private readonly firestore: IFirestoreClient, private readonly audit: IAuditService,
+    private readonly firestore: IFirestoreClient,
     logger: ILogger, eventBus: IEventBus,
   ) { super(logger, eventBus); }
 
@@ -55,7 +54,7 @@ export class PaymentService extends BaseService implements IPaymentService {
     const all = await this.firestore.getCollection<Record<string, unknown>>(this.intentsCollection,
       [{ field: 'organizationId', operator: '==', value: orgId }],
       { limit: pagination.limit * pagination.page, orderBy: [{ field: 'createdAt', direction: 'desc' }] });
-    const mapped = all.map((d) => ({ id: d.id, ...d.data } as PaymentIntent));
+    const mapped = all.map((d: { id: string; data: Record<string, unknown> }) => ({ id: d.id, ...d.data } as PaymentIntent));
     const start = (pagination.page - 1) * pagination.limit;
     return this.success(createPaginatedResponse(mapped.slice(start, start + pagination.limit), mapped.length, pagination));
   }
@@ -71,7 +70,7 @@ export class PaymentService extends BaseService implements IPaymentService {
   async listPaymentMethods(orgId: string): Promise<Result<readonly PaymentMethod[]>> {
     const docs = await this.firestore.getCollection<Record<string, unknown>>(this.methodsCollection,
       [{ field: 'organizationId', operator: '==', value: orgId }]);
-    return this.success(docs.map((d) => ({ id: d.id, ...d.data } as PaymentMethod)));
+    return this.success(docs.map((d: { id: string; data: Record<string, unknown> }) => ({ id: d.id, ...d.data } as PaymentMethod)));
   }
 
   async removePaymentMethod(id: string): Promise<Result<void>> {
@@ -102,7 +101,7 @@ export class PaymentService extends BaseService implements IPaymentService {
     const all = await this.firestore.getCollection<Record<string, unknown>>(this.invoicesCollection,
       [{ field: 'organizationId', operator: '==', value: orgId }],
       { limit: pagination.limit * pagination.page, orderBy: [{ field: 'createdAt', direction: 'desc' }] });
-    const mapped = all.map((d) => ({ id: d.id, ...d.data } as Invoice));
+    const mapped = all.map((d: { id: string; data: Record<string, unknown> }) => ({ id: d.id, ...d.data } as Invoice));
     const start = (pagination.page - 1) * pagination.limit;
     return this.success(createPaginatedResponse(mapped.slice(start, start + pagination.limit), mapped.length, pagination));
   }

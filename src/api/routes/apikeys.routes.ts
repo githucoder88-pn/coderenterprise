@@ -8,7 +8,7 @@ import type { ILogger } from '../../telemetry/logger.js';
 import { CreateApiKeySchema } from '../../modules/apikeys/apikey.types.js';
 import { ErrorCode, createError } from '../../types/index.js';
 
-export function createApiKeyRouter(apiKeyService: IApiKeyService, logger: ILogger): Hono {
+export function createApiKeyRouter(apiKeyService: IApiKeyService, _logger: ILogger): Hono {
   const router = new Hono();
 
   // GET /api-keys

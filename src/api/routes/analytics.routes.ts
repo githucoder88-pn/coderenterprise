@@ -7,7 +7,7 @@ import type { IAnalyticsService } from '../../modules/analytics/analytics.servic
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, createError } from '../../types/index.js';
 
-export function createAnalyticsRouter(analyticsService: IAnalyticsService, logger: ILogger): Hono {
+export function createAnalyticsRouter(analyticsService: IAnalyticsService, _logger: ILogger): Hono {
   const router = new Hono();
 
   // POST /analytics/track

@@ -15,7 +15,7 @@ interface CsrfToken {
 export class CsrfProtectionService {
   private readonly secret: string;
 
-  constructor(secret: string, private readonly logger: ILogger) {
+  constructor(secret: string, _logger: ILogger) {
     this.secret = secret;
   }
 

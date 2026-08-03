@@ -8,7 +8,6 @@ import { nanoid } from 'nanoid';
 import { BaseProvider } from '../base-provider.js';
 import type {
   ProviderName,
-  ProviderConfig,
   ProviderCapabilities,
   ProviderRequest,
   ProviderResponse,
@@ -245,7 +244,7 @@ export class OllamaProvider extends BaseProvider {
                 };
               }
 
-              const chunk: StreamChunk = {
+              let chunk: StreamChunk = {
                 id: streamId,
                 delta: {
                   content: message.content ?? undefined,
@@ -253,12 +252,20 @@ export class OllamaProvider extends BaseProvider {
               };
 
               if (message.tool_calls) {
-                chunk.delta.toolCalls = message.tool_calls.map((tc: any) => ({
-                  function: {
-                    name: tc.function?.name,
-                    arguments: JSON.stringify(tc.function?.arguments ?? {}),
+                chunk = {
+                  ...chunk,
+                  delta: {
+                    ...chunk.delta,
+                    toolCalls: message.tool_calls.map((tc: any) => ({
+                      id: tc.id,
+                      type: 'function' as const,
+                      function: {
+                        name: tc.function?.name,
+                        arguments: JSON.stringify(tc.function?.arguments ?? {}),
+                      },
+                    })),
                   },
-                }));
+                };
               }
 
               return { done: false, value: chunk };

@@ -5,7 +5,7 @@
  * Integrates with QueueManager for job dispatch.
  */
 
-import type { QueueName, Job } from '../types.js';
+import type { QueueName } from '../types.js';
 import type { QueueManager } from '../queues/queue-manager.js';
 import type { ILogger } from '../../telemetry/logger.js';
 

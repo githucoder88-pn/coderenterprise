@@ -13,16 +13,6 @@ import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import { ErrorCode, type Result } from '../../types/index.js';
 
-interface EncryptedSecret {
-  readonly id: string;
-  readonly name: string;
-  readonly encryptedValue: string;
-  readonly iv: string;
-  readonly tag: string;
-  readonly organizationId: string;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-}
 
 export interface Secret {
   readonly id: string;

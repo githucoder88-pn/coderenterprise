@@ -91,7 +91,7 @@ export class StorageClientAdapter implements IStorageClient {
     ]);
 
     return {
-      data,
+      data: Buffer.from(data[0]),
       metadata: (metadata[0]?.metadata as Record<string, string>) ?? {},
     };
   }

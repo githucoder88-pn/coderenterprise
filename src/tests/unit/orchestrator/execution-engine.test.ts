@@ -46,7 +46,7 @@ describe('ExecutionEngine', () => {
     const logger = createMockLogger();
     registry = new AgentRegistry(logger);
     eventBus = new EventBus();
-    engine = new ExecutionEngine(registry, eventBus, logger);
+    engine = new ExecutionEngine(registry, logger);
     registry.registerHandler(makeHandler());
   });
 

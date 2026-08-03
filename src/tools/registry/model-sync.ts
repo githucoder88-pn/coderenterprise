@@ -147,7 +147,7 @@ export class DynamicModelRegistry implements IModelRegistryService {
     let added = 0, updated = 0, removed = 0;
     const errors: string[] = [];
 
-    for (const [provider, adapter] of this.adapters) {
+    for (const [provider, _adapter] of this.adapters) {
       try {
         const result = await this.synchronizeProvider(provider);
         added += result.added;
@@ -161,7 +161,7 @@ export class DynamicModelRegistry implements IModelRegistryService {
 
     // Remove models from providers that no longer report them
     const activeProviders = new Set([...this.adapters.keys()]);
-    for (const [id, model] of this.models) {
+    for (const [_id, model] of this.models) {
       if (activeProviders.has(model.provider) && model.status === 'active') {
         // Check if model still exists in provider's list
       }
@@ -211,13 +211,13 @@ export class DynamicModelRegistry implements IModelRegistryService {
   }
 
   async getModel(id: string): Promise<Model | null> {
-    let model = this.models.get(id);
+    let model: Model | undefined | null = this.models.get(id) ?? null;
     if (!model) {
       // Try cache
       const cached = await this.cache.get<Model[]>('models:registry');
       model = cached?.find((m) => m.id === id) ?? null;
     }
-    return model ?? null;
+    return model;
   }
 
   async getModels(filter?: { provider?: string; capability?: string; status?: string }): Promise<readonly Model[]> {
@@ -270,7 +270,7 @@ export class OpenAISyncAdapter implements ModelSyncAdapter {
 
 export class AnthropicSyncAdapter implements ModelSyncAdapter {
   readonly provider = 'anthropic';
-  constructor(private readonly apiKey: string) {}
+  constructor(_apiKey: string) {}
   async fetchModels(): Promise<readonly RawModel[]> {
     // Anthropic doesn't have a models list endpoint; return known models via API header
     return [
@@ -314,7 +314,7 @@ export class OllamaSyncAdapter implements ModelSyncAdapter {
 
 export class OpenRouterSyncAdapter implements ModelSyncAdapter {
   readonly provider = 'openrouter';
-  constructor(private readonly apiKey: string) {}
+  constructor(_apiKey: string) {}
   async fetchModels(): Promise<readonly RawModel[]> {
     const res = await fetch('https://openrouter.ai/api/v1/models');
     if (!res.ok) throw new Error(`OpenRouter ${res.status}`);
@@ -361,7 +361,7 @@ export class MistralSyncAdapter implements ModelSyncAdapter {
 
 export class DeepSeekSyncAdapter implements ModelSyncAdapter {
   readonly provider = 'deepseek';
-  constructor(private readonly apiKey: string) {}
+  constructor(_apiKey: string) {}
   async fetchModels(): Promise<readonly RawModel[]> {
     return [
       { id: 'deepseek-chat', name: 'DeepSeek V3', contextWindow: 64_000, maxOutputTokens: 8_192, pricing: { input: 0.14, output: 0.28 }, capabilities: ['streaming', 'toolCalling'] },

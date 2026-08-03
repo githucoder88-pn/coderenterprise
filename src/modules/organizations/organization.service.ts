@@ -4,8 +4,6 @@
 
 import { BaseService } from '../../core/base-service.js';
 import type { OrganizationRepository } from './organization.repository.js';
-import type { UserRepository } from '../users/user.repository.js';
-import type { IRBACService } from '../rbac/rbac.service.js';
 import type { IAuditService } from '../audit/audit.service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
@@ -45,8 +43,6 @@ export interface IOrganizationService {
 export class OrganizationService extends BaseService implements IOrganizationService {
   constructor(
     private readonly orgRepo: OrganizationRepository,
-    private readonly userRepo: UserRepository,
-    private readonly rbac: IRBACService,
     private readonly audit: IAuditService,
     logger: ILogger,
     eventBus: IEventBus,

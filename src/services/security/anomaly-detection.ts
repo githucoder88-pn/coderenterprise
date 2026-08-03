@@ -4,7 +4,6 @@
  * Statistical anomaly detection for usage patterns, cost spikes, and behavioral changes.
  */
 
-import type { ILogger } from '../../telemetry/logger.js';
 import type { IRedisClient } from '../../infrastructure/redis/redis-client.js';
 
 interface Anomaly {
@@ -28,7 +27,6 @@ interface UsageSnapshot {
 export class AnomalyDetectionService {
   constructor(
     private readonly redis: IRedisClient,
-    private readonly logger: ILogger,
   ) {}
 
   async recordUsage(orgId: string, metrics: { requests: number; tokens: number; errors: number; cost: number }): Promise<void> {

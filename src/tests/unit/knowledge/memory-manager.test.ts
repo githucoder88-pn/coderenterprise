@@ -19,7 +19,7 @@ function createMockCache(): ICacheService {
 describe('MemoryManager', () => {
   let manager: MemoryManager;
 
-  beforeEach(() => { manager = new MemoryManager(createMockCache(), createMockLogger()); });
+  beforeEach(() => { manager = new MemoryManager(createMockLogger()); });
 
   describe('store', () => {
     it('should store a memory entry', async () => {

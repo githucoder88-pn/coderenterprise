@@ -233,7 +233,7 @@ export class QueueManager implements IQueueManager {
     }
   }
 
-  private async executeJob(queue: QueueName, job: Job, handler: (job: Job) => Promise<unknown>): Promise<void> {
+  private async executeJob(_queue: QueueName, job: Job, handler: (job: Job) => Promise<unknown>): Promise<void> {
     try {
       const result = await handler(job);
       await this.complete(job.id, result);
