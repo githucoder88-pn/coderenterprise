@@ -68,7 +68,7 @@ describe('ApprovalManager', () => {
         workflowId: 'wf-1', type: 'human', title: 'Deploy', description: '', riskLevel: 'medium', requestedBy: 'a1',
       });
       manager.escalate(req.id);
-      expect(manager.getPending()[0]!.riskLevel).toBe('critical');
+      expect(manager.getHistory()[0]!.riskLevel).toBe('critical');
     });
   });
 

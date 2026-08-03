@@ -126,9 +126,9 @@ describe('RuntimeManager', () => {
       const tasks = runtime.getWorkflow(wf.id)!.tasks;
 
       // Exhaust corrections
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
         await runtime.failTask(wf.id, tasks[0]!.id, 'Error');
-        if (i < 2) await runtime.correctTask(wf.id, tasks[0]!.id);
+        if (i < 3) await runtime.correctTask(wf.id, tasks[0]!.id);
       }
 
       const result = await runtime.correctTask(wf.id, tasks[0]!.id);

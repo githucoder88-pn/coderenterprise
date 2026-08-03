@@ -86,7 +86,7 @@ export class MemoryManager implements IMemoryManager {
         store.delete(key);
         return null;
       }
-      store.set(key, { ...entry, accessCount: entry.accessCount + 1, lastAccessedAt: new Date() });
+      const updatedEntry = { ...entry, accessCount: entry.accessCount + 1, lastAccessedAt: new Date() }; store.set(key, updatedEntry); return updatedEntry;
       return entry;
     }
     return null;

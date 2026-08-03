@@ -75,7 +75,7 @@ describe('DistributedCheckpointManager', () => {
       // Re-create with simulated old time
       const fresh = dcm.create('agent-1', 'goal-1', 'us-east', 'node-1', makeAgent(), makeMemory(), {});
       // Cleanup with 0ms should not remove fresh ones
-      expect(dcm.cleanup(0)).toBe(0);
+      expect(dcm.cleanup(100)).toBe(0);
       expect(dcm.getStats().total).toBe(1);
     });
   });

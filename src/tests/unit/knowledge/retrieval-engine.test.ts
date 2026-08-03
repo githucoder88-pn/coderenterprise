@@ -37,10 +37,10 @@ describe('RetrievalEngine', () => {
       expect(stats.totalEntities).toBe(1);
     });
 
-    it('should build inverted index', () => {
+    it('should build inverted index', async () => {
       engine.index(makeEntity());
       const results = engine.search({ query: 'API', mode: 'keyword', organizationId: 'org-1', userId: 'u1' });
-      expect(results).resolves.toBeDefined();
+      await expect(results).resolves.toBeDefined();
     });
   });
 

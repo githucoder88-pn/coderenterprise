@@ -55,7 +55,7 @@ export class RuntimeManager implements IRuntimeManager {
     return { success: true, data: workflow };
   }
 
-  getWorkflow(id: string): Workflow | null { return this.workflows.get(id) ?? null; }
+  getWorkflow(id: string): Workflow | null { const wf = this.workflows.get(id); if (!wf) return null; return { ...wf, tasks: wf.tasks.map(t => this.tasks.get(t.id) ?? t) }; }
 
   listWorkflows(status?: WorkflowStatus): readonly Workflow[] {
     const all = [...this.workflows.values()];

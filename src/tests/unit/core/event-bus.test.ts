@@ -142,7 +142,7 @@ describe('EventBus', () => {
 
   describe('error handling', () => {
     it('should not throw when handler throws', async () => {
-      const errorHandler = vi.fn().mockRejectedValue(new Error('handler error'));
+      const errorHandler = vi.fn().mockImplementation(() => { throw new Error('handler error'); });
       const okHandler = vi.fn();
 
       eventBus.on(DomainEvent.USER_CREATED, errorHandler);

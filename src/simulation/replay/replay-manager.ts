@@ -26,7 +26,7 @@ export class ReplayManager implements IReplayManager {
   constructor(private readonly logger: ILogger) {}
 
   startRecording(simulationId: string): string {
-    const sessionId = `replay-${Date.now()}`;
+    const sessionId = `replay-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     this.activeRecordings.set(simulationId, { sessionId, events: [], startTime: Date.now() });
     this.logger.info({ sessionId, simulationId }, 'Recording started');
     return sessionId;

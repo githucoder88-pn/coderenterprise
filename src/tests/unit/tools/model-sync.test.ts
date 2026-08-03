@@ -33,10 +33,10 @@ describe('DynamicModelRegistry', () => {
   });
 
   describe('registerAdapter', () => {
-    it('should register a provider adapter', () => {
+    it('should register a provider adapter', async () => {
       const adapter = createMockAdapter('openai', []);
       registry.registerAdapter(adapter);
-      expect(registry.getProviders()).resolves.toContain('openai');
+      await expect(registry.getProviders()).resolves.toContain('openai');
     });
   });
 

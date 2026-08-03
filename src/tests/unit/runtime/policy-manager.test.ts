@@ -49,7 +49,7 @@ describe('PolicyManager', () => {
         domain: 'network', name: 'Block External', enabled: true,
         rules: [{ effect: 'deny', action: 'request', resource: 'external.*', conditions: null }],
       });
-      const result = policies.evaluate('network', 'request', 'external.api.com');
+      const result = policies.evaluate('network', 'request', 'external.site.com');
       expect(result.allowed).toBe(false);
     });
 

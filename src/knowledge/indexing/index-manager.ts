@@ -123,7 +123,7 @@ export class IndexManager implements IIndexManager {
     }
 
     // Fallback to fixed-size chunking if blocks are too large
-    if (chunks.length === 0) {
+    if (chunks.length === 0 || chunks.some(c => c.content.split(/\s+/).length > this.chunkSize)) { chunks.length = 0;
       const words = content.split(/\s+/);
       for (let i = 0; i < words.length; i += this.chunkSize - this.chunkOverlap) {
         const chunkWords = words.slice(i, i + this.chunkSize);
