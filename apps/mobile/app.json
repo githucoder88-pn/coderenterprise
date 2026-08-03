@@ -1,3 +1,52 @@
-export default {
-  plugins: ['@tanstack/react-query'],
-};
+{
+  "expo": {
+    "name": "CODER",
+    "slug": "coder-mobile",
+    "scheme": "coder",
+    "version": "1.0.0",
+    "orientation": "default",
+
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#05050a"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ai.coder.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used for capturing photos to attach to conversations.",
+        "NSMicrophoneUsageDescription": "Used for voice input in conversations.",
+        "NSPhotoLibraryUsageDescription": "Used to attach images to conversations.",
+        "NSFaceIDUsageDescription": "Used to securely unlock the CODER app."
+      }
+    },
+    "android": {
+      "package": "ai.coder.mobile",
+      "permissions": ["CAMERA", "RECORD_AUDIO", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow CODER to access your photos to attach them to conversations.",
+          "cameraPermission": "Allow CODER to use your camera to capture photos."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow CODER to use your microphone for voice messages."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

@@ -25,13 +25,15 @@ describe('Auth Store Logic', () => {
 
 describe('App Store Logic', () => {
   it('should toggle theme', () => {
-    let theme: 'dark' | 'light' = 'dark';
-    const setTheme = (t: 'dark' | 'light') => { theme = t; };
+    let theme: 'dark' | 'light' | 'system' = 'dark';
+    const setTheme = (t: 'dark' | 'light' | 'system') => { theme = t; };
 
     setTheme('light');
     expect(theme).toBe('light');
     setTheme('dark');
     expect(theme).toBe('dark');
+    setTheme('system');
+    expect(theme).toBe('system');
   });
 
   it('should track active conversation', () => {
