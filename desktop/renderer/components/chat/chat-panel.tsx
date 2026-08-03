@@ -4,7 +4,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '../../lib/utils';
-import { Send, Square, Plus, ChevronDown } from 'lucide-react';
+import { Send, Square, Plus, Paperclip } from 'lucide-react';
+import { MarkdownMessage } from './markdown-message';
 
 interface ChatMessage {
   id: string;
@@ -49,14 +50,22 @@ export function ChatPanel() {
     });
 
     try {
-      await window.coder.chat.send('current', { content: userMsg.content });
+      await window.coder.chat.stream('current', { content: userMsg.content });
     } catch {
       setIsStreaming(false);
     }
   };
 
   return (
-    <div className="flex h-full flex-col bg-[var(--color-bg)]">
+    <div
+      className="flex h-full flex-col bg-[var(--color-bg)]"
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        event.preventDefault();
+        const files = Array.from(event.dataTransfer.files).map((file) => file.name).join(', ');
+        if (files) setInput((value) => `${value}${value ? '\n' : ''}Attached: ${files}`);
+      }}
+    >
       {/* Header */}
       <div className="flex h-9 items-center justify-between border-b border-[var(--color-border)] px-3">
         <span className="text-[12px] font-medium text-[var(--color-text-secondary)]">Chat</span>
@@ -78,7 +87,7 @@ export function ChatPanel() {
               'max-w-[85%] rounded-[var(--radius-lg)] px-3 py-2 text-[13px] leading-5',
               msg.role === 'user' ? 'bg-[var(--color-brand)] text-white' : 'bg-[var(--color-bg-muted)] text-[var(--color-text)]',
             )}>
-              <pre className="whitespace-pre-wrap font-sans">{msg.content || (msg.role === 'assistant' && !isStreaming ? '' : '…')}</pre>
+              {msg.role === 'assistant' ? <MarkdownMessage content={msg.content || (isStreaming ? '…' : '')} /> : <pre className="whitespace-pre-wrap font-sans">{msg.content}</pre>}
             </div>
           </div>
         ))}
@@ -88,6 +97,7 @@ export function ChatPanel() {
       {/* Input */}
       <div className="border-t border-[var(--color-border)] p-3">
         <div className="flex items-end gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-2">
+          <Paperclip className="mb-1 h-3.5 w-3.5 text-[var(--color-text-tertiary)]" />
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
