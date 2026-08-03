@@ -9,7 +9,7 @@ import type { ICacheService } from '../../infrastructure/redis/cache.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { IMetrics } from '../../telemetry/metrics.js';
-import { ErrorCode, type Result } from '../../types/index.js';
+import { type Result } from '../../types/index.js';
 
 export interface AnalyticsEvent {
   readonly name: string;
@@ -106,9 +106,9 @@ export class AnalyticsService extends BaseService implements IAnalyticsService {
     return this.success({
       organizationId,
       period,
-      requestCount: requestCount.data ?? 0,
+      requestCount: requestCount.success ? requestCount.data : 0,
       uniqueUsers: 0, // Would require a Set data structure in production
-      errorCount: errorCount.data ?? 0,
+      errorCount: errorCount.success ? errorCount.data : 0,
       avgResponseTime: 0, // Would require histogram data
     });
   }

@@ -165,12 +165,12 @@ export class AttachmentService implements IAttachmentService {
     this.attachments.delete(id);
   }
 
-  private async getImageDimensions(base64: string): Promise<{ width: number; height: number } | undefined> {
+  private async getImageDimensions(_base64: string): Promise<{ width: number; height: number } | undefined> {
     // In production, use sharp/jimp for image metadata
     return undefined;
   }
 
-  private async getAudioDuration(base64: string): Promise<number | undefined> {
+  private async getAudioDuration(_base64: string): Promise<number | undefined> {
     // In production, use ffprobe for audio metadata
     return undefined;
   }

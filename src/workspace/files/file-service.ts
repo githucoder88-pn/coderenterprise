@@ -4,9 +4,8 @@
  * Core file operations with atomic writes, compression, directory tree management.
  */
 
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { createBrotliCompress, createBrotliDecompress } from 'node:zlib';
-import { Readable } from 'node:stream';
 import type { IFirestoreClient } from '../../infrastructure/firebase/firestore-client.js';
 import type { IStorageClient } from '../../infrastructure/firebase/storage-client.js';
 import type { ILogger } from '../../telemetry/logger.js';
@@ -33,7 +32,7 @@ export interface TreeNode {
   readonly name: string;
   readonly path: string;
   readonly isDirectory: boolean;
-  readonly children: readonly TreeNode[];
+  children: TreeNode[];
   readonly file?: WorkspaceFile;
 }
 
@@ -96,7 +95,7 @@ export class FileService implements IFileService {
     const existing = await this.findFile(workspaceId, path);
 
     // Atomic write: write to temp path, then rename
-    let buffer = Buffer.from(content, opts.encoding);
+    let buffer: Buffer = Buffer.from(content, opts.encoding);
     if (opts.compress) {
       buffer = await this.compress(buffer);
     }
@@ -227,7 +226,7 @@ export class FileService implements IFileService {
     return docs.length > 0 ? this.mapFile(docs[0]!.id, docs[0]!.data) : null;
   }
 
-  private buildTree(files: readonly WorkspaceFile[], rootPath: string): TreeNode {
+  private buildTree(files: readonly WorkspaceFile[], _rootPath: string): TreeNode {
     const root: TreeNode = { name: '/', path: '/', isDirectory: true, children: [] };
     const dirMap = new Map<string, TreeNode>();
     dirMap.set('', root);

@@ -22,11 +22,12 @@ export interface IReplayManager {
 export class ReplayManager implements IReplayManager {
   private readonly sessions = new Map<string, ReplaySession>();
   private readonly activeRecordings = new Map<string, { sessionId: string; events: ReplayEvent[]; startTime: number }>();
+  private sessionCounter = 0;
 
   constructor(private readonly logger: ILogger) {}
 
   startRecording(simulationId: string): string {
-    const sessionId = `replay-${Date.now()}`;
+    const sessionId = `replay-${Date.now()}-${++this.sessionCounter}`;
     this.activeRecordings.set(simulationId, { sessionId, events: [], startTime: Date.now() });
     this.logger.info({ sessionId, simulationId }, 'Recording started');
     return sessionId;

@@ -4,7 +4,7 @@
  * Wraps ioredis with health checks, metrics, and graceful shutdown.
  */
 
-import Redis from 'ioredis';
+import Redis, { type ChainableCommander } from 'ioredis';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface RedisConfig {
@@ -39,7 +39,7 @@ export interface IRedisClient {
   llen(key: string): Promise<number>;
   keys(pattern: string): Promise<string[]>;
   scan(cursor: string, match?: string, count?: number): Promise<[string, string[]]>;
-  pipeline(): Redis.ChainableCommander;
+  pipeline(): ChainableCommander;
   healthCheck(): Promise<boolean>;
   disconnect(): Promise<void>;
   getClient(): Redis;
@@ -187,7 +187,7 @@ export class RedisClientAdapter implements IRedisClient {
     return (await (this.client as any).call(...args)) as [string, string[]];
   }
 
-  pipeline(): Redis.ChainableCommander {
+  pipeline(): ChainableCommander {
     return this.client.pipeline();
   }
 

@@ -78,12 +78,12 @@ export function registerWorkspaceCommands(context: vscode.ExtensionContext, work
         label: t.name,
         description: t.id,
       }));
-      const selected = await vscode.window.showQuickPick(items, { placeHolder: 'Select tool to execute' });
+      const selected = await vscode.window.showQuickPick(items, { placeHolder: 'Select tool to execute' }) as vscode.QuickPickItem | undefined;
       if (!selected) return;
       const input = await vscode.window.showInputBox({ prompt: 'Tool input (JSON)', placeHolder: '{}' });
       if (!input) return;
       try {
-        const result = await api.executeTool(selected.description, JSON.parse(input));
+        const result = await api.executeTool(selected.description ?? '', JSON.parse(input));
         const output = JSON.stringify(result.output ?? result, null, 2);
         const doc = await vscode.workspace.openTextDocument({ content: output, language: 'json' });
         vscode.window.showTextDocument(doc, { preview: true, viewColumn: vscode.ViewColumn.Beside });

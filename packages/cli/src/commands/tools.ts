@@ -76,7 +76,7 @@ toolsCommand
   .description('Show tool execution statistics')
   .action(async () => {
     try {
-      const stats = await api.getToolStats();
+      const stats = await api.getTools();
       console.log(chalk.bold('\n  Tool Statistics\n'));
       console.log(`  Total tools: ${stats.totalTools}`);
       console.log(`  Enabled: ${stats.enabledTools}`);

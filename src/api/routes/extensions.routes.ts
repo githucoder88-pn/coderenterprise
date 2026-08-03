@@ -17,7 +17,7 @@ export function createExtensionRouter(
   permissions: PermissionManager,
   messageBus: MessageBus,
   marketplace: ExtensionMarketplace,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 

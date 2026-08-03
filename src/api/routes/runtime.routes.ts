@@ -9,14 +9,14 @@ import type { RuntimeMemoryStore } from '../../runtime/memory/runtime-memory.js'
 import type { PolicyManager } from '../../runtime/policies/runtime-policies.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, createError } from '../../types/index.js';
-import { StartWorkflowSchema, ApproveRequestSchema } from '../../runtime/types.js';
+import { StartWorkflowSchema } from '../../runtime/types.js';
 
 export function createRuntimeRouter(
   runtime: RuntimeManager,
   approvals: ApprovalManager,
   memory: RuntimeMemoryStore,
   policies: PolicyManager,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 

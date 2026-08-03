@@ -8,7 +8,6 @@ import { nanoid } from 'nanoid';
 import { BaseProvider } from '../base-provider.js';
 import type {
   ProviderName,
-  ProviderConfig,
   ProviderCapabilities,
   ProviderRequest,
   ProviderResponse,
@@ -287,7 +286,9 @@ export class AnthropicProvider extends BaseProvider {
                       id: streamId,
                       delta: {
                         toolCalls: [{
-                          function: { arguments: data.delta.partial_json },
+                          id: `tc-${Date.now()}`,
+                          type: 'function' as const,
+                          function: { name: '', arguments: data.delta.partial_json ?? '' },
                         }],
                       },
                     },

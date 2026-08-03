@@ -154,7 +154,7 @@ export interface StreamChunk {
 }
 
 export interface ProviderStream {
-  readonly [Symbol.asyncIterator](): AsyncIterator<StreamChunk>;
+  [Symbol.asyncIterator](): AsyncIterator<StreamChunk>;
   abort(): void;
   readonly id: string;
   readonly provider: ProviderName;

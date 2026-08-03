@@ -63,7 +63,7 @@ export class WebhookService extends BaseService implements IWebhookService {
     return this.success(createPaginatedResponse(mapped.slice(start, start + pagination.limit), mapped.length, pagination));
   }
 
-  async delete(id: string, actor: AuthenticatedUser): Promise<Result<void>> {
+  async delete(id: string, _actor: AuthenticatedUser): Promise<Result<void>> {
     await this.firestore.deleteDocument(this.collection, id);
     return this.success(undefined);
   }

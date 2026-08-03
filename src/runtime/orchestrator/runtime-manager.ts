@@ -71,7 +71,7 @@ export class RuntimeManager implements IRuntimeManager {
 
     // Generate plan
     const plan = this.generatePlan(wf.goal);
-    const tasks = this.createTasksFromPlan(id, plan);
+    const tasks = this.createTasksFromPlan(id, plan, wf.maxRetries);
 
     const updated = {
       ...wf, status: 'executing' as WorkflowStatus, plan, tasks,
@@ -161,23 +161,34 @@ export class RuntimeManager implements IRuntimeManager {
   }
 
   validateTask(
-    workflowId: string, taskId: string, passed: boolean,
+    _workflowId: string, taskId: string, passed: boolean,
     checks: { name: string; passed: boolean; message: string }[],
   ): Result<void> {
     const task = this.tasks.get(taskId);
     if (!task) return { success: false, error: { code: ErrorCode.NOT_FOUND, message: 'Task not found', timestamp: new Date() } };
 
     const score = checks.filter((c) => c.passed).length / Math.max(1, checks.length);
-    this.tasks.set(taskId, {
-      ...task, status: passed ? 'completed' : 'correcting',
+    const updatedTask = {
+      ...task, status: passed ? 'completed' as RuntimeTaskStatus : 'correcting' as RuntimeTaskStatus,
       validation: { passed, checks, score, validatedAt: new Date() },
       updatedAt: new Date(),
-    });
+    };
+    this.tasks.set(taskId, updatedTask);
+
+    // Also update the task in the workflow's tasks array
+    for (const [wfId, wf] of this.workflows) {
+      const taskIndex = wf.tasks.findIndex((t) => t.id === taskId);
+      if (taskIndex !== -1) {
+        const newTasks = [...wf.tasks];
+        newTasks[taskIndex] = updatedTask;
+        this.workflows.set(wfId, { ...wf, tasks: newTasks, updatedAt: new Date() });
+      }
+    }
 
     return { success: true, data: undefined };
   }
 
-  async correctTask(workflowId: string, taskId: string): Promise<Result<RuntimeTask>> {
+  async correctTask(_workflowId: string, taskId: string): Promise<Result<RuntimeTask>> {
     const task = this.tasks.get(taskId);
     if (!task) return { success: false, error: { code: ErrorCode.NOT_FOUND, message: 'Task not found', timestamp: new Date() } };
 
@@ -204,7 +215,7 @@ export class RuntimeManager implements IRuntimeManager {
 
   // ─── Private ─────────────────────────────────────────────────────────────
 
-  private generatePlan(goal: string): ExecutionPlan {
+  private generatePlan(_goal: string): ExecutionPlan {
     const steps: PlanStep[] = [
       { id: 's1', name: 'Analyze goal', description: 'Understand requirements and constraints', agentRole: 'planner', toolIds: [], dependencies: [], estimatedDurationMs: 5000, requiresApproval: false },
       { id: 's2', name: 'Research context', description: 'Gather relevant information from workspace and memory', agentRole: 'researcher', toolIds: ['search.search'], dependencies: ['s1'], estimatedDurationMs: 10000, requiresApproval: false },
@@ -224,14 +235,14 @@ export class RuntimeManager implements IRuntimeManager {
     };
   }
 
-  private createTasksFromPlan(workflowId: string, plan: ExecutionPlan): RuntimeTask[] {
+  private createTasksFromPlan(workflowId: string, plan: ExecutionPlan, maxCorrections = 3): RuntimeTask[] {
     const now = new Date();
     return plan.steps.map((step) => {
       const task: RuntimeTask = {
         id: `task-${++this.taskCounter}-${Math.random().toString(36).slice(2, 6)}`,
         workflowId, stepId: step.id, name: step.name, description: step.description,
         agentRole: step.agentRole, status: 'pending', input: step.description,
-        output: null, validation: null, correctionAttempts: 0, maxCorrections: 3,
+        output: null, validation: null, correctionAttempts: 0, maxCorrections,
         approvalId: null, checkpointId: null, toolInvocations: [], error: null,
         metadata: {}, createdAt: now, updatedAt: now,
       };

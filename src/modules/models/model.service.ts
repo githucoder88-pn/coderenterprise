@@ -44,7 +44,7 @@ export class ModelRegistryService extends BaseService implements IModelRegistryS
     if (!parsed.success) return this.failure(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
     const existing = await this.repo.findByModelId(parsed.data.modelId);
     if (existing) return this.failure(ErrorCode.CONFLICT, `Model ${parsed.data.modelId} already registered`);
-    const model = await this.repo.create({ ...parsed.data, status: 'active', pricing: parsed.data.pricing ? { ...parsed.data.pricing, currency: parsed.data.pricing.currency ?? 'USD' } : null });
+    const model = await this.repo.create({ ...parsed.data, description: parsed.data.description ?? '', metadata: parsed.data.metadata ?? {}, status: 'active', pricing: parsed.data.pricing ? { ...parsed.data.pricing, currency: parsed.data.pricing.currency ?? 'USD' } : null, capabilities: parsed.data.capabilities ?? { streaming: false, toolCalling: false, vision: false, embeddings: false, imageGeneration: false, reasoning: false, structuredOutput: false } });
     return this.success(model);
   }
 
@@ -53,7 +53,7 @@ export class ModelRegistryService extends BaseService implements IModelRegistryS
     if (!parsed.success) return this.failure(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
     const existing = await this.repo.findById(id);
     if (!existing) return this.failure(ErrorCode.NOT_FOUND, `Model ${id} not found`);
-    return this.success(await this.repo.update(id, parsed.data));
+    return this.success(await this.repo.update(id, { ...parsed.data, capabilities: parsed.data.capabilities as any, pricing: parsed.data.pricing as any }));
   }
 
   async deprecate(id: string): Promise<Result<Model>> {

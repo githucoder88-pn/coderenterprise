@@ -4,10 +4,9 @@
  * Key management, secret rotation, intrusion detection, certificate management.
  */
 
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
-import type { SecurityPolicy, PasswordPolicy, SessionPolicy, NetworkPolicy, EncryptionPolicy } from '../types.js';
+import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import type { SecurityPolicy } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
-import type { IRedisClient } from '../../infrastructure/redis/redis-client.js';
 import { ErrorCode, type Result } from '../../types/index.js';
 
 export interface ISecurityManager {
@@ -30,7 +29,6 @@ export class SecurityManager implements ISecurityManager {
   private readonly failedAttempts = new Map<string, { count: number; lastAttempt: Date }>();
 
   constructor(
-    private readonly redis: IRedisClient,
     private readonly logger: ILogger,
   ) {}
 

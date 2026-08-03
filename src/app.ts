@@ -73,17 +73,18 @@ export function createApp(config: AppConfig): AppContext {
   const apiRouter = createApiRouter(
     services,
     firebase.auth,
-    redis.redis,
+    redis,
     logger,
     metrics,
     config,
+    firebase,
   );
   app.route(config.api.prefix, apiRouter);
 
   // Root health check (no auth required)
   app.get('/health', async (c) => {
     const result = await services.health.shallow();
-    return c.json({ success: true, data: result.data });
+    return c.json({ success: true, data: result.success ? result.data : { status: 'unknown', uptime: 0 } });
   });
 
   // 404 handler

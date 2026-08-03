@@ -22,7 +22,7 @@ export function createClusterRouter(
   clusterMonitor: ClusterMonitor,
   serviceRegistry: ServiceRegistry,
   eventBus: DistributedEventBus,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 

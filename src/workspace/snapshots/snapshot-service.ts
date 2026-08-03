@@ -89,9 +89,9 @@ export class SnapshotService implements ISnapshotService {
     const pathsA = new Set(a.files.keys());
     const pathsB = new Set(b.files.keys());
 
-    const added: SnapshotDiff['added'] = [];
-    const removed: SnapshotDiff['removed'] = [];
-    const modified: SnapshotDiff['modified'] = [];
+    const added: { path: string; size: number }[] = [];
+    const removed: { path: string; size: number }[] = [];
+    const modified: { path: string; oldSize: number; newSize: number }[] = [];
     let unchanged = 0;
 
     // Added and modified

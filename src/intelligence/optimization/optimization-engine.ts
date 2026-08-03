@@ -15,7 +15,7 @@ export interface IOptimizationEngine {
 }
 
 export class OptimizationEngine implements IOptimizationEngine {
-  constructor(private readonly logger: ILogger) {}
+  constructor(_logger: ILogger) {}
 
   optimize(plan: Plan, objective: OptimizationObjective): { plan: Plan; result: OptimizationResult } {
     const before = this.measurePlan(plan);

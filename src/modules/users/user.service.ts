@@ -7,7 +7,6 @@
 import { BaseService } from '../../core/base-service.js';
 import type { UserRepository } from './user.repository.js';
 import type { IAuthClient } from '../../infrastructure/firebase/auth-client.js';
-import type { IRBACService } from '../rbac/rbac.service.js';
 import type { IAuditService } from '../audit/audit.service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
@@ -43,7 +42,6 @@ export class UserService extends BaseService implements IUserService {
   constructor(
     private readonly userRepo: UserRepository,
     private readonly authClient: IAuthClient,
-    private readonly rbac: IRBACService,
     private readonly audit: IAuditService,
     logger: ILogger,
     eventBus: IEventBus,
@@ -128,7 +126,7 @@ export class UserService extends BaseService implements IUserService {
 
       return this.success(user);
     } catch (error) {
-      return this.handleResult('createUser', this.wrapError(error, ErrorCode.INTERNAL, 'Failed to create user'));
+      return this.failure(ErrorCode.INTERNAL, 'Failed to create user');
     }
   }
 

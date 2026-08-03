@@ -64,7 +64,7 @@ describe('ApiKeyService', () => {
     const eventBus = createMockEventBus();
     rbac = new RBACService(logger, eventBus);
     audit = new AuditService({} as any, logger, eventBus);
-    service = new ApiKeyService(repo, rbac, audit, logger, eventBus);
+    service = new ApiKeyService(repo, audit, logger, eventBus);
   });
 
   describe('create', () => {

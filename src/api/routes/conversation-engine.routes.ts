@@ -10,7 +10,7 @@ import type { SessionManager } from '../../conversations/engine/session-manager.
 import type { PromptTemplateService } from '../../conversations/engine/prompt-templates.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, createError } from '../../types/index.js';
-import { CreateConversationSchema, SendMessageSchema, MemoryStoreSchema, CreateBranchSchema, CreateCheckpointSchema } from '../../conversations/engine/types.js';
+import { CreateConversationSchema, MemoryStoreSchema, CreateBranchSchema, CreateCheckpointSchema } from '../../conversations/engine/types.js';
 
 export function createConversationEngineRouter(
   conversations: ConversationService,
@@ -18,7 +18,7 @@ export function createConversationEngineRouter(
   memory: MemoryService,
   sessions: SessionManager,
   prompts: PromptTemplateService,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -186,6 +186,7 @@ export function createConversationEngineRouter(
     const result = await memory.store({
       ...parsed.data, userId: user.uid, organizationId: user.organizationId,
       summary: null, expiresAt: parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null,
+      metadata: {}, conversationId: parsed.data.conversationId ?? null,
     });
     return c.json({ success: true, data: result }, 201);
   });

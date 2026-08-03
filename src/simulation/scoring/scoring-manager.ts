@@ -16,7 +16,7 @@ export interface IScoringManager {
 }
 
 export class ScoringManager implements IScoringManager {
-  constructor(private readonly logger: ILogger) {}
+  constructor(_logger: ILogger) {}
 
   scoreRun(run: BenchmarkRun, scenario: Scenario): ScoreCard {
     const dimensions: ScoreDimension[] = [

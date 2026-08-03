@@ -5,11 +5,11 @@
  * Writes to Firestore for persistence and Redis for real-time counters.
  */
 
-import type { UsageRecord, UsageAggregate, UsageSummary, TrackUsageSchema, CostEstimate, PricingTable, ModelStats } from './types.js';
+import type { UsageRecord, UsageAggregate, UsageSummary, CostEstimate, PricingTable, ModelStats } from './types.js';
 import type { ICacheService } from '../infrastructure/redis/cache.js';
 import type { ILogger } from '../telemetry/logger.js';
 import type { ProviderName } from '../modules/providers/types.js';
-import { type Result, ErrorCode, createPaginatedResponse, type PaginationParams, type PaginatedResponse } from '../types/index.js';
+import { type Result, createPaginatedResponse, type PaginationParams, type PaginatedResponse } from '../types/index.js';
 
 export interface IUsageTracker {
   track(record: Omit<UsageRecord, 'id' | 'createdAt' | 'updatedAt' | 'totalTokens' | 'estimatedCost' | 'currency'>): Promise<Result<UsageRecord>>;

@@ -2,7 +2,7 @@
  * Search Tools
  */
 
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import type { Tool, ToolDefinition, ToolExecutionContext, ToolExecutionResult } from '../types.js';
 import { SearchSchema, GlobSchema } from '../types.js';

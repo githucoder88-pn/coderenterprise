@@ -5,11 +5,10 @@
  * sequential, parallel, hierarchical, consensus, event-driven.
  */
 
-import type { Goal, Task, AgentRole, WorkflowPattern, ExecutionMode, AgentState, AgentResult, GoalResult, Checkpoint } from '../types.js';
+import type { Goal, Task, AgentRole, AgentState, AgentResult, GoalResult, Artifact } from '../types.js';
 import type { AgentRegistry } from '../registry/agent-registry.js';
 import type { ILogger } from '../../telemetry/logger.js';
-import type { IEventBus } from '../../core/event-bus.js';
-import { DomainEvent, ErrorCode, type Result } from '../../types/index.js';
+import { ErrorCode, type Result } from '../../types/index.js';
 
 export interface IExecutionEngine {
   execute(goal: Goal): Promise<Result<GoalResult>>;
@@ -23,7 +22,6 @@ export class ExecutionEngine implements IExecutionEngine {
 
   constructor(
     private readonly registry: AgentRegistry,
-    private readonly eventBus: IEventBus,
     private readonly logger: ILogger,
   ) {}
 
@@ -93,7 +91,7 @@ export class ExecutionEngine implements IExecutionEngine {
 
   private async executeSequential(goal: Goal): Promise<GoalResult> {
     const results: AgentResult[] = [];
-    const allArtifacts: GoalResult['artifacts'] = [];
+    const allArtifacts: Artifact[] = [];
     let totalTokens = 0;
 
     for (const task of goal.tasks) {
@@ -138,7 +136,7 @@ export class ExecutionEngine implements IExecutionEngine {
   private async executeParallel(goal: Goal): Promise<GoalResult> {
     // Group tasks by dependency level
     const levels = this.topologicalSort(goal.tasks);
-    const allArtifacts: GoalResult['artifacts'] = [];
+    const allArtifacts: Artifact[] = [];
     let totalTokens = 0;
     let completed = 0;
     let failed = 0;
@@ -196,7 +194,7 @@ export class ExecutionEngine implements IExecutionEngine {
       createdAt: new Date(), updatedAt: new Date(),
     };
 
-    const leadResult = await this.registry.executeTask(leadAgent.id, delegationTask);
+    await this.registry.executeTask(leadAgent.id, delegationTask);
 
     // Execute delegated tasks in parallel
     return this.executeParallel({ ...goal, tasks: goal.tasks });
@@ -207,7 +205,7 @@ export class ExecutionEngine implements IExecutionEngine {
   private async executeConsensus(goal: Goal): Promise<GoalResult> {
     // Multiple agents work on same task, vote on best result
     const consensusRoles: AgentRole[] = ['coder', 'reviewer', 'architect'];
-    const allArtifacts: GoalResult['artifacts'] = [];
+    const allArtifacts: Artifact[] = [];
     let totalTokens = 0;
 
     for (const task of goal.tasks) {

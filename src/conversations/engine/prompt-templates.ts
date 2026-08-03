@@ -4,9 +4,7 @@
  * Versioned prompt templates with variable interpolation, categories, and ratings.
  */
 
-import type { PromptTemplate, PromptVariable } from './types.js';
-import type { ILogger } from '../../telemetry/logger.js';
-import type { ICacheService } from '../../infrastructure/redis/cache.js';
+import type { PromptTemplate } from './types.js';
 
 export interface IPromptTemplateService {
   create(template: Omit<PromptTemplate, 'id' | 'createdAt' | 'updatedAt' | 'version' | 'usageCount' | 'rating'>): Promise<PromptTemplate>;
@@ -28,8 +26,6 @@ export class PromptTemplateService implements IPromptTemplateService {
   private readonly templates = new Map<string, PromptTemplate>();
 
   constructor(
-    private readonly cache: ICacheService,
-    private readonly logger: ILogger,
   ) {}
 
   async create(template: Omit<PromptTemplate, 'id' | 'createdAt' | 'updatedAt' | 'version' | 'usageCount' | 'rating'>): Promise<PromptTemplate> {

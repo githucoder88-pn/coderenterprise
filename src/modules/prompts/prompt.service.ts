@@ -49,7 +49,7 @@ export class PromptService extends BaseService implements IPromptService {
     return this.success({ id, ...parsed.data, userId: actor.uid, version: 1, usageCount: 0, createdAt: now, updatedAt: now } as unknown as Prompt);
   }
 
-  async update(id: string, input: UpdatePromptInput, actor: AuthenticatedUser): Promise<Result<Prompt>> {
+  async update(id: string, input: UpdatePromptInput, _actor: AuthenticatedUser): Promise<Result<Prompt>> {
     const parsed = UpdatePromptSchema.safeParse(input);
     if (!parsed.success) return this.failure(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
     const existing = await this.firestore.getDocument<Record<string, unknown>>(this.collection, id);

@@ -10,14 +10,13 @@
 
 import type {
   OrchestrationRequest, OrchestrationResult,
-  Conversation, Message, TokenUsage, ConversationStream, ContextWindow,
+  Conversation, Message, ContextWindow,
 } from './types.js';
 import type { ConversationService } from './conversation-service.js';
 import type { ContextEngine, ContextBuildOptions } from './context-engine.js';
 import type { StreamingEngine, StreamingCallbacks } from './streaming-engine.js';
-import type { AttachmentService } from './attachment-service.js';
 import type { ProviderRouter } from '../../modules/providers/provider-router.js';
-import type { ProviderRequest, ProviderResponse, ProviderName } from '../../modules/providers/types.js';
+import type { ProviderRequest, ProviderName } from '../../modules/providers/types.js';
 import type { SessionManager } from './session-manager.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, type Result } from '../../types/index.js';
@@ -32,7 +31,6 @@ export class Orchestrator implements IOrchestrator {
     private readonly conversationService: ConversationService,
     private readonly contextEngine: ContextEngine,
     private readonly streamingEngine: StreamingEngine,
-    private readonly attachmentService: AttachmentService,
     private readonly providerRouter: ProviderRouter,
     private readonly sessionManager: SessionManager,
     private readonly logger: ILogger,
@@ -56,7 +54,8 @@ export class Orchestrator implements IOrchestrator {
       if (!userMsg.success) return userMsg as any;
 
       // 3. Build context
-      const messages = (await this.conversationService.getMessages(request.conversationId)).data ?? [];
+      const msgsResult = await this.conversationService.getMessages(request.conversationId);
+      const messages = msgsResult.success ? msgsResult.data : [];
       const context = await this.buildContext(conversation, messages, request);
 
       // 4. Build provider request
@@ -87,7 +86,8 @@ export class Orchestrator implements IOrchestrator {
         }
 
         // Rebuild context and re-call provider
-        const updatedMessages = (await this.conversationService.getMessages(request.conversationId)).data ?? [];
+        const updatedMsgsResult = await this.conversationService.getMessages(request.conversationId);
+        const updatedMessages = updatedMsgsResult.success ? updatedMsgsResult.data : [];
         const updatedContext = await this.buildContext(conversation, updatedMessages, request);
         const updatedRequest = this.buildProviderRequest(conversation, updatedContext, request, false);
         finalResponse = await this.providerRouter.complete(updatedRequest, request.provider as ProviderName);
@@ -98,6 +98,7 @@ export class Orchestrator implements IOrchestrator {
         request.conversationId, 'assistant', finalResponse.content,
         { model: finalResponse.model, provider: finalResponse.provider },
       );
+      if (!assistantMsg.success) return assistantMsg as any;
 
       // 8. Save context snapshot
       await this.sessionManager.saveContext(request.conversationId, context);
@@ -108,7 +109,7 @@ export class Orchestrator implements IOrchestrator {
         success: true,
         data: {
           conversationId: request.conversationId,
-          messageId: assistantMsg.data?.id ?? '',
+          messageId: assistantMsg.data.id,
           response: finalResponse.content,
           toolCalls: finalResponse.toolCalls.map((tc) => ({
             id: tc.id, name: tc.function.name, arguments: tc.function.arguments,
@@ -147,7 +148,8 @@ export class Orchestrator implements IOrchestrator {
       if (!assistantMsg.success) return assistantMsg as any;
 
       // Build context
-      const messages = (await this.conversationService.getMessages(request.conversationId)).data ?? [];
+      const streamMsgsResult = await this.conversationService.getMessages(request.conversationId);
+      const messages = streamMsgsResult.success ? streamMsgsResult.data : [];
       const context = await this.buildContext(conversation, messages, request);
 
       // Build provider request (streaming)

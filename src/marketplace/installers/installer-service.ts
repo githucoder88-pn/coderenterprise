@@ -4,7 +4,6 @@
  * Handles package installation, updates, uninstallation, and dependency resolution.
  */
 
-import type { Package, PackageVersion, VersionDependency } from '../types.js';
 import type { PackageRegistry } from '../registry/package-registry.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, type Result } from '../../types/index.js';

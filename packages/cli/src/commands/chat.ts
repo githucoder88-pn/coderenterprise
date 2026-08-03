@@ -24,7 +24,7 @@ export const chatCommand = new Command('chat')
     const model = opts.model ?? get('defaultModel');
     const stream = opts.stream !== false && get('streamByDefault');
 
-    let conversationId: string | null = null;
+    let conversationId: string = '';
 
     // Continue last conversation
     if (opts.continue) {
@@ -79,12 +79,12 @@ export const chatCommand = new Command('chat')
           let fullResponse = '';
 
           try {
-            for await (const chunk of api.streamMessage(conversationId, { content: message, model, provider })) {
+            for await (const chunk of api.streamMessage(conversationId, { content: message, model: model ?? undefined, provider: provider ?? undefined })) {
               process.stdout.write(chunk);
               fullResponse += chunk;
             }
             console.log('\n');
-            addMessage(conversationId, 'assistant', fullResponse, model ?? undefined, provider ?? undefined);
+            addMessage(conversationId, 'assistant', fullResponse, model ?? 'default', provider ?? 'default');
           } catch (error) {
             console.log('');
             console.error(chalk.red(`Stream error: ${error instanceof Error ? error.message : String(error)}`));
@@ -92,7 +92,7 @@ export const chatCommand = new Command('chat')
         } else {
           const spinner = ora('Thinking…').start();
           try {
-            const result = await api.sendMessage(conversationId, { content: message, model, provider });
+            const result = await api.sendMessage(conversationId, { content: message, model: model ?? undefined, provider: provider ?? undefined });
             spinner.stop();
 
             const response = result.response ?? result.content ?? '';
@@ -101,7 +101,7 @@ export const chatCommand = new Command('chat')
             } else {
               console.log(chalk.green('\nAssistant: ') + renderMarkdown(response) + '\n');
             }
-            addMessage(conversationId, 'assistant', response, model ?? undefined, provider ?? undefined);
+            addMessage(conversationId, 'assistant', response, model ?? 'default', provider ?? 'default');
           } catch (error) {
             spinner.fail('Request failed');
             console.error(chalk.red(error instanceof Error ? error.message : String(error)));

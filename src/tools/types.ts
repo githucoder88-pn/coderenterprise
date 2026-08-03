@@ -72,7 +72,7 @@ export interface ToolExecution extends Timestamps {
   readonly metadata: Record<string, unknown>;
 }
 
-export interface Tool<TInput = unknown, TOutput = unknown> {
+export interface Tool<TInput = unknown, _TOutput = unknown> {
   readonly definition: ToolDefinition;
   execute(input: TInput, context: ToolExecutionContext): Promise<ToolExecutionResult>;
   validate?(input: TInput): { valid: boolean; errors: readonly string[] };

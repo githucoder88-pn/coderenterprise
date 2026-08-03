@@ -5,9 +5,8 @@
  * workspace, organizational, and global layers.
  */
 
-import type { MemoryEntry, MemoryLayer, StoreMemorySchema } from '../types.js';
+import type { MemoryEntry, MemoryLayer } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
-import type { ICacheService } from '../../infrastructure/redis/cache.js';
 
 interface LayerConfig {
   readonly maxEntries: number;
@@ -41,7 +40,6 @@ export class MemoryManager implements IMemoryManager {
   private readonly stores = new Map<string, Map<string, MemoryEntry>>();
 
   constructor(
-    private readonly cache: ICacheService,
     private readonly logger: ILogger,
   ) {}
 
@@ -86,8 +84,9 @@ export class MemoryManager implements IMemoryManager {
         store.delete(key);
         return null;
       }
-      store.set(key, { ...entry, accessCount: entry.accessCount + 1, lastAccessedAt: new Date() });
-      return entry;
+      const updated = { ...entry, accessCount: entry.accessCount + 1, lastAccessedAt: new Date() };
+      store.set(key, updated);
+      return updated;
     }
     return null;
   }
@@ -131,7 +130,7 @@ export class MemoryManager implements IMemoryManager {
     }
   }
 
-  async consolidate(userId: string, orgId: string): Promise<{ consolidated: number; summarized: number }> {
+  async consolidate(userId: string, _orgId: string): Promise<{ consolidated: number; summarized: number }> {
     let consolidated = 0, summarized = 0;
 
     // Move high-importance short-term to long-term
@@ -167,7 +166,7 @@ export class MemoryManager implements IMemoryManager {
     return parts.join('\n\n');
   }
 
-  async getStats(userId: string, orgId: string): Promise<Record<MemoryLayer, { entries: number; tokens: number }>> {
+  async getStats(userId: string, _orgId: string): Promise<Record<MemoryLayer, { entries: number; tokens: number }>> {
     const stats = {} as Record<MemoryLayer, { entries: number; tokens: number }>;
     for (const layer of Object.keys(LAYER_CONFIGS) as MemoryLayer[]) {
       stats[layer] = { entries: 0, tokens: 0 };

@@ -4,7 +4,7 @@
  * Coordinates multiple agents, manages shared state, handles communication.
  */
 
-import type { CoordinationRequest, CoordinationResult, IntelligenceGoal } from '../types.js';
+import type { CoordinationRequest, CoordinationResult } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { nanoid } from 'nanoid';
 
@@ -26,14 +26,14 @@ export class CoordinationEngine implements ICoordinationEngine {
   private readonly agents = new Map<string, AgentHandle>();
   private readonly sharedMemory = new Map<string, unknown>();
 
-  constructor(private readonly logger: ILogger) {}
+  constructor(_logger: ILogger) {}
 
   async coordinate(
     request: CoordinationRequest,
     task: (agentId: string, input: string) => Promise<string>,
   ): Promise<CoordinationResult> {
     const start = performance.now();
-    const agentResults: CoordinationResult['agentResults'] = [];
+    const agentResults: { agentId: string; output: string; success: boolean }[] = [];
 
     switch (request.strategy) {
       case 'parallel': {

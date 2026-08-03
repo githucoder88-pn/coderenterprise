@@ -4,6 +4,7 @@
  * Shared utilities for test suites.
  */
 
+import { vi } from 'vitest';
 import { EventBus, type IEventBus } from '../core/event-bus.js';
 import type { ILogger } from '../telemetry/logger.js';
 import type { AuthenticatedUser, Timestamps } from '../types/index.js';

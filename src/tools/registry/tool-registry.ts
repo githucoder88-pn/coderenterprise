@@ -69,7 +69,7 @@ export class ToolRegistry implements IToolRegistry {
   }
 
   async execute(toolId: string, input: unknown, context: ToolExecutionContext): Promise<Result<ToolExecutionResult>> {
-    const entry = this.tools.get(toolId);
+    let entry = this.tools.get(toolId);
     if (!entry) {
       return { success: false, error: { code: ErrorCode.NOT_FOUND, message: `Tool ${toolId} not found`, timestamp: new Date() } };
     }
@@ -123,10 +123,15 @@ export class ToolRegistry implements IToolRegistry {
       this.executions.push(execution);
 
       // Update stats
-      entry.executionCount++;
-      entry.lastExecutedAt = new Date();
-      entry.averageDurationMs = (entry.averageDurationMs * (entry.executionCount - 1) + execution.durationMs) / entry.executionCount;
-      entry.errorRate = (entry.errorRate * (entry.executionCount - 1) + (result.success ? 0 : 1)) / entry.executionCount;
+      const newCount = entry.executionCount + 1;
+      entry = {
+        ...entry,
+        executionCount: newCount,
+        lastExecutedAt: new Date(),
+        averageDurationMs: (entry.averageDurationMs * (newCount - 1) + execution.durationMs) / newCount,
+        errorRate: (entry.errorRate * (newCount - 1) + (result.success ? 0 : 1)) / newCount,
+      };
+      this.tools.set(toolId, entry);
 
       // Audit log
       if (this.audit) {

@@ -10,7 +10,7 @@ import type { SecurityManager } from '../../enterprise/security/security-manager
 import type { DeploymentManager } from '../../enterprise/deployments/deployment-manager.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, createError } from '../../types/index.js';
-import { CreateOrganizationSchema, CreateTeamSchema, CreateProjectSchema, CreatePolicySchema } from '../../enterprise/types.js';
+import { CreateOrganizationSchema, CreateTeamSchema, CreatePolicySchema } from '../../enterprise/types.js';
 
 export function createEnterpriseRouter(
   orgs: OrganizationHierarchy,
@@ -18,7 +18,7 @@ export function createEnterpriseRouter(
   compliance: ComplianceEngine,
   security: SecurityManager,
   deployments: DeploymentManager,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -129,7 +129,17 @@ export function createEnterpriseRouter(
     const body = await c.req.json();
     const parsed = CreatePolicySchema.safeParse(body);
     if (!parsed.success) throw createError(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
-    const policy = policies.createPolicy({ ...parsed.data, organizationId: c.req.param('orgId'), enabled: true, metadata: {} });
+    const policy = policies.createPolicy({
+      ...parsed.data,
+      organizationId: c.req.param('orgId'),
+      enabled: true,
+      metadata: {},
+      rules: parsed.data.rules.map((r) => ({
+        ...r,
+        conditions: r.conditions ?? null,
+        principals: r.principals ?? null,
+      })),
+    });
     return c.json({ success: true, data: policy }, 201);
   });
 

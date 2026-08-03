@@ -10,7 +10,6 @@ import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { AuditLog, AuditLogInput } from './audit.types.js';
 import {
-  DomainEvent,
   ErrorCode,
   type Result,
   type PaginationParams,

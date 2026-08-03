@@ -6,7 +6,7 @@ import { Hono } from 'hono';
 import type { IAuditService } from '../../modules/audit/audit.service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
-export function createAuditRouter(auditService: IAuditService, logger: ILogger): Hono {
+export function createAuditRouter(auditService: IAuditService, _logger: ILogger): Hono {
   const router = new Hono();
 
   // GET /audit

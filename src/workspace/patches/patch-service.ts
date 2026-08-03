@@ -40,7 +40,7 @@ export class PatchService implements IPatchService {
     const newMap = new Map(newFiles.map((f) => [f.path, f]));
 
     // Modified and removed files
-    for (const [path, oldFile] of oldMap) {
+    for (const [path, _oldFile] of oldMap) {
       const newFile = newMap.get(path);
       if (newFile) {
         const oldContent = await this.snapshotService.readFile(oldSnapshotId, path);
@@ -73,7 +73,7 @@ export class PatchService implements IPatchService {
     return patch;
   }
 
-  async apply(patchId: string, workspaceId: string): Promise<PatchApplyResult> {
+  async apply(patchId: string, _workspaceId: string): Promise<PatchApplyResult> {
     const patch = this.patches.get(patchId);
     if (!patch) return { success: false, appliedFiles: [], failedFiles: [{ path: '', error: 'Patch not found' }], conflicts: [] };
 
@@ -87,6 +87,7 @@ export class PatchService implements IPatchService {
         if (diff.oldPath === '/dev/null') {
           // New file
           const content = diff.hunks.flatMap((h) => h.changes.filter((c) => c.type === 'add').map((c) => c.content)).join('\n');
+          void content; // Content for new file in patch application
           appliedFiles.push(path);
         } else if (diff.newPath === '/dev/null') {
           // Deleted file

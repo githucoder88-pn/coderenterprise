@@ -40,7 +40,7 @@ export const loginCommand = new Command('login')
     // Email/password authentication
     try {
       const email = opts.email ?? await input({ message: 'Email:' });
-      const password = opts.password ?? await input({ message: 'Password:', type: 'password' });
+      const password = opts.password ?? await input({ message: 'Password:' });
 
       const spinner = ora('Signing in…').start();
       const result = await api.login({ email, password });

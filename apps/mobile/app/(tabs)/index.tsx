@@ -1,150 +1,96 @@
 /**
- * Home Screen — dashboard overview.
+ * Home Screen — dashboard overview
  */
-import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
+
+import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTheme } from '@/theme/theme';
-import { useLayout } from '@/utils/responsive';
-import { Card } from '@/components/common/Card';
-import { HPressable } from '@/components/common/Pressable';
-import { Icon } from '@/components/common/Icon';
 import { useUsage, useConversations, useHealth, useUnreadCount } from '@/hooks/use-api';
-import { SkeletonBlock } from '@/components/skeleton/Shimmer';
-import { ScreenContainer } from '@/components/common/SafeLayout';
-import { useCachedQuery } from '@/hooks/use-cached-query';
-import { api } from '@/services/api';
+import { useAppStore } from '@/stores/app-store';
 
 function formatNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(Math.round(n));
-}
-
-function StatTile({ label, value, color, icon }: { label: string; value: string; color: string; icon: React.ReactNode }) {
-  const { colors, radius, spacing } = useTheme();
-  return (
-    <Card style={styles.stat}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <View style={[styles.iconBubble, { backgroundColor: color + '22' }]}>{icon}</View>
-      </View>
-      <Text style={[styles.value, { color }]}>{value}</Text>
-      <Text style={[styles.label, { color: colors.textTertiary }]}>{label}</Text>
-    </Card>
-  );
-}
-
-function QuickAction({ label, icon, onPress }: { label: string; icon: React.ReactNode; onPress: () => void }) {
-  const { colors, radius } = useTheme();
-  return (
-    <HPressable onPress={onPress} style={{ flex: 1, minWidth: '45%' }}>
-      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <View style={[styles.iconBubble, { backgroundColor: colors.primarySoft }]}>{icon}</View>
-        <Text style={{ color: colors.text, fontSize: 14, fontWeight: '600', flex: 1 }}>{label}</Text>
-        <Icon.ChevronRight size={16} color={colors.textTertiary} />
-      </Card>
-    </HPressable>
-  );
+  return String(n);
 }
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { colors, typography, spacing } = useTheme();
-  const layout = useLayout();
-
-  const { data: usage, isLoading: loadingUsage, refetch: refetchUsage } = useCachedQuery(['usage'], () => api.getUsage());
-  const { data: convs, isLoading: loadingConvs, refetch: refetchConvs } = useCachedQuery(['conversations', 1], () => api.getConversations(1));
-  const { data: health, isLoading: loadingHealth, refetch: refetchHealth } = useCachedQuery(['health'], () => api.health());
-  const { data: unread, isLoading: loadingUnread, refetch: refetchUnread } = useCachedQuery(['unread'], () => api.getUnreadCount());
-
-  const [refreshing, setRefreshing] = React.useState(false);
-  const onRefresh = React.useCallback(async () => {
-    setRefreshing(true);
-    await Promise.all([refetchUsage(), refetchConvs(), refetchHealth(), refetchUnread()]).catch(() => {});
-    setRefreshing(false);
-  }, [refetchUsage, refetchConvs, refetchHealth, refetchUnread]);
+  const isDark = useAppStore((s) => s.theme) === 'dark';
+  const { data: usage } = useUsage();
+  const { data: convs } = useConversations();
+  const { data: health } = useHealth();
+  const { data: unread } = useUnreadCount();
 
   const summary = (usage as any)?.currentPeriod;
-  const totalConvs = (convs as any)?.pagination?.total ?? 0;
-  const isHealthy = (health as any)?.status === 'ok';
+  const c = isDark ? { bg: '#0a0a0a', card: '#171717', border: '#262626', text: '#fafafa', sub: '#a3a3a3', muted: '#737373', accent: '#3b82f6', green: '#22c55e' }
+    : { bg: '#ffffff', card: '#fafafa', border: '#e5e5e5', text: '#0a0a0a', sub: '#737373', muted: '#a3a3a3', accent: '#2563eb', green: '#16a34a' };
+
+  const cards = [
+    { label: 'Requests', value: formatNumber(summary?.totalRequests ?? 0), color: c.accent },
+    { label: 'Tokens', value: formatNumber(summary?.totalTokens ?? 0), color: c.green },
+    { label: 'Cost', value: `$${(summary?.totalCost ?? 0).toFixed(2)}`, color: '#eab308' },
+    { label: 'Conversations', value: String((convs as any)?.pagination?.total ?? 0), color: '#a855f7' },
+  ];
 
   return (
-    <ScreenContainer
-      padded
-      bg={colors.bgGrouped}
-    >
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: layout.gutter, paddingTop: 8 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
-        showsVerticalScrollIndicator={!layout.isTablet}
-      >
-        {/* Greeting */}
-        <View style={{ marginBottom: spacing['5'], marginTop: spacing['2'] }}>
-          <Text style={[typography.largeTitle, { color: colors.text }]}>CODER</Text>
-          <Text style={[typography.callout, { color: colors.textSecondary }]}>Enterprise AI · Ready to assist</Text>
-        </View>
-
-        {/* Stats */}
-        <View style={styles.grid}>
-          {loadingUsage ? (
-            <>
-              <Card style={styles.stat}><SkeletonBlock width="60%" height={14} /><SkeletonBlock width="80%" height={24} /></Card>
-              <Card style={styles.stat}><SkeletonBlock width="60%" height={14} /><SkeletonBlock width="80%" height={24} /></Card>
-              <Card style={styles.stat}><SkeletonBlock width="60%" height={14} /><SkeletonBlock width="80%" height={24} /></Card>
-              <Card style={styles.stat}><SkeletonBlock width="60%" height={14} /><SkeletonBlock width="80%" height={24} /></Card>
-            </>
-          ) : (
-            <>
-              <StatTile label="Requests" value={formatNumber(summary?.totalRequests ?? 0)} color={colors.primary} icon={<Icon.Bolt size={16} color={colors.primary} />} />
-              <StatTile label="Tokens" value={formatNumber(summary?.totalTokens ?? 0)} color={colors.success} icon={<Icon.Sparkles size={16} color={colors.success} />} />
-              <StatTile label="Cost" value={`$${(summary?.totalCost ?? 0).toFixed(2)}`} color={colors.warning} icon={<Icon.Globe size={16} color={colors.warning} />} />
-              <StatTile label="Chats" value={String(totalConvs)} color="#a855f7" icon={<Icon.Chat size={16} color="#a855f7" />} />
-            </>
-          )}
-        </View>
-
-        {/* Quick Actions */}
-        <Text style={[typography.headline, { color: colors.text, marginTop: spacing['6'], marginBottom: spacing['3'] }]}>Quick Actions</Text>
-        <View style={styles.actionsGrid}>
-          <QuickAction label="New Chat" icon={<Icon.Send size={16} color={colors.primary} />} onPress={() => router.push('/conversations')} />
-          <QuickAction label="Workspaces" icon={<Icon.Folder size={16} color={colors.primary} />} onPress={() => router.push('/workspaces')} />
-          <QuickAction label="Agents" icon={<Icon.Users size={16} color={colors.primary} />} onPress={() => router.push('/agents')} />
-          <QuickAction label="Models" icon={<Icon.Cpu size={16} color={colors.primary} />} onPress={() => router.push('/more')} />
-        </View>
-
-        {/* Status */}
-        <Text style={[typography.headline, { color: colors.text, marginTop: spacing['6'], marginBottom: spacing['3'] }]}>System Status</Text>
-        <Card>
-          <StatusRow label="API Health" value={loadingHealth ? '…' : (health as any)?.status ?? 'unknown'} ok={isHealthy} colors={colors} />
-          <View style={[styles.sep, { backgroundColor: colors.separator }]} />
-          <StatusRow label="Uptime" value={`${formatNumber((health as any)?.uptime ?? 0)}s`} colors={colors} />
-          <View style={[styles.sep, { backgroundColor: colors.separator }]} />
-          <StatusRow label="Unread" value={String((unread as any)?.count ?? 0)} colors={colors} />
-        </Card>
-      </ScrollView>
-    </ScreenContainer>
-  );
-}
-
-function StatusRow({ label, value, ok, colors }: { label: string; value: string; ok?: boolean; colors: any }) {
-  return (
-    <View style={styles.statusRow}>
-      <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{label}</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        {ok !== undefined && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ok ? colors.success : colors.danger }} />}
-        <Text style={{ color: ok !== undefined ? (ok ? colors.success : colors.danger) : colors.text, fontWeight: '600', fontSize: 14, textTransform: 'capitalize' }}>{value}</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16 }}>
+      {/* Stats Grid */}
+      <View style={s.grid}>
+        {cards.map((card) => (
+          <View key={card.label} style={[s.card, { backgroundColor: c.card, borderColor: c.border }]}>
+            <Text style={[s.cardLabel, { color: c.muted }]}>{card.label}</Text>
+            <Text style={[s.cardValue, { color: card.color }]}>{card.value}</Text>
+          </View>
+        ))}
       </View>
-    </View>
+
+      {/* Quick Actions */}
+      <Text style={[s.section, { color: c.text }]}>Quick Actions</Text>
+      <View style={s.actions}>
+        {[
+          { label: 'New Chat', route: '/conversations' },
+          { label: 'Workspaces', route: '/workspaces' },
+          { label: 'Agents', route: '/agents' },
+          { label: 'Models', route: '/(tabs)/more' },
+        ].map((a) => (
+          <Pressable key={a.label} style={[s.action, { backgroundColor: c.card, borderColor: c.border }]} onPress={() => router.push(a.route)}>
+            <Text style={[s.actionText, { color: c.text }]}>{a.label}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* Status */}
+      <Text style={[s.section, { color: c.text }]}>System Status</Text>
+      <View style={[s.statusCard, { backgroundColor: c.card, borderColor: c.border }]}>
+        <View style={s.statusRow}>
+          <Text style={[s.statusLabel, { color: c.sub }]}>API Health</Text>
+          <Text style={{ color: (health as any)?.status === 'ok' ? c.green : '#ef4444', fontWeight: '600' }}>
+            {(health as any)?.status ?? 'checking…'}
+          </Text>
+        </View>
+        <View style={s.statusRow}>
+          <Text style={[s.statusLabel, { color: c.sub }]}>Uptime</Text>
+          <Text style={{ color: c.text }}>{formatNumber((health as any)?.uptime ?? 0)}s</Text>
+        </View>
+        <View style={s.statusRow}>
+          <Text style={[s.statusLabel, { color: c.sub }]}>Unread</Text>
+          <Text style={{ color: c.text }}>{(unread as any)?.count ?? 0}</Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  stat: { width: '48%', gap: 4 },
-  value: { fontSize: 24, fontWeight: '800' },
-  label: { fontSize: 12, fontWeight: '600' },
-  iconBubble: { width: 32, height: 32, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
-  sep: { height: StyleSheet.hairlineWidth },
+const s = StyleSheet.create({
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
+  card: { width: '48%', padding: 16, borderRadius: 12, borderWidth: 1 },
+  cardLabel: { fontSize: 12, fontWeight: '500', marginBottom: 4 },
+  cardValue: { fontSize: 22, fontWeight: '700' },
+  section: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
+  action: { width: '48%', padding: 14, borderRadius: 10, borderWidth: 1, alignItems: 'center' },
+  actionText: { fontSize: 14, fontWeight: '500' },
+  statusCard: { padding: 16, borderRadius: 12, borderWidth: 1, gap: 12 },
+  statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  statusLabel: { fontSize: 14 },
 });

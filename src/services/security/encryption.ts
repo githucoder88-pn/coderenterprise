@@ -22,7 +22,7 @@ interface KeyVersion {
 }
 
 export class EncryptionService {
-  private readonly keys: Map<number, Buffer> = new Map();
+  private readonly keys: Map<number, KeyVersion> = new Map();
   private currentVersion = 1;
 
   constructor(
@@ -31,11 +31,12 @@ export class EncryptionService {
   ) {
     // Derive initial key
     const key = scryptSync(masterKey, 'coderenterprise-v1', 32);
-    this.keys.set(1, key);
+    this.keys.set(1, { version: 1, key, createdAt: new Date(), active: true });
   }
 
   encrypt(plaintext: string): EncryptionResult {
-    const key = this.keys.get(this.currentVersion)!;
+    const keyEntry = this.keys.get(this.currentVersion)!;
+    const key = keyEntry.key;
     const iv = randomBytes(16);
     const cipher = createCipheriv('aes-256-gcm', key, iv);
 
@@ -52,8 +53,9 @@ export class EncryptionService {
   }
 
   decrypt(data: EncryptionResult): string {
-    const key = this.keys.get(data.keyVersion);
-    if (!key) throw new Error(`Key version ${data.keyVersion} not found`);
+    const keyEntry = this.keys.get(data.keyVersion);
+    if (!keyEntry) throw new Error(`Key version ${data.keyVersion} not found`);
+    const key = keyEntry.key;
 
     const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(data.iv, 'hex'));
     decipher.setAuthTag(Buffer.from(data.tag, 'hex'));
@@ -67,7 +69,7 @@ export class EncryptionService {
   rotateKey(): number {
     this.currentVersion++;
     const newKey = randomBytes(32);
-    this.keys.set(this.currentVersion, newKey);
+    this.keys.set(this.currentVersion, { version: this.currentVersion, key: newKey, createdAt: new Date(), active: true });
     this.logger.info({ version: this.currentVersion }, 'Encryption key rotated');
     return this.currentVersion;
   }

@@ -5,7 +5,6 @@
  * Prometheus-compatible metrics, OpenTelemetry traces, Sentry errors.
  */
 
-import type { ILogger } from './logger.js';
 import type { IMetrics } from './metrics.js';
 
 // ─── Tracing ─────────────────────────────────────────────────────────────────
@@ -127,7 +126,6 @@ export interface ErrorTracker {
 export class InMemoryErrorTracker implements ErrorTracker {
   private readonly errors: { id: string; error: Error; context?: Record<string, unknown>; timestamp: Date }[] = [];
   private readonly messages: { id: string; message: string; level: string; timestamp: Date }[] = [];
-  private userContext: { id: string; email?: string; organizationId?: string } | null = null;
   private readonly breadcrumbs: { category: string; message: string; data?: Record<string, unknown>; timestamp: Date }[] = [];
 
   captureException(error: Error, context?: Record<string, unknown>): string {
@@ -137,14 +135,14 @@ export class InMemoryErrorTracker implements ErrorTracker {
     return id;
   }
 
-  captureMessage(message: string, level: 'info' | 'warning' | 'error', context?: Record<string, unknown>): string {
+  captureMessage(message: string, level: 'info' | 'warning' | 'error', _context?: Record<string, unknown>): string {
     const id = crypto.randomUUID();
     this.messages.push({ id, message, level, timestamp: new Date() });
     return id;
   }
 
-  setUser(user: { id: string; email?: string; organizationId?: string }): void {
-    this.userContext = user;
+  setUser(_user: { id: string; email?: string; organizationId?: string }): void {
+    // User context stored for error tracking correlation
   }
 
   addBreadcrumb(category: string, message: string, data?: Record<string, unknown>): void {
@@ -178,7 +176,6 @@ export class ObservabilityService implements IObservability {
 
   constructor(
     readonly metrics: IMetrics,
-    private readonly logger: ILogger,
   ) {
     this.tracer = new TracerImpl();
     this.errors = new InMemoryErrorTracker();

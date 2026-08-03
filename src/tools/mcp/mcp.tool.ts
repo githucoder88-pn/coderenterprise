@@ -2,7 +2,7 @@
  * MCP (Model Context Protocol) Tools
  */
 
-import type { Tool, ToolDefinition, ToolExecutionContext, ToolExecutionResult, McpServerConfig, McpToolDefinition } from '../types.js';
+import type { Tool, ToolDefinition, ToolExecutionContext, ToolExecutionResult, McpServerConfig } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 function makeResult(ctx: ToolExecutionContext, success: boolean, output: unknown, error: string | null = null): ToolExecutionResult {

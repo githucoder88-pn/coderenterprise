@@ -5,7 +5,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { BaseService } from '../../core/base-service.js';
 import type { ApiKeyRepository } from './apikey.repository.js';
-import type { IRBACService } from '../rbac/rbac.service.js';
 import type { IAuditService } from '../audit/audit.service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
@@ -30,7 +29,6 @@ export interface IApiKeyService {
 export class ApiKeyService extends BaseService implements IApiKeyService {
   constructor(
     private readonly apiKeyRepo: ApiKeyRepository,
-    private readonly rbac: IRBACService,
     private readonly audit: IAuditService,
     logger: ILogger,
     eventBus: IEventBus,

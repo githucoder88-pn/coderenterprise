@@ -42,11 +42,6 @@ class LocalDatabase {
     this.db.prepare('INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, datetime("now"))').run(key, JSON.stringify(value));
   }
 
-  getSettings(): Record<string, unknown> {
-    const rows = this.db.prepare('SELECT key, value FROM settings').all() as Array<{ key: string; value: string }>;
-    return Object.fromEntries(rows.map((row) => [row.key, JSON.parse(row.value)]));
-  }
-
   resetSettings(): void {
     this.db.prepare('DELETE FROM settings').run();
   }

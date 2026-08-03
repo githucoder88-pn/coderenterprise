@@ -6,7 +6,6 @@ import type { ReactNode } from 'react';
 import { useAppStore } from '../../stores/app-store';
 import { TitleBar } from './title-bar';
 import { Sidebar } from './sidebar';
-import { CommandPalette } from '../command-palette/command-palette';
 import { cn } from '../../lib/utils';
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -21,7 +20,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
-      <CommandPalette />
     </div>
   );
 }

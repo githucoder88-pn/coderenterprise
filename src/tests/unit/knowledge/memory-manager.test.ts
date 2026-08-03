@@ -19,7 +19,7 @@ function createMockCache(): ICacheService {
 describe('MemoryManager', () => {
   let manager: MemoryManager;
 
-  beforeEach(() => { manager = new MemoryManager(createMockCache(), createMockLogger()); });
+  beforeEach(() => { manager = new MemoryManager(createMockLogger()); });
 
   describe('store', () => {
     it('should store a memory entry', async () => {
@@ -54,8 +54,8 @@ describe('MemoryManager', () => {
 
   describe('retrieve', () => {
     it('should retrieve by layer and key', async () => {
-      await manager.store({ layer: 'episodic', userId: 'u1', organizationId: 'o1', key: 'task', value: 'Built API', importance: 60, tags: [], source: 'test' });
-      const entry = await manager.retrieve('episodic', 'task', 'u1');
+      await manager.store({ layer: 'conversation', userId: 'u1', organizationId: 'o1', key: 'task', value: 'Built API', importance: 60, tags: [], source: 'test' });
+      const entry = await manager.retrieve('conversation', 'task', 'u1');
       expect(entry).not.toBeNull();
       expect(entry!.value).toBe('Built API');
     });

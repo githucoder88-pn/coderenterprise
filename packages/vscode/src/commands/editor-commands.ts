@@ -18,8 +18,8 @@ async function askCoder(prompt: string, chat: ChatService, api: ApiClient): Prom
   return chat.sendSync(prompt);
 }
 
-function showResponse(title: string, response: string): void {
-  const doc = vscode.workspace.openTextDocument({ content: response, language: 'markdown' });
+async function showResponse(title: string, response: string): Promise<void> {
+  const doc = await vscode.workspace.openTextDocument({ content: response, language: 'markdown' });
   vscode.window.showTextDocument(doc, { preview: true, viewColumn: vscode.ViewColumn.Beside });
 }
 

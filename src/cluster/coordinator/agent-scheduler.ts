@@ -4,7 +4,7 @@
  * Schedules agents across regions and nodes with fault tolerance.
  */
 
-import type { DistributedAgent, DistributedTask, RegionId, DistributedNode, AgentLifecycle } from './types.js';
+import type { DistributedAgent, DistributedTask, RegionId, AgentLifecycle } from './types.js';
 import type { ClusterManager } from './cluster-manager.js';
 import type { NodeManager } from './node-manager.js';
 import type { ILogger } from '../../telemetry/logger.js';

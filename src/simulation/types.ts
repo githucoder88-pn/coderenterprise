@@ -13,6 +13,20 @@ export type Environment = 'development' | 'testing' | 'staging' | 'production' |
 
 export type SimulationStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
+export interface SimulationResult {
+  readonly simulationId: string;
+  readonly totalScenarios: number;
+  readonly completed: number;
+  readonly failed: number;
+  readonly averageScore: number;
+  readonly totalDurationMs: number;
+  readonly totalTokens: number;
+  readonly totalCost: number;
+  readonly scenarioResults: readonly { scenarioId: string; success: boolean; score: number; durationMs: number }[];
+  readonly scores: Record<string, number>;
+  readonly completedAt: Date;
+}
+
 export interface Simulation extends Timestamps {
   readonly id: string;
   readonly name: string;
@@ -81,7 +95,7 @@ export interface ScenarioExpected {
 
 export interface ScenarioAssertion {
   readonly type: 'output_match' | 'token_limit' | 'time_limit' | 'cost_limit' | 'tool_used' | 'no_error' | 'custom';
-  readonly value: unknown;
+  readonly value?: unknown;
   readonly message: string;
 }
 

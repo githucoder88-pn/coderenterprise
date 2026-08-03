@@ -5,7 +5,7 @@
  * Assigns tasks to appropriate agent roles.
  */
 
-import type { Goal, Task, AgentRole, WorkflowStep } from '../types.js';
+import type { Goal, Task, AgentRole } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface ITaskPlanner {
@@ -68,7 +68,6 @@ export class TaskPlanner implements ITaskPlanner {
   }
 
   resolveDependencies(tasks: readonly Task[]): readonly Task[][] {
-    const taskMap = new Map(tasks.map((t) => [t.id, t]));
     const resolved = new Set<string>();
     const levels: Task[][] = [];
 

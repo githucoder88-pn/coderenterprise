@@ -17,7 +17,7 @@ export function createBillingAnalyticsRouter(
   subscriptions: SubscriptionService,
   invoices: InvoiceService,
   observability: IObservability,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -185,7 +185,7 @@ export function createBillingAnalyticsRouter(
     return c.json({ success: true, data: observability.getHealthMetrics() });
   });
 
-  app.get('/metrics/prometheus', (c) => {
+  app.get('/metrics/prometheus', (_c) => {
     return new Response(observability.prometheus.export(), {
       headers: { 'Content-Type': 'text/plain; version=0.0.4' },
     });

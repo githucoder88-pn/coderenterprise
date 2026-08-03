@@ -6,7 +6,7 @@
 
 import type {
   RetrievalQuery, RetrievalResult, RetrievalResponse, RankedResult,
-  RankingSignal, KnowledgeEntity, KnowledgeChunk, SearchMode,
+  RankingSignal, KnowledgeEntity,
 } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
@@ -36,7 +36,7 @@ export class RetrievalEngine implements IRetrievalEngine {
   private readonly entities = new Map<string, KnowledgeEntity>();
   private readonly invertedIndex = new Map<string, Set<string>>();
 
-  constructor(private readonly logger: ILogger) {}
+  constructor(_logger: ILogger) {}
 
   index(entity: KnowledgeEntity): void {
     this.entities.set(entity.id, entity);
@@ -81,7 +81,7 @@ export class RetrievalEngine implements IRetrievalEngine {
     const maxResults = query.maxResults ?? 20;
     const minScore = query.minScore ?? 0.3;
 
-    let candidates: IndexedChunk[];
+    let candidates: readonly IndexedChunk[];
 
     switch (query.mode) {
       case 'keyword':
@@ -223,7 +223,7 @@ export class RetrievalEngine implements IRetrievalEngine {
     });
   }
 
-  private rerank(ranked: readonly RankedResult[], query: RetrievalQuery): RankedResult[] {
+  private rerank(ranked: readonly RankedResult[], _query: RetrievalQuery): RankedResult[] {
     // Diversity-aware reranking: penalize results from same entity
     const seen = new Map<string, number>();
     return ranked.map((r) => {
@@ -236,8 +236,8 @@ export class RetrievalEngine implements IRetrievalEngine {
 
   // ─── Helpers ────────────────────────────────────────────────────────────
 
-  private applyFilters(chunks: readonly IndexedChunk[], query: RetrievalQuery): IndexedChunk[] {
-    let filtered = chunks;
+  private applyFilters(chunks: readonly IndexedChunk[], query: RetrievalQuery): readonly IndexedChunk[] {
+    let filtered: readonly IndexedChunk[] = chunks;
     if (query.filters?.sources?.length) {
       filtered = filtered.filter((c) => query.filters!.sources!.includes(c.source as any));
     }

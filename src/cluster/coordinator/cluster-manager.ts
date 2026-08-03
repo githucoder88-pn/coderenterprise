@@ -26,7 +26,6 @@ export interface IClusterManager {
 export class ClusterManager implements IClusterManager {
   private readonly regions = new Map<RegionId, Region>();
   private readonly nodes = new Map<string, DistributedNode>();
-  private readonly startedAt = Date.now();
 
   constructor(private readonly logger: ILogger) {}
 
@@ -95,7 +94,7 @@ export class ClusterManager implements IClusterManager {
       const memAvg = healthy.length > 0 ? healthy.reduce((s, n) => s + n.resources.memory.percent, 0) / healthy.length : 0;
 
       return {
-        id: r.id, status: r.status,
+        id: r.id, status: r.status === 'active' ? 'healthy' as const : r.status,
         nodes: regionNodes.length, healthyNodes: healthy.length,
         activeAgents: healthy.reduce((s, n) => s + n.resources.activeAgents, 0),
         cpuAvg, memoryAvg: memAvg,

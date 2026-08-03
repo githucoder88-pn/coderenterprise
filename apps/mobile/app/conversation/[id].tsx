@@ -1,244 +1,99 @@
 /**
- * Conversation Detail — premium chat experience with streaming, markdown,
- * code blocks, attachments, voice input, and gestures.
+ * Conversation Detail — chat with streaming
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { FlashList, type ListRenderItemInfo } from '@shopify/flash-list';
-import { useLocalSearchParams } from 'expo-router';
-import { useTheme } from '@/theme/theme';
-import { useLayout } from '@/utils/responsive';
-import { useMessages } from '@/hooks/use-api';
-import { api } from '@/services/api';
-import { MessageBubble, type UIMessage } from '@/components/chat/MessageRenderer';
-import { Composer } from '@/components/chat/Composer';
-import { MessageSkeleton } from '@/components/skeleton/Shimmer';
-import { Icon } from '@/components/common/Icon';
-import { HapticsService } from '@/utils/haptics';
-import { DraftStore } from '@/offline/storage';
-import { matchCommand } from '@/lib/commands';
-import { HPressable } from '@/components/common/Pressable';
-import { BottomSheet } from '@/components/sheet/BottomSheet';
-import type { Attachment } from '@/components/attachments/picker';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-type OutAttachment = { uri: string; type: string; name?: string };
+import { View, Text, TextInput, FlatList, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { useState, useRef, useEffect } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import { useMessages } from '@/hooks/use-api';
+import { useAppStore } from '@/stores/app-store';
+import { api } from '@/services/api';
+
+interface Msg { id: string; role: string; content: string; timestamp: Date }
 
 export default function ConversationDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const { colors, spacing } = useTheme();
-  const layout = useLayout();
-  const insets = useSafeAreaInsets();
-  const { data, isLoading } = useMessages(id as string);
-
-  const [messages, setMessages] = useState<UIMessage[]>([]);
+  const { data } = useMessages(id);
+  const isDark = useAppStore((s) => s.theme) === 'dark';
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [streaming, setStreaming] = useState(false);
-  const [draft, setDraft] = useState(DraftStore.get(id ?? ''));
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [activeMsg, setActiveMsg] = useState<UIMessage | null>(null);
-  const [suggestions, setSuggestions] = useState<ReturnType<typeof matchCommand>>([]);
-  const listRef = useRef<FlashList<any>>(null);
-  const abortRef = useRef<{ abort: boolean }>({ abort: false });
+  const flatListRef = useRef<FlatList>(null);
 
-  // Seed messages from fetched history
   useEffect(() => {
     const existing = (data as any)?.data ?? [];
     if (existing.length > 0) {
-      setMessages(existing.map((m: any, i: number): UIMessage => ({
-        id: m.id ?? `m-${i}`,
-        role: m.role === 'user' ? 'user' : m.role === 'system' ? 'system' : 'assistant',
-        content: m.content ?? '',
-        timestamp: new Date(m.createdAt ?? Date.now()),
+      setMessages(existing.map((m: any, i: number) => ({
+        id: m.id ?? `m-${i}`, role: m.role, content: m.content, timestamp: new Date(m.createdAt),
       })));
     }
   }, [data]);
 
-  useEffect(() => {
-    if (id) setDraft(DraftStore.get(id));
-  }, [id]);
+  const c = isDark ? { bg: '#0a0a0a', card: '#171717', border: '#262626', text: '#fafafa', sub: '#a3a3a3', accent: '#3b82f6', inputBg: '#1f1f1f' }
+    : { bg: '#ffffff', card: '#f5f5f5', border: '#e5e5e5', text: '#0a0a0a', sub: '#737373', accent: '#2563eb', inputBg: '#f5f5f5' };
 
-  const onDraftChange = useCallback((t: string) => {
-    setDraft(t);
-    if (id) DraftStore.set(id, t);
-    setSuggestions(matchCommand(t));
-  }, [id]);
-
-  const scrollToEnd = useCallback((animated = true) => {
-    requestAnimationFrame(() => {
-      listRef.current?.scrollToEnd({ animated });
-    });
-  }, []);
-
-  useEffect(() => { scrollToEnd(false); }, [messages.length]);
-
-  const stopStreaming = () => { abortRef.current.abort = true; };
-
-  const send = async ({ text, attachments, voice }: { text: string; attachments?: Attachment[]; voice?: { uri?: string; durationMs: number } }) => {
-    if (streaming) return;
-    const finalText = text || (voice ? '(voice message)' : '');
-    if (!finalText && (!attachments || attachments.length === 0)) return;
-
-    const atts: OutAttachment[] = (attachments ?? []).map((a) => ({ uri: a.uri, type: a.type, name: a.name }));
-    const userMsg: UIMessage = {
-      id: `m-${Date.now()}`, role: 'user', content: finalText, timestamp: new Date(), attachments: atts,
-    };
-    const assistantId = `m-${Date.now()}-a`;
-    const assistantMsg: UIMessage = { id: assistantId, role: 'assistant', content: '', timestamp: new Date(), streaming: true };
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
+  const send = async () => {
+    if (!input.trim() || streaming) return;
+    const userMsg: Msg = { id: `m-${Date.now()}`, role: 'user', content: input.trim(), timestamp: new Date() };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput('');
     setStreaming(true);
-    abortRef.current = { abort: false };
+
+    const assistantMsg: Msg = { id: `m-${Date.now()}-a`, role: 'assistant', content: '', timestamp: new Date() };
+    setMessages((prev) => [...prev, assistantMsg]);
 
     try {
-      // Handle slash commands that don't hit the stream
-      if (text.startsWith('/')) {
-        const cmd = matchCommand(text)[0];
-        if (cmd && !['/provider', '/models', '/settings'].includes(cmd.command)) {
-          await new Promise((r) => setTimeout(r, 300));
-          setMessages((prev) => prev.map((m) => m.id === assistantId ? {
-            ...m, content: `**${cmd.command}** — running ${cmd.description.toLowerCase()}…\n\nQueued with the orchestration engine. You'll see results appear here as agents complete their work.`,
-            streaming: false,
-          } : m));
-          HapticsService.success();
-          setStreaming(false);
-          return;
-        }
+      for await (const chunk of api.streamMessage(id!, { content: userMsg.content })) {
+        setMessages((prev) => prev.map((m) => m.id === assistantMsg.id ? { ...m, content: m.content + chunk } : m));
       }
-
-      for await (const chunk of api.streamMessage(id!, { content: finalText })) {
-        if (abortRef.current.abort) break;
-        setMessages((prev) => prev.map((m) => m.id === assistantId ? { ...m, content: m.content + chunk } : m));
-      }
-      setMessages((prev) => prev.map((m) => m.id === assistantId ? { ...m, streaming: false } : m));
-      HapticsService.receive();
-    } catch (e: any) {
-      setMessages((prev) => prev.map((m) => m.id === assistantId ? {
-        ...m, content: '', error: e?.message ?? 'Response failed. Check your connection and try again.', streaming: false,
-      } : m));
-      HapticsService.error();
+    } catch {
+      setMessages((prev) => prev.map((m) => m.id === assistantMsg.id ? { ...m, content: m.content || 'Error: failed to get response' } : m));
     }
     setStreaming(false);
   };
 
-  const retry = (failedMsg: UIMessage) => {
-    // Find user msg before the failed assistant msg and re-send its content
-    const idx = messages.findIndex((m) => m.id === failedMsg.id);
-    const prev = idx > 0 ? messages[idx - 1] : null;
-    if (prev?.role === 'user') {
-      setMessages((ms) => ms.filter((m) => m.id !== failedMsg.id));
-      send({ text: prev.content, attachments: prev.attachments as any });
-    }
-  };
-
-  const keyExtractor = (item: UIMessage) => item.id;
-  const renderItem = ({ item, index }: ListRenderItemInfo<UIMessage>) => (
-    <View style={{ paddingHorizontal: layout.isTablet ? 24 : 12 }}>
-      <MessageBubble
-        message={item}
-        isLast={index === messages.length - 1}
-        onRetry={retry}
-        onLongPress={(m) => { setActiveMsg(m); setSheetOpen(true); }}
-      />
-    </View>
-  );
-
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: colors.bg }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-    >
-      {isLoading && messages.length === 0 ? (
-        <View style={{ flex: 1, paddingTop: 16 }}>
-          <MessageSkeleton />
-        </View>
-      ) : messages.length === 0 ? (
-        <View style={styles.empty}>
-          <View style={[styles.logoBubble, { backgroundColor: colors.primarySoft }]}>
-            <Icon.Sparkles size={28} color={colors.primary} />
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+        renderItem={({ item }) => (
+          <View style={[s.msg, item.role === 'user' ? s.userMsg : s.assistantMsg, { backgroundColor: item.role === 'user' ? c.accent : c.card }]}>
+            <Text style={{ color: item.role === 'user' ? '#fff' : c.text, fontSize: 15, lineHeight: 22 }}>{item.content || '…'}</Text>
           </View>
-          <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700', marginTop: 16 }}>How can I help today?</Text>
-          <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 6, textAlign: 'center', paddingHorizontal: 32 }}>
-            Ask anything, write code, attach files, or use voice to get started.
-          </Text>
-        </View>
-      ) : (
-        <FlashList
-          ref={listRef}
-          data={messages}
-          keyExtractor={keyExtractor}
-          estimatedItemSize={120}
-          renderItem={renderItem}
-          contentContainerStyle={{
-            paddingTop: 12,
-            paddingBottom: 24,
-            paddingHorizontal: layout.isTablet ? 24 : 4,
-          }}
-          onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {}}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={!layout.isTablet}
-        />
-      )}
+        )}
+      />
 
-      {/* Slash commands suggestions */}
-      {suggestions.length > 0 && draft.startsWith('/') && (
-        <View style={[styles.suggestions, { backgroundColor: colors.surface, borderColor: colors.separator, bottom: 76 + insets.bottom }]}>
-          {suggestions.slice(0, 5).map((cmd) => (
-            <HPressable
-              key={cmd.command}
-              haptic="selection"
-              onPress={() => { setDraft(cmd.prefix ?? `${cmd.command} `); setSuggestions([]); }}
-              style={styles.suggestion}
-            >
-              <Text style={{ fontSize: 18 }}>{cmd.icon}</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: colors.text, fontWeight: '700', fontSize: 14 }}>{cmd.command}</Text>
-                <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{cmd.description}</Text>
-              </View>
-            </HPressable>
-          ))}
-        </View>
-      )}
-
-      {/* Composer */}
-      <View style={{ paddingBottom: insets.bottom > 0 ? 0 : 8, backgroundColor: colors.bg }}>
-        <Composer
-          onSend={send}
-          streaming={streaming}
-          onStopStreaming={stopStreaming}
-          initialText={draft}
-          onChangeText={onDraftChange}
-          disabled={isLoading}
+      <View style={[s.inputBar, { backgroundColor: c.bg, borderTopColor: c.border }]}>
+        <TextInput
+          style={[s.input, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+          value={input}
+          onChangeText={setInput}
+          placeholder="Type a message…"
+          placeholderTextColor={c.sub}
+          multiline
+          maxLength={10000}
         />
+        <Pressable
+          style={[s.sendBtn, { backgroundColor: input.trim() ? c.accent : c.border }]}
+          onPress={send}
+          disabled={!input.trim() || streaming}
+        >
+          <Text style={{ color: '#fff', fontWeight: '600' }}>↑</Text>
+        </Pressable>
       </View>
-
-      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} snapPoints={[0.35]}>
-        <View style={{ padding: 20 }}>
-          <Text style={{ color: colors.text, fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Message</Text>
-          {[
-            { label: 'Copy text', icon: <Icon.Copy size={18} color={colors.text} />, onPress: () => {
-              setSheetOpen(false);
-              require('expo-clipboard').default.setStringAsync(activeMsg?.content ?? '').then(() => HapticsService.success());
-            }},
-            { label: activeMsg?.role === 'assistant' ? 'Regenerate' : 'Edit', icon: <Icon.Refresh size={18} color={colors.text} />, onPress: () => { setSheetOpen(false); if (activeMsg) retry(activeMsg); } },
-            { label: 'Share', icon: <Icon.Paperclip size={18} color={colors.text} />, onPress: () => { setSheetOpen(false); } },
-          ].map((it) => (
-            <HPressable key={it.label} onPress={it.onPress} haptic="light"
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 }}>
-              {it.icon}
-              <Text style={{ color: colors.text, fontSize: 15, fontWeight: '500' }}>{it.label}</Text>
-            </HPressable>
-          ))}
-        </View>
-      </BottomSheet>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  logoBubble: { width: 64, height: 64, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  suggestions: { position: 'absolute', left: 12, right: 12, borderWidth: StyleSheet.hairlineWidth, borderRadius: 14, padding: 8, maxHeight: 260 },
-  suggestion: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 8, paddingVertical: 8, borderRadius: 10 },
+const s = StyleSheet.create({
+  msg: { maxWidth: '80%', padding: 12, borderRadius: 16, marginBottom: 8 },
+  userMsg: { alignSelf: 'flex-end', borderBottomRightRadius: 4 },
+  assistantMsg: { alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
+  inputBar: { flexDirection: 'row', alignItems: 'flex-end', padding: 12, gap: 8, borderTopWidth: 1, position: 'absolute', bottom: 0, left: 0, right: 0 },
+  input: { flex: 1, borderWidth: 1, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, maxHeight: 120 },
+  sendBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
 });

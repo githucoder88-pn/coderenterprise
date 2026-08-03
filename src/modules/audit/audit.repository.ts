@@ -3,7 +3,6 @@
  */
 
 import type { IFirestoreClient } from '../../infrastructure/firebase/firestore-client.js';
-import type { ILogger } from '../../telemetry/logger.js';
 import type { AuditLog } from './audit.types.js';
 import { BaseRepository, type FindOptions, type QueryFilter } from '../../core/base-repository.js';
 import type { PaginationParams, PaginatedResponse } from '../../types/index.js';
@@ -14,7 +13,6 @@ export class AuditRepository extends BaseRepository<AuditLog> {
 
   constructor(
     private readonly firestore: IFirestoreClient,
-    private readonly logger: ILogger,
   ) {
     super();
   }

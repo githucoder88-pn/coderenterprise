@@ -7,7 +7,7 @@ import type { ISecretsService } from '../../modules/secrets/secrets.service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, createError } from '../../types/index.js';
 
-export function createSecretsRouter(secretsService: ISecretsService, logger: ILogger): Hono {
+export function createSecretsRouter(secretsService: ISecretsService, _logger: ILogger): Hono {
   const router = new Hono();
 
   // GET /secrets

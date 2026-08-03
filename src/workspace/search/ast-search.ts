@@ -4,7 +4,7 @@
  * Search code by AST symbol properties: name, kind, parameters, return types.
  */
 
-import type { SearchQuery, SearchResponse, SearchResult, AstSymbol, SupportedLanguage, IndexEntry } from '../types.js';
+import type { SearchQuery, SearchResponse, SearchResult, AstSymbol, SupportedLanguage } from '../types.js';
 import { AstParser } from '../editors/ast-parser.js';
 
 interface SymbolIndex {
@@ -54,7 +54,7 @@ export class AstSearchEngine {
   /**
    * Find all symbols of a specific kind.
    */
-  findByKind(kind: AstSymbol['kind'], workspaceId?: string): SearchResult[] {
+  findByKind(kind: AstSymbol['kind'], _workspaceId?: string): SearchResult[] {
     const results: SearchResult[] = [];
     for (const [, file] of this.files) {
       this.walkSymbols(file.symbols, (symbol) => {

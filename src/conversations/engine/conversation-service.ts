@@ -6,10 +6,9 @@
 
 import type {
   Conversation, Message, Branch, Checkpoint, MessageVersion,
-  TokenUsage, CreateConversationSchema, SendMessageSchema,
-  EditMessageSchema, CreateCheckpointSchema, CreateBranchSchema,
+  TokenUsage,
 } from './types.js';
-import type { IContextEngine, ContextBuildOptions } from './context-engine.js';
+import type { IContextEngine } from './context-engine.js';
 import type { SessionManager } from './session-manager.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';

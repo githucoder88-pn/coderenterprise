@@ -22,18 +22,6 @@ export interface ISimulationManager {
   getStats(): { total: number; byStatus: Record<string, number>; byEnvironment: Record<string, number> };
 }
 
-export interface SimulationResult {
-  readonly simulationId: string;
-  readonly totalScenarios: number;
-  readonly completed: number;
-  readonly failed: number;
-  readonly averageScore: number;
-  readonly totalDurationMs: number;
-  readonly totalTokens: number;
-  readonly totalCost: number;
-  readonly scenarioResults: readonly { scenarioId: string; success: boolean; score: number; durationMs: number }[];
-}
-
 export class SimulationManager implements ISimulationManager {
   private readonly simulations = new Map<string, Simulation>();
 
@@ -76,7 +64,7 @@ export class SimulationManager implements ISimulationManager {
     this.simulations.set(simulationId, { ...simulation, status: 'running', updatedAt: new Date() });
     const start = performance.now();
 
-    const scenarioResults: SimulationResult['scenarioResults'] = [];
+    const scenarioResults: { scenarioId: string; success: boolean; score: number; durationMs: number }[] = [];
     let totalTokens = 0, totalCost = 0;
 
     for (const scenarioId of simulation.scenarioIds) {
@@ -101,9 +89,10 @@ export class SimulationManager implements ISimulationManager {
     const simResult: SimulationResult = {
       simulationId, totalScenarios: scenarioResults.length,
       completed, failed: scenarioResults.length - completed,
-      averageScore: scenarioResults.reduce((s, r) => s + r.score, 0) / Math.max(1, scenarioResults.length),
+      averageScore: scenarioResults.reduce((sum: number, r: { score: number }) => sum + r.score, 0) / Math.max(1, scenarioResults.length),
       totalDurationMs: performance.now() - start,
       totalTokens, totalCost, scenarioResults,
+      scores: {}, completedAt: new Date(),
     };
 
     this.simulations.set(simulationId, { ...simulation, status: 'completed', results: simResult, updatedAt: new Date() });

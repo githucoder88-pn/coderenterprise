@@ -104,6 +104,7 @@ export interface Goal extends Timestamps {
   readonly agents: readonly AgentState[];
   readonly checkpoints: readonly Checkpoint[];
   readonly result: GoalResult | null;
+  readonly maxIterations: number;
   readonly metadata: Record<string, unknown>;
 }
 

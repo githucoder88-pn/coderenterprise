@@ -168,7 +168,7 @@ export class EmbeddingService implements IEmbeddingService {
     return blocks;
   }
 
-  private isBlockStart(line: string, language: SupportedLanguage): boolean {
+  private isBlockStart(line: string, _language: SupportedLanguage): boolean {
     const trimmed = line.trim();
     const patterns: RegExp[] = [
       /(?:export\s+)?(?:async\s+)?function\s+\w/,

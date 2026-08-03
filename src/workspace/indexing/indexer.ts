@@ -14,7 +14,7 @@ import type { ILogger } from '../../telemetry/logger.js';
 export interface IIndexer {
   indexWorkspace(workspaceId: string): Promise<IndexStats>;
   indexFile(workspaceId: string, path: string): Promise<IndexEntry | null>;
-  indexIncremental(workspaceId: string, changedFiles: readonly string[]): Promise<readonly IndexEntry>>;
+  indexIncremental(workspaceId: string, changedFiles: readonly string[]): Promise<readonly IndexEntry[]>;
   removeFile(fileId: string): void;
   getStats(workspaceId: string): IndexStats;
   getEntry(fileId: string): IndexEntry | null;
@@ -76,7 +76,7 @@ export class WorkspaceIndexer implements IIndexer {
     return this.createEntry(workspaceId, path, content, language);
   }
 
-  async indexIncremental(workspaceId: string, changedFiles: readonly string[]): Promise<readonly IndexEntry> {
+  async indexIncremental(workspaceId: string, changedFiles: readonly string[]): Promise<readonly IndexEntry[]> {
     const entries: IndexEntry[] = [];
     for (const path of changedFiles) {
       const entry = await this.indexFile(workspaceId, path);
@@ -98,7 +98,7 @@ export class WorkspaceIndexer implements IIndexer {
     }
   }
 
-  getStats(workspaceId: string): IndexStats {
+  getStats(_workspaceId: string): IndexStats {
     const byLanguage: Record<string, { files: number; symbols: number; lines: number }> = {};
     let totalSymbols = 0, totalLines = 0;
 
@@ -141,7 +141,7 @@ export class WorkspaceIndexer implements IIndexer {
     this.createEntry(workspaceId, file.path, readResult.data.content, file.language);
   }
 
-  private createEntry(workspaceId: string, path: string, content: string, language: SupportedLanguage | null): IndexEntry {
+  private createEntry(_workspaceId: string, path: string, content: string, language: SupportedLanguage | null): IndexEntry {
     const fileId = crypto.randomUUID();
     const lines = content.split('\n');
 

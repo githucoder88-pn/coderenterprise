@@ -5,7 +5,7 @@
  * Integrates with billing plans and quota management.
  */
 
-import type { Subscription, BillingPlan, CreateSubscriptionSchema } from './types.js';
+import type { Subscription, BillingPlan } from './types.js';
 import type { QuotaService } from './quota-service.js';
 import type { ILogger } from '../telemetry/logger.js';
 import { ErrorCode, type Result } from '../types/index.js';

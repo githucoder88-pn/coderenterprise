@@ -4,7 +4,7 @@
  * Manages individual node lifecycle, resource tracking, and task assignment.
  */
 
-import type { DistributedNode, NodeLifecycle, NodeResources } from './types.js';
+import type { DistributedNode, NodeResources } from './types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface INodeManager {
@@ -89,7 +89,6 @@ export class NodeManager implements INodeManager {
   selectBestNode(nodes: readonly DistributedNode[]): DistributedNode | null {
     const available = nodes.filter((n) =>
       (n.lifecycle === 'available' || n.lifecycle === 'allocated') &&
-      n.lifecycle !== 'terminated' &&
       n.resources.activeAgents < n.capabilities.maxConcurrentAgents,
     );
     if (available.length === 0) return null;

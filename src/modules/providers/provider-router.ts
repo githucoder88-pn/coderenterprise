@@ -24,7 +24,6 @@ import type {
 import { ProviderRegistry } from './provider-registry.js';
 import { LoadBalancer } from './resilience/load-balancer.js';
 import { ProviderError, ProviderRateLimitError } from './base-provider.js';
-import { nanoid } from 'nanoid';
 
 interface RouterConfig {
   readonly fallback: FallbackConfig;
@@ -217,7 +216,7 @@ export class ProviderRouter {
         cb?.recordSuccess();
 
         if (i > 0) {
-          this.stats.totalFallbacks++;
+          this.stats = { ...this.stats, totalFallbacks: this.stats.totalFallbacks + 1 };
         }
 
         return result;
@@ -250,24 +249,24 @@ export class ProviderRouter {
   }
 
   private recordRequest(provider: ProviderName): void {
-    this.stats.totalRequests++;
+    this.stats = { ...this.stats, totalRequests: this.stats.totalRequests + 1 };
     if (!this.stats.providerBreakdown[provider]) {
-      this.stats.providerBreakdown[provider] = { requests: 0, successes: 0, failures: 0 };
+      this.stats = { ...this.stats, providerBreakdown: { ...this.stats.providerBreakdown, [provider]: { requests: 0, successes: 0, failures: 0 } } };
     }
-    this.stats.providerBreakdown[provider]!.requests++;
+    this.stats = { ...this.stats, providerBreakdown: { ...this.stats.providerBreakdown, [provider]: { ...this.stats.providerBreakdown[provider]!, requests: this.stats.providerBreakdown[provider]!.requests + 1 } } };
   }
 
   private recordSuccess(provider: ProviderName): void {
-    this.stats.totalSuccesses++;
+    this.stats = { ...this.stats, totalSuccesses: this.stats.totalSuccesses + 1 };
     if (this.stats.providerBreakdown[provider]) {
-      this.stats.providerBreakdown[provider]!.successes++;
+      this.stats = { ...this.stats, providerBreakdown: { ...this.stats.providerBreakdown, [provider]: { ...this.stats.providerBreakdown[provider]!, successes: this.stats.providerBreakdown[provider]!.successes + 1 } } };
     }
   }
 
   private recordFailure(provider: ProviderName): void {
-    this.stats.totalFailures++;
+    this.stats = { ...this.stats, totalFailures: this.stats.totalFailures + 1 };
     if (this.stats.providerBreakdown[provider]) {
-      this.stats.providerBreakdown[provider]!.failures++;
+      this.stats = { ...this.stats, providerBreakdown: { ...this.stats.providerBreakdown, [provider]: { ...this.stats.providerBreakdown[provider]!, failures: this.stats.providerBreakdown[provider]!.failures + 1 } } };
     }
   }
 }

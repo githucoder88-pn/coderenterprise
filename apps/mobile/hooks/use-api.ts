@@ -3,19 +3,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { useAuthStore } from '@/stores/auth-store';
-import { secureStorage } from '@/security/secure-storage';
 
 // Auth
 export function useSignIn() {
   const { setUser, setToken } = useAuthStore();
   return useMutation({
     mutationFn: (body: { email: string; password: string }) => api.signIn(body),
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       setUser(data.user);
-      if (data.tokens?.accessToken) {
-        setToken(data.tokens.accessToken);
-        try { await secureStorage.setToken(data.tokens.accessToken); } catch {}
-      }
+      if (data.tokens?.accessToken) setToken(data.tokens.accessToken);
     },
   });
 }

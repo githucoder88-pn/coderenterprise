@@ -4,7 +4,7 @@
  * Registers agent types, creates agent instances, manages agent lifecycle.
  */
 
-import type { AgentRole, AgentState, AgentContext, AgentStatus, Task, AgentResult, ExecutionMode } from '../types.js';
+import type { AgentRole, AgentState, AgentContext, AgentStatus, Task, AgentResult } from '../types.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface AgentHandler {

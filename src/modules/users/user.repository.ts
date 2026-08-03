@@ -5,8 +5,7 @@
  */
 
 import type { IFirestoreClient } from '../../infrastructure/firebase/firestore-client.js';
-import type { ILogger } from '../../telemetry/logger.js';
-import type { User, UserQuery } from './user.types.js';
+import type { User } from './user.types.js';
 import {
   BaseRepository,
   type FindOptions,
@@ -20,7 +19,6 @@ export class UserRepository extends BaseRepository<User> {
 
   constructor(
     private readonly firestore: IFirestoreClient,
-    private readonly logger: ILogger,
   ) {
     super();
   }

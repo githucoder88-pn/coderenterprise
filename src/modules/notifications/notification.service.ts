@@ -51,7 +51,7 @@ export class NotificationService extends BaseService implements INotificationSer
   }
 
   async listByUser(userId: string, pagination: PaginationParams, unreadOnly = false): Promise<Result<PaginatedResponse<Notification>>> {
-    const filters = [{ field: 'userId', operator: '==' as const, value: userId }];
+    const filters: { field: string; operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'in' | 'not-in' | 'array-contains-any'; value: unknown }[] = [{ field: 'userId', operator: '==' as const, value: userId }];
     if (unreadOnly) filters.push({ field: 'read', operator: '==' as const, value: false });
     const docs = await this.firestore.getCollection<Record<string, unknown>>(this.collection, filters,
       { limit: pagination.limit * pagination.page, orderBy: [{ field: 'createdAt', direction: 'desc' }] });

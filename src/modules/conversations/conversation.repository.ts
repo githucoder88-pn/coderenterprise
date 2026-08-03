@@ -3,7 +3,6 @@
  */
 
 import type { IFirestoreClient } from '../../infrastructure/firebase/firestore-client.js';
-import type { ILogger } from '../../telemetry/logger.js';
 import type { Conversation, ConversationMessage } from './conversation.types.js';
 import { BaseRepository, type FindOptions, type QueryFilter } from '../../core/base-repository.js';
 import type { PaginationParams, PaginatedResponse } from '../../types/index.js';
@@ -13,7 +12,7 @@ export class ConversationRepository extends BaseRepository<Conversation> {
   private readonly collection = 'conversations';
   private readonly messagesCollection = 'conversation_messages';
 
-  constructor(private readonly firestore: IFirestoreClient, private readonly logger: ILogger) { super(); }
+  constructor(private readonly firestore: IFirestoreClient) { super(); }
 
   async findById(id: string): Promise<Conversation | null> {
     const doc = await this.firestore.getDocument<Record<string, unknown>>(this.collection, id);

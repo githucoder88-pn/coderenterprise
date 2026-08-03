@@ -155,7 +155,7 @@ export class ZeroTrustService {
   private async isKnownDevice(userId: string, userAgent: string): Promise<boolean> {
     if (!userId) return true;
     const key = `security:devices:${userId}`;
-    const known = await this.redis.sismember(key, userAgent);
+    const known = await this.redis.getClient().sismember(key, userAgent);
     if (!known) {
       await this.redis.getClient().sadd(key, userAgent);
       await this.redis.expire(key, 90 * 86400);
@@ -177,7 +177,7 @@ export class ZeroTrustService {
     return { exceeded: count > 100, count };
   }
 
-  private async checkGeoAnomaly(userId: string, ip: string): Promise<boolean> {
+  private async checkGeoAnomaly(_userId: string, _ip: string): Promise<boolean> {
     // In production, use MaxMind GeoIP
     return false;
   }

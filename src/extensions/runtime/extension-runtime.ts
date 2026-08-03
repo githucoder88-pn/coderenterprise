@@ -6,9 +6,7 @@
  */
 
 import type { InstalledExtension, ExtensionManifest } from '../types.js';
-import type { ExtensionSandbox } from '../sandbox/extension-sandbox.js';
 import type { MessageBus } from '../messaging/message-bus.js';
-import type { PermissionManager } from '../permissions/permission-manager.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
 export interface ExtensionContext {
@@ -54,9 +52,7 @@ export class ExtensionRuntime implements IExtensionRuntime {
   private readonly contexts = new Map<string, ExtensionContext>();
 
   constructor(
-    private readonly sandbox: ExtensionSandbox,
     private readonly messageBus: MessageBus,
-    private readonly permissions: PermissionManager,
     private readonly logger: ILogger,
   ) {}
 
@@ -109,14 +105,14 @@ export class ExtensionRuntime implements IExtensionRuntime {
       extensionId: id,
       manifest: extension.manifest,
       storage: {
-        get: async <T>(key: string): Promise<T | null> => {
+        get: async <T>(_key: string): Promise<T | null> => {
           // In production: use isolated storage per extension
           return null;
         },
-        set: async <T>(key: string, value: T): Promise<void> => {
+        set: async <T>(key: string, _value: T): Promise<void> => {
           this.logger.debug({ extensionId: id, key }, 'Storage set');
         },
-        delete: async (key: string): Promise<void> => {},
+        delete: async (_key: string): Promise<void> => {},
         keys: async (): Promise<readonly string[]> => [],
       },
       messaging: {

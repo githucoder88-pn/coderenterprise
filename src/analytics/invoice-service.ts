@@ -108,7 +108,7 @@ export class InvoiceService implements IInvoiceService {
     return { success: true, data: updated };
   }
 
-  async generateSummary(orgId: string, period: string): Promise<{ totalAmount: number; totalInvoices: number; paidAmount: number; unpaidAmount: number }> {
+  async generateSummary(orgId: string, _period: string): Promise<{ totalAmount: number; totalInvoices: number; paidAmount: number; unpaidAmount: number }> {
     const invoices = [...this.invoices.values()].filter((i) => i.organizationId === orgId);
     return {
       totalAmount: invoices.reduce((s, i) => s + i.total, 0),

@@ -8,7 +8,7 @@ import { Hono } from 'hono';
 import type { ServiceProvider } from '../../providers/service.provider.js';
 import type { ILogger } from '../../telemetry/logger.js';
 
-export function createDashboardRouter(services: ServiceProvider, logger: ILogger): Hono {
+export function createDashboardRouter(services: ServiceProvider, _logger: ILogger): Hono {
   const app = new Hono();
 
   // ─── User Profile ─────────────────────────────────────────────────────────
@@ -94,6 +94,7 @@ export function createDashboardRouter(services: ServiceProvider, logger: ILogger
     const user = c.get('user');
     const days = Number(c.req.query('days') ?? 30);
     const result = await services.analytics.getUsageMetrics(user.organizationId, `daily:${days}`);
+    if (!result.success) throw result.error;
     return c.json({ success: true, data: result.data });
   });
 
@@ -189,6 +190,7 @@ export function createDashboardRouter(services: ServiceProvider, logger: ILogger
   app.get('/notifications/unread-count', async (c) => {
     const user = c.get('user');
     const result = await services.notifications.getUnreadCount(user.uid);
+    if (!result.success) throw result.error;
     return c.json({ success: true, data: { count: result.data ?? 0 } });
   });
 
@@ -200,6 +202,7 @@ export function createDashboardRouter(services: ServiceProvider, logger: ILogger
   app.post('/notifications/mark-all-read', async (c) => {
     const user = c.get('user');
     const result = await services.notifications.markAllRead(user.uid);
+    if (!result.success) throw result.error;
     return c.json({ success: true, data: { count: result.data ?? 0 } });
   });
 

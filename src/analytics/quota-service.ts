@@ -5,10 +5,9 @@
  * overage detection, and hard/soft limits.
  */
 
-import type { Quota, QuotaCheckResult, SetQuotaSchema } from './types.js';
-import type { ICacheService } from '../infrastructure/redis/cache.js';
+import type { Quota, QuotaCheckResult } from './types.js';
 import type { ILogger } from '../telemetry/logger.js';
-import { ErrorCode, type Result } from '../types/index.js';
+import { type Result } from '../types/index.js';
 
 export interface IQuotaService {
   setQuota(orgId: string, metric: Quota['metric'], limit: number, period?: Quota['period'], hardLimit?: boolean): Result<Quota>;
@@ -26,7 +25,6 @@ export class QuotaService implements IQuotaService {
   private readonly usageCounters = new Map<string, number>();
 
   constructor(
-    private readonly cache: ICacheService,
     private readonly logger: ILogger,
   ) {}
 

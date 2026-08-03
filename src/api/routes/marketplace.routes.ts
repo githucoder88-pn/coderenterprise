@@ -10,15 +10,15 @@ import type { InstallerService } from '../../marketplace/installers/installer-se
 import type { ModerationService } from '../../marketplace/moderation/moderation-service.js';
 import type { ILogger } from '../../telemetry/logger.js';
 import { ErrorCode, createError } from '../../types/index.js';
-import { PublishPackageSchema, PublishVersionSchema, CreateReviewSchema, SearchPackagesSchema } from '../../marketplace/types.js';
+import { PublishPackageSchema, PublishVersionSchema, CreateReviewSchema } from '../../marketplace/types.js';
 
 export function createMarketplaceRouter(
   registry: PackageRegistry,
   publishers: PublisherService,
   ratings: RatingService,
   installer: InstallerService,
-  moderation: ModerationService,
-  logger: ILogger,
+  _moderation: ModerationService,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -28,7 +28,7 @@ export function createMarketplaceRouter(
     const query = c.req.query('q') ?? '';
     const page = Number(c.req.query('page') ?? 1);
     const limit = Number(c.req.query('limit') ?? 20);
-    const kind = c.req.query('kind');
+    const kind = c.req.query('kind') as import('../../marketplace/types.js').ArtifactKind | undefined;
     const category = c.req.query('category');
     const sort = c.req.query('sort') as any;
     const result = await registry.search(query, { kind, category, sort }, { page, limit });
@@ -116,7 +116,9 @@ export function createMarketplaceRouter(
       ...parsed.data, publisherId: publisher.id,
       slug: parsed.data.name, status: 'published', latestVersion: '0.0.0',
       icon: parsed.data.icon ?? null, banner: null, screenshots: [],
-      featured: false, verified: false,
+      featured: false, verified: false, metadata: {},
+      homepage: parsed.data.homepage ?? null,
+      repository: parsed.data.repository ?? null,
       monetization: { ...parsed.data.monetization, interval: parsed.data.monetization.interval ?? null, trialDays: parsed.data.monetization.trialDays ?? 0, enterpriseContact: parsed.data.monetization.enterpriseContact ?? null },
     });
 
@@ -128,7 +130,9 @@ export function createMarketplaceRouter(
     const body = await c.req.json();
     const parsed = PublishVersionSchema.safeParse(body);
     if (!parsed.success) throw createError(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
-    const result = await registry.publishVersion(c.req.param('id'), parsed.data);
+    const result = await registry.publishVersion(c.req.param('id'), {
+      ...parsed.data, manifest: {}, metadata: {},
+    });
     if (!result.success) throw result.error;
     return c.json({ success: true, data: result.data }, 201);
   });

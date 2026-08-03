@@ -3,7 +3,6 @@
  */
 
 import type { IFirestoreClient } from '../../infrastructure/firebase/firestore-client.js';
-import type { ILogger } from '../../telemetry/logger.js';
 import type { ApiKey } from './apikey.types.js';
 import {
   BaseRepository,
@@ -18,7 +17,6 @@ export class ApiKeyRepository extends BaseRepository<ApiKey> {
 
   constructor(
     private readonly firestore: IFirestoreClient,
-    private readonly logger: ILogger,
   ) {
     super();
   }

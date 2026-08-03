@@ -8,7 +8,7 @@ import type { ILogger } from '../../telemetry/logger.js';
 import { CreateOrganizationSchema, UpdateOrganizationSchema, AddMemberSchema } from '../../modules/organizations/organization.types.js';
 import { ErrorCode, createError } from '../../types/index.js';
 
-export function createOrganizationRouter(orgService: IOrganizationService, logger: ILogger): Hono {
+export function createOrganizationRouter(orgService: IOrganizationService, _logger: ILogger): Hono {
   const router = new Hono();
 
   // GET /organizations/:id

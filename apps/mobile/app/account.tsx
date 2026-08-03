@@ -1,83 +1,49 @@
 /**
  * Account Screen
  */
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTheme } from '@/theme/theme';
 import { useProfile } from '@/hooks/use-api';
 import { useAuthStore } from '@/stores/auth-store';
-import { HPressable } from '@/components/common/Pressable';
-import { Icon } from '@/components/common/Icon';
-import { Card } from '@/components/common/Card';
-import { ScreenContainer } from '@/components/common/SafeLayout';
-import { secureStorage } from '@/security/secure-storage';
-import { HapticsService } from '@/utils/haptics';
+import { useAppStore } from '@/stores/app-store';
 
 export default function AccountScreen() {
   const router = useRouter();
   const { data: profile } = useProfile();
   const { logout } = useAuthStore();
-  const { colors, typography, spacing } = useTheme();
+  const isDark = useAppStore((s) => s.theme) === 'dark';
+  const c = isDark ? { bg: '#0a0a0a', card: '#171717', border: '#262626', text: '#fafafa', sub: '#a3a3a3', accent: '#3b82f6', error: '#ef4444' }
+    : { bg: '#ffffff', card: '#fafafa', border: '#e5e5e5', text: '#0a0a0a', sub: '#737373', accent: '#2563eb', error: '#dc2626' };
 
   const user = profile as any;
-  const initial = (user?.displayName ?? user?.email ?? 'U')[0]?.toUpperCase();
-
-  const doLogout = async () => {
-    HapticsService.warning();
-    try { await secureStorage.clearAll(); } catch {}
-    logout();
-    router.replace('/auth');
-  };
 
   return (
-    <ScreenContainer scroll bg={colors.bgGrouped}>
-      <View style={{ padding: 16 }}>
-        <Card style={{ alignItems: 'center', paddingVertical: 24, marginBottom: 24 }}>
-          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-            <Text style={{ color: '#fff', fontSize: 28, fontWeight: '800' }}>{initial}</Text>
-          </View>
-          <Text style={[typography.title2, { color: colors.text, marginTop: 12 }]}>
-            {user?.displayName ?? 'User'}
+    <View style={{ flex: 1, backgroundColor: c.bg, padding: 16 }}>
+      <View style={[s.card, { backgroundColor: c.card, borderColor: c.border }]}>
+        <View style={[s.avatar, { backgroundColor: c.accent }]}>
+          <Text style={{ color: '#fff', fontSize: 20, fontWeight: '700' }}>
+            {(user?.displayName ?? user?.email ?? 'U')[0]?.toUpperCase()}
           </Text>
-          <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 2 }}>
-            {user?.email ?? '—'}
-          </Text>
-          <Text style={[typography.caption1, { color: colors.textTertiary, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }]}>
-            {user?.role ?? 'member'} · {user?.organizationId ?? 'coder'}
-          </Text>
-        </Card>
-
-        <Card padded={false}>
-          {[
-            { label: 'Security', icon: <Icon.Settings size={18} color={colors.primary} />, desc: 'Biometrics & sessions' },
-            { label: 'API Keys', icon: <Icon.Key size={18} color={colors.primary} />, desc: 'Manage tokens' },
-            { label: 'Notifications', icon: <Icon.Chat size={18} color={colors.primary} />, desc: 'Alert preferences' },
-          ].map((r, i, arr) => (
-            <HPressable key={r.label} haptic="light">
-              <View style={[styles.row, i < arr.length - 1 ? { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.separator } : null]}>
-                <View style={[styles.iconWrap, { backgroundColor: colors.primarySoft }]}>{r.icon}</View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.text, fontSize: 15, fontWeight: '600' }}>{r.label}</Text>
-                  <Text style={{ color: colors.textTertiary, fontSize: 12 }}>{r.desc}</Text>
-                </View>
-                <Icon.ChevronRight size={16} color={colors.textTertiary} />
-              </View>
-            </HPressable>
-          ))}
-        </Card>
-
-        <HPressable onPress={doLogout} style={[styles.logoutBtn, { borderColor: colors.danger + '60', backgroundColor: colors.danger + '12', marginTop: 24 }]}>
-          <Text style={{ color: colors.danger, fontWeight: '700', fontSize: 15 }}>Sign Out</Text>
-        </HPressable>
+        </View>
+        <Text style={[s.name, { color: c.text }]}>{user?.displayName ?? 'User'}</Text>
+        <Text style={[s.email, { color: c.sub }]}>{user?.email ?? '—'}</Text>
       </View>
-    </ScreenContainer>
+
+      <Pressable
+        style={[s.logoutBtn, { borderColor: c.error }]}
+        onPress={() => { logout(); router.replace('/auth'); }}
+      >
+        <Text style={{ color: c.error, fontWeight: '600', fontSize: 15 }}>Sign Out</Text>
+      </Pressable>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  avatar: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center' },
-  row: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
-  iconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  logoutBtn: { padding: 14, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center' },
+const s = StyleSheet.create({
+  card: { padding: 20, borderRadius: 12, borderWidth: 1, alignItems: 'center', marginBottom: 24 },
+  avatar: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  name: { fontSize: 18, fontWeight: '700', marginBottom: 4 },
+  email: { fontSize: 14 },
+  logoutBtn: { padding: 14, borderRadius: 10, borderWidth: 1, alignItems: 'center' },
 });

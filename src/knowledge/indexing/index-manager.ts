@@ -5,7 +5,7 @@
  */
 
 import type {
-  KnowledgeEntity, KnowledgeChunk, KnowledgeSource, IngestionRequest, IngestionResult, IndexEntry, IndexStats,
+  KnowledgeEntity, KnowledgeChunk, KnowledgeSource, IngestionRequest, IngestionResult, IndexStats,
 } from '../types.js';
 import type { IRetrievalEngine } from '../retrieval/retrieval-engine.js';
 import type { ILogger } from '../../telemetry/logger.js';
@@ -113,16 +113,32 @@ export class IndexManager implements IIndexManager {
     const blocks = this.splitByBlocks(lines);
     for (const block of blocks) {
       if (block.content.length > 0) {
-        chunks.push({
-          id: crypto.randomUUID(), entityId, index: chunks.length,
-          content: block.content, embedding: null,
-          startLine: block.startLine, endLine: block.endLine,
-          tokenCount: Math.ceil(block.content.length / 4),
-        });
+        // If block is too large, split it further by token count
+        const tokenCount = Math.ceil(block.content.length / 4);
+        if (tokenCount > this.chunkSize) {
+          const words = block.content.split(/\s+/);
+          for (let i = 0; i < words.length; i += this.chunkSize - this.chunkOverlap) {
+            const chunkWords = words.slice(i, i + this.chunkSize);
+            const chunkContent = chunkWords.join(' ');
+            chunks.push({
+              id: crypto.randomUUID(), entityId, index: chunks.length,
+              content: chunkContent, embedding: null,
+              startLine: block.startLine, endLine: block.endLine,
+              tokenCount: Math.ceil(chunkContent.length / 4),
+            });
+          }
+        } else {
+          chunks.push({
+            id: crypto.randomUUID(), entityId, index: chunks.length,
+            content: block.content, embedding: null,
+            startLine: block.startLine, endLine: block.endLine,
+            tokenCount,
+          });
+        }
       }
     }
 
-    // Fallback to fixed-size chunking if blocks are too large
+    // Fallback to fixed-size chunking if no blocks found
     if (chunks.length === 0) {
       const words = content.split(/\s+/);
       for (let i = 0; i < words.length; i += this.chunkSize - this.chunkOverlap) {

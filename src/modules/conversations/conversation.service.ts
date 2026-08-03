@@ -47,7 +47,7 @@ export class ConversationService extends BaseService implements IConversationSer
     return this.success(conv);
   }
 
-  async delete(id: string, actor: AuthenticatedUser): Promise<Result<void>> {
+  async delete(id: string, _actor: AuthenticatedUser): Promise<Result<void>> {
     const conv = await this.repo.findById(id);
     if (!conv) return this.failure(ErrorCode.NOT_FOUND, `Conversation ${id} not found`);
     await this.repo.delete(id);
@@ -78,7 +78,7 @@ export class ConversationService extends BaseService implements IConversationSer
     return this.success(await this.repo.findByWorkspace(workspaceId, pagination));
   }
 
-  async archive(id: string, actor: AuthenticatedUser): Promise<Result<Conversation>> {
+  async archive(id: string, _actor: AuthenticatedUser): Promise<Result<Conversation>> {
     const conv = await this.repo.findById(id);
     if (!conv) return this.failure(ErrorCode.NOT_FOUND, `Conversation ${id} not found`);
     return this.success(await this.repo.update(id, { status: 'archived' }));

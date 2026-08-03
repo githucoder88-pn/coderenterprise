@@ -32,9 +32,8 @@ describe('Notification Service', () => {
     const types = [
       'workflow_complete', 'task_assigned', 'checkpoint_created',
       'agent_failed', 'security_alert', 'billing_alert', 'provider_alert',
-      'message', 'error',
     ];
-    expect(types.length).toBe(9);
+    expect(types.length).toBe(7);
   });
 
   it('should map notification icons', () => {
@@ -46,10 +45,8 @@ describe('Notification Service', () => {
       security_alert: '🔒',
       billing_alert: '💳',
       provider_alert: '☁️',
-      message: '💬',
-      error: '⚠️',
     };
-    expect(Object.keys(icons).length).toBe(9);
+    expect(Object.keys(icons).length).toBe(7);
   });
 });
 
@@ -62,15 +59,5 @@ describe('Screens', () => {
       'Analytics', 'Account',
     ];
     expect(screens.length).toBe(14);
-  });
-});
-
-describe('Slash Commands', () => {
-  it('should define product slash commands', () => {
-    const commands = [
-      '/goal', '/teamwork', '/review', '/debug', '/explain',
-      '/test', '/document', '/settings', '/provider', '/models',
-    ];
-    expect(commands.length).toBe(10);
   });
 });

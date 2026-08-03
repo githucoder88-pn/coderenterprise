@@ -55,7 +55,7 @@ export class ExtensionService extends BaseService implements IExtensionService {
     return this.success({ id, ...ext } as unknown as Extension);
   }
 
-  async update(id: string, input: UpdateExtensionInput, actor: AuthenticatedUser): Promise<Result<Extension>> {
+  async update(id: string, input: UpdateExtensionInput, _actor: AuthenticatedUser): Promise<Result<Extension>> {
     const parsed = UpdateExtensionSchema.safeParse(input);
     if (!parsed.success) return this.failure(ErrorCode.VALIDATION, 'Invalid input', { errors: parsed.error.flatten() });
     await this.firestore.updateDocument(this.collection, id, { ...parsed.data, updatedAt: new Date() } as Record<string, unknown>);
@@ -63,7 +63,7 @@ export class ExtensionService extends BaseService implements IExtensionService {
     return this.success({ id: doc!.id, ...doc!.data } as unknown as Extension);
   }
 
-  async delete(id: string, actor: AuthenticatedUser): Promise<Result<void>> {
+  async delete(id: string, _actor: AuthenticatedUser): Promise<Result<void>> {
     await this.firestore.deleteDocument(this.collection, id);
     return this.success(undefined);
   }
@@ -77,17 +77,17 @@ export class ExtensionService extends BaseService implements IExtensionService {
     return this.success(createPaginatedResponse(mapped.slice(start, start + pagination.limit), mapped.length, pagination));
   }
 
-  async activate(id: string, actor: AuthenticatedUser): Promise<Result<Extension>> {
+  async activate(id: string, _actor: AuthenticatedUser): Promise<Result<Extension>> {
     await this.firestore.updateDocument(this.collection, id, { status: 'active', updatedAt: new Date() });
     return this.getById(id);
   }
 
-  async deactivate(id: string, actor: AuthenticatedUser): Promise<Result<Extension>> {
+  async deactivate(id: string, _actor: AuthenticatedUser): Promise<Result<Extension>> {
     await this.firestore.updateDocument(this.collection, id, { status: 'inactive', updatedAt: new Date() });
     return this.getById(id);
   }
 
-  async install(id: string, actor: AuthenticatedUser): Promise<Result<void>> {
+  async install(id: string, _actor: AuthenticatedUser): Promise<Result<void>> {
     const doc = await this.firestore.getDocument<Record<string, unknown>>(this.collection, id);
     if (!doc) return this.failure(ErrorCode.NOT_FOUND, `Extension ${id} not found`);
     await this.firestore.updateDocument(this.collection, id, { installCount: ((doc.data['installCount'] as number) ?? 0) + 1, updatedAt: new Date() });

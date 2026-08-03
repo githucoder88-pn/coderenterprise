@@ -1,115 +1,75 @@
 /**
- * Auth Screen — sign in.
+ * Auth Screen — sign in / sign up
  */
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+
+import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useSignIn } from '@/hooks/use-api';
-import { useTheme } from '@/theme/theme';
-import { HPressable } from '@/components/common/Pressable';
-import { Icon } from '@/components/common/Icon';
-import { ScreenContainer } from '@/components/common/SafeLayout';
-import { HapticsService } from '@/utils/haptics';
-import { secureStorage } from '@/security/secure-storage';
-import { useAuthStore } from '@/stores/auth-store';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAppStore } from '@/stores/app-store';
 
 export default function AuthScreen() {
   const router = useRouter();
   const signIn = useSignIn();
-  const { colors, typography, radius } = useTheme();
-  const isAuth = useAuthStore((s) => s.isAuthenticated);
+  const isDark = useAppStore((s) => s.theme) === 'dark';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  React.useEffect(() => {
-    if (isAuth) router.replace('/(tabs)');
-  }, [isAuth]);
+  const c = isDark ? { bg: '#0a0a0a', card: '#171717', border: '#262626', text: '#fafafa', sub: '#a3a3a3', accent: '#3b82f6', inputBg: '#1f1f1f', error: '#ef4444' }
+    : { bg: '#ffffff', card: '#fafafa', border: '#e5e5e5', text: '#0a0a0a', sub: '#737373', accent: '#2563eb', inputBg: '#f5f5f5', error: '#dc2626' };
 
   const handleSignIn = async () => {
     setError('');
-    HapticsService.medium();
     try {
-      const data = await signIn.mutateAsync({ email, password });
-      if (data?.tokens?.accessToken) {
-        await secureStorage.setToken(data.tokens.accessToken);
-      }
-      HapticsService.success();
+      await signIn.mutateAsync({ email, password });
       router.replace('/(tabs)');
     } catch (e: any) {
-      HapticsService.error();
-      setError(e?.message ?? 'Sign in failed');
+      setError(e.message ?? 'Sign in failed');
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: colors.bg }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScreenContainer padded>
-        <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 32 }}>
-          <View style={{ alignItems: 'center', marginBottom: 32 }}>
-            <View style={[styles.logo, { backgroundColor: colors.primarySoft }]}>
-              <Icon.Sparkles size={32} color={colors.primary} />
-            </View>
-            <Text style={[typography.largeTitle, { color: colors.text, marginTop: 16 }]}>CODER</Text>
-            <Text style={[typography.callout, { color: colors.textSecondary, marginTop: 4 }]}>Enterprise AI Platform</Text>
-          </View>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg, justifyContent: 'center', padding: 24 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <Text style={[s.title, { color: c.text }]}>CODER</Text>
+      <Text style={[s.subtitle, { color: c.sub }]}>Enterprise AI Platform</Text>
 
-          {error ? (
-            <View style={[styles.errBox, { backgroundColor: colors.danger + '18', borderColor: colors.danger + '40' }]}>
-              <Icon.Warn size={16} color={colors.danger} />
-              <Text style={{ color: colors.danger, fontSize: 13, flex: 1 }}>{error}</Text>
-            </View>
-          ) : null}
+      {error ? <Text style={[s.error, { color: c.error }]}>{error}</Text> : null}
 
-          <View style={{ gap: 10, marginBottom: 16 }}>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.inputBorder }]}
-              placeholder="Email"
-              placeholderTextColor={colors.textTertiary}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              textContentType="emailAddress"
-            />
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.inputBorder }]}
-              placeholder="Password"
-              placeholderTextColor={colors.textTertiary}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              textContentType="password"
-              autoComplete="password"
-            />
-          </View>
+      <TextInput
+        style={[s.input, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+        placeholder="Email"
+        placeholderTextColor={c.sub}
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={[s.input, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+        placeholder="Password"
+        placeholderTextColor={c.sub}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
 
-          <HPressable
-            onPress={handleSignIn}
-            disabled={signIn.isPending || !email || !password}
-            style={[styles.button, { backgroundColor: colors.primary, opacity: signIn.isPending || !email || !password ? 0.6 : 1 }]}
-          >
-            <Text style={styles.buttonText}>{signIn.isPending ? 'Signing in…' : 'Sign In'}</Text>
-          </HPressable>
-
-          <Text style={{ textAlign: 'center', color: colors.textTertiary, fontSize: 12, marginTop: 20 }}>
-            Protected by end-to-end encryption · Biometric supported
-          </Text>
-        </View>
-      </ScreenContainer>
+      <Pressable
+        style={[s.button, { backgroundColor: c.accent, opacity: signIn.isPending ? 0.7 : 1 }]}
+        onPress={handleSignIn}
+        disabled={signIn.isPending}
+      >
+        <Text style={s.buttonText}>{signIn.isPending ? 'Signing in…' : 'Sign In'}</Text>
+      </Pressable>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  logo: { width: 72, height: 72, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  input: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 14, fontSize: 16 },
-  button: { padding: 16, borderRadius: 14, alignItems: 'center' },
-  buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  errBox: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, marginBottom: 12 },
+const s = StyleSheet.create({
+  title: { fontSize: 32, fontWeight: '800', textAlign: 'center', marginBottom: 4 },
+  subtitle: { fontSize: 14, textAlign: 'center', marginBottom: 32 },
+  error: { fontSize: 13, textAlign: 'center', marginBottom: 12 },
+  input: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, marginBottom: 12 },
+  button: { padding: 14, borderRadius: 10, alignItems: 'center', marginTop: 8 },
+  buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
 });

@@ -16,7 +16,7 @@ export function createKnowledgeRouter(
   retrieval: RetrievalEngine,
   indexer: IndexManager,
   summarizer: Summarizer,
-  logger: ILogger,
+  _logger: ILogger,
 ): Hono {
   const app = new Hono();
 
@@ -30,6 +30,7 @@ export function createKnowledgeRouter(
     const entry = await memory.store({
       ...parsed.data, userId: user.uid, organizationId: user.organizationId,
       embedding: null, expiresAt: parsed.data.expiresInMs ? new Date(Date.now() + parsed.data.expiresInMs) : null,
+      metadata: {}, summary: parsed.data.summary ?? null,
     });
     return c.json({ success: true, data: entry }, 201);
   });

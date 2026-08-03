@@ -16,7 +16,9 @@ class ApiBridge {
 
   private getHeaders(): Record<string, string> {
     const apiKey = db.getSetting('apiKey', '');
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
     if (apiKey) headers['X-API-Key'] = apiKey;
     return headers;
   }

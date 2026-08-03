@@ -18,6 +18,7 @@ export function createNotificationRouter(notif: INotificationService, _logger: I
   app.get('/unread-count', async (c) => {
     const user = c.get('user');
     const result = await notif.getUnreadCount(user.uid);
+    if (!result.success) throw result.error;
     return c.json({ success: true, data: { count: result.data ?? 0 } });
   });
 
@@ -29,12 +30,14 @@ export function createNotificationRouter(notif: INotificationService, _logger: I
   app.post('/mark-all-read', async (c) => {
     const user = c.get('user');
     const result = await notif.markAllRead(user.uid);
+    if (!result.success) throw result.error;
     return c.json({ success: true, data: { count: result.data ?? 0 } });
   });
 
   app.get('/preferences', async (c) => {
     const user = c.get('user');
     const result = await notif.getPreferences(user.uid);
+    if (!result.success) throw result.error;
     return c.json({ success: true, data: result.data });
   });
 
@@ -42,6 +45,7 @@ export function createNotificationRouter(notif: INotificationService, _logger: I
     const user = c.get('user');
     const body = await c.req.json();
     const result = await notif.updatePreferences(user.uid, body);
+    if (!result.success) throw result.error;
     return c.json({ success: true, data: result.data });
   });
 
