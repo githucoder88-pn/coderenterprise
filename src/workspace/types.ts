@@ -3,7 +3,7 @@
  */
 
 import { z } from 'zod';
-import type { Timestamps } from '../../types/index.js';
+import type { Timestamps } from '../types/index.js';
 
 // ─── Supported Languages ─────────────────────────────────────────────────────
 
