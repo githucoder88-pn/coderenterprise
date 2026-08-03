@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 
 // ─── Generic hook factory ───────────────────────────────────────────────────
 
-function useApiQuery<T>(key: string[], fetcher: () => Promise<T>, opts?: Partial<UseQueryOptions<T>>) {
-  return useQuery({ queryKey: key, queryFn: fetcher, ...opts });
+function useApiQuery<T>(key: (string | number | boolean | Record<string, string> | undefined)[], fetcher: () => Promise<T>, opts?: Partial<UseQueryOptions<T>>) {
+  return useQuery({ queryKey: key as string[], queryFn: fetcher, ...opts });
 }
 
 // ─── Auth ───────────────────────────────────────────────────────────────────

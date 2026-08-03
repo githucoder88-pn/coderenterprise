@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { Cpu, RefreshCw, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 export default function ModelsPage() {
   const [provider, setProvider] = useState<string>('');
@@ -15,11 +15,18 @@ export default function ModelsPage() {
   const { data: models, isLoading } = useModels(provider ? { provider } : undefined);
   const syncMutation = useSyncModels();
 
-  const modelList = ((models as any) ?? []).filter((m: any) =>
-    !search || m.name?.toLowerCase().includes(search.toLowerCase()) || m.provider?.toLowerCase().includes(search.toLowerCase()),
-  );
+  // ⚡ Bolt: Memoized modelList to prevent expensive array filtering on every render.
+  // This drastically reduces main thread blocking during fast typing in the search input.
+  const modelList = useMemo(() => {
+    return ((models as any) ?? []).filter((m: any) =>
+      !search || m.name?.toLowerCase().includes(search.toLowerCase()) || m.provider?.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [models, search]);
 
-  const providers = [...new Set(((models as any) ?? []).map((m: any) => m.provider))] as string[];
+  // ⚡ Bolt: Memoized providers list to avoid O(N) mapping and Set deduplication on every render.
+  const providers = useMemo(() => {
+    return [...new Set(((models as any) ?? []).map((m: any) => m.provider))] as string[];
+  }, [models]);
 
   return (
     <div className="space-y-6">
