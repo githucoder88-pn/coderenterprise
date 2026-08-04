@@ -2,18 +2,27 @@
  * Polished pressable with scaling feedback and haptics.
  */
 import React, { useState, type ReactNode } from 'react';
-import { Pressable as RNPressable, PressableProps, StyleSheet, ViewStyle, Platform } from 'react-native';
+import {
+  Pressable as RNPressable,
+  type PressableProps,
+  StyleSheet,
+  type StyleProp,
+  type ViewStyle,
+  Platform,
+} from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { HapticsService } from '@/utils/haptics';
+import { haptic as triggerHaptic, type FeedbackType } from '@/utils/haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(RNPressable);
+
+export type HapticKind = FeedbackType | false;
 
 interface HPressableProps extends Omit<PressableProps, 'children' | 'style'> {
   children: ReactNode;
   scaleOnPress?: number;
-  haptic?: 'light' | 'medium' | 'heavy' | 'selection' | false;
+  haptic?: HapticKind;
   activeOpacity?: number;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function HPressable({
@@ -44,7 +53,7 @@ export function HPressable({
       }}
       onPress={(e) => {
         if (!disabled) {
-          if (haptic) HapticsService.press();
+          if (haptic) void triggerHaptic(haptic);
           onPress?.(e);
         }
       }}

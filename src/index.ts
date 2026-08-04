@@ -4,8 +4,13 @@
  * Application entry point.
  */
 
+import { config as loadEnv } from 'dotenv';
+import { resolve } from 'node:path';
 import { loadConfig } from './config/index.js';
 import { createApp } from './app.js';
+
+// Load repository-root .env before reading process.env in loadConfig().
+loadEnv({ path: resolve(process.cwd(), '.env') });
 
 async function main(): Promise<void> {
   const config = loadConfig();

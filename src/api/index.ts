@@ -172,7 +172,10 @@ export function createApiRouter(
   api.route('/billing', createBillingRouter(services.billing, logger));
   api.route('/analytics', createAnalyticsRouter(services.analytics, logger));
   api.route('/workspaces', createWorkspaceRouter(services.workspaces, logger));
-  api.route('/conversations', createConversationRouter(services.conversations, logger));
+  // Conversation CRUD + send/stream are served by the conversation engine router below
+  // under /conversations (client-compatible). Keep createConversationRouter import for
+  // potential future dual-backend mode.
+  void createConversationRouter;
   api.route('/models', createModelRouter(services.models, logger));
   api.route('/webhooks', createWebhookRouter(services.webhooks, logger));
   api.route('/notifications', createNotificationRouter(services.notifications, logger));
@@ -207,7 +210,19 @@ export function createApiRouter(
     null as any, null as any,
     sessionManager, logger,
   );
-  api.route('/conversation-engine', createConversationEngineRouter(engineConversationService, conversationOrchestrator, contextEngine as any, sessionManager, promptTemplateService, logger));
+  // Mount under both legacy client path (/conversations) aliases and explicit engine path.
+  // CRUD remains on createConversationRouter above; engine adds /:id/send(+stream) and advanced ops.
+  const conversationEngineRouter = createConversationEngineRouter(
+    engineConversationService,
+    conversationOrchestrator,
+    contextEngine as any,
+    sessionManager,
+    promptTemplateService,
+    logger,
+  );
+  api.route('/conversation-engine', conversationEngineRouter);
+  // Client-compatible aliases for chat send/stream and engine features
+  api.route('/conversations', conversationEngineRouter);
 
   // ─── Distributed ───────────────────────────────────────────────────────
   const clusterManager = new ClusterManager(logger);
@@ -292,7 +307,18 @@ export function createApiRouter(
   const searchEngine = new HybridSearchEngine();
   const workspaceIndexer = new WorkspaceIndexer(fileService, astParser, searchEngine, logger);
   const snapshotService = new SnapshotService(fileService, logger);
-  api.route('/workspace-engine', createWorkspaceEngineRouter(fileService, workspaceIndexer, snapshotService, diffEngine, astParser, searchEngine, logger));
+  const workspaceEngineRouter = createWorkspaceEngineRouter(
+    fileService,
+    workspaceIndexer,
+    snapshotService,
+    diffEngine,
+    astParser,
+    searchEngine,
+    logger,
+  );
+  // Clients call /workspace/*; keep /workspace-engine as an explicit alias.
+  api.route('/workspace', workspaceEngineRouter);
+  api.route('/workspace-engine', workspaceEngineRouter);
 
   // ─── Metrics endpoint ──────────────────────────────────────────────────
   api.get('/metrics', (c) => {

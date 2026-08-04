@@ -1,3 +1,41 @@
-export default {
-  plugins: ['@tanstack/react-query'],
-};
+{
+  "expo": {
+    "name": "CODER",
+    "slug": "coder-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "coder",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F19"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.coder.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0F19"
+      },
+      "package": "com.coder.mobile"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}

@@ -99,7 +99,7 @@ export function MessageBubble({ message, onCopy, onRetry, onLongPress, isLast }:
 
   const pan = Gesture.Pan()
     .activeOffsetX([-20, 20])
-    .onChange((e) => {
+    .onChange((e: { translationX: number }) => {
       const x = Math.max(-60, Math.min(60, e.translationX * 0.3));
       translateX.value = x;
     })

@@ -23,11 +23,37 @@ const AppConfigSchema = z.object({
 
   firebase: z.object({
     projectId: z.string().min(1),
-    clientEmail: z.string().email().optional(),
-    privateKey: z.string().optional(),
-    storageBucket: z.string().optional(),
-    apiKey: z.string().optional(),
-    useEmulator: z.coerce.boolean().default(false),
+    // Empty env vars become "" — coerce blanks to undefined for local/dev startup.
+    clientEmail: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().email().optional(),
+    ),
+    privateKey: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().optional(),
+    ),
+    credentialsFile: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().optional(),
+    ),
+    storageBucket: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().optional(),
+    ),
+    apiKey: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().optional(),
+    ),
+    // z.coerce.boolean treats non-empty strings as true ("false" => true). Parse explicitly.
+    useEmulator: z
+      .union([z.boolean(), z.string()])
+      .transform((v) => {
+        if (typeof v === 'boolean') return v;
+        const s = v.trim().toLowerCase();
+        if (s === '' || s === '0' || s === 'false' || s === 'no' || s === 'off') return false;
+        return true;
+      })
+      .default(false),
     emulatorHost: z.string().default('localhost'),
     firestoreEmulatorPort: z.coerce.number().int().default(8080),
     authEmulatorPort: z.coerce.number().int().default(9099),
@@ -115,6 +141,7 @@ export function loadConfig(overrides?: Partial<AppConfig>): AppConfig {
       projectId: process.env['FIREBASE_PROJECT_ID'] ?? 'demo-coderenterprise',
       clientEmail: process.env['FIREBASE_CLIENT_EMAIL'],
       privateKey: process.env['FIREBASE_PRIVATE_KEY']?.replace(/\\n/g, '\n'),
+      credentialsFile: process.env['FIREBASE_CREDENTIALS_FILE'],
       storageBucket: process.env['FIREBASE_STORAGE_BUCKET'],
       apiKey: process.env['FIREBASE_API_KEY'],
       useEmulator: process.env['FIREBASE_USE_EMULATOR'],

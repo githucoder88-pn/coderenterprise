@@ -4,9 +4,11 @@
  * Type-safe wrapper around Firebase Admin Storage.
  */
 
-import * as admin from 'firebase-admin';
+import firebaseAdmin from 'firebase-admin';
 import { nanoid } from 'nanoid';
 import type { ILogger } from '../../telemetry/logger.js';
+
+const admin = firebaseAdmin as unknown as typeof import('firebase-admin');
 
 export interface IStorageUploadParams {
   readonly bucket: string;

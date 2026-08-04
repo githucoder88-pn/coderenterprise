@@ -41,12 +41,12 @@ export function BottomSheet({ open, onClose, children, snapPoints = [0.5], initi
 
   const pan = Gesture.Pan()
     .onStart(() => {})
-    .onChange((e) => {
+    .onChange((e: { translationY: number }) => {
       const base = SCREEN_H * (1 - (snapPoints[initialSnap] ?? 0.5));
       const next = Math.max(0, base + e.translationY);
       translateY.value = next;
     })
-    .onEnd((e) => {
+    .onEnd((e: { translationY: number; velocityY: number }) => {
       const dismissThreshold = 120;
       if (e.translationY > dismissThreshold || e.velocityY > 600) {
         translateY.value = withTiming(SCREEN_H, { duration: 220 });

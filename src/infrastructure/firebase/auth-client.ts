@@ -4,8 +4,10 @@
  * Wraps Firebase Admin Auth with type-safe operations.
  */
 
-import * as admin from 'firebase-admin';
+import firebaseAdmin from 'firebase-admin';
 import type { ILogger } from '../../telemetry/logger.js';
+
+const admin = firebaseAdmin as unknown as typeof import('firebase-admin');
 
 export interface IUserRecord {
   readonly uid: string;

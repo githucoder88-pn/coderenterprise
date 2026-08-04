@@ -65,3 +65,10 @@ tsconfig.tsbuildinfo
 
 # Turbo
 .turbo/
+
+# local secrets / build
+.env.*
+!.env.example
+.firebase-service-account.json
+**/serviceAccount*.json
+dashboard/.next/

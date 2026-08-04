@@ -4,7 +4,7 @@
  */
 import { Platform, Vibration } from 'react-native';
 
-type FeedbackType = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'selection';
+export type FeedbackType = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'selection';
 
 let Haptics: any = null;
 try {

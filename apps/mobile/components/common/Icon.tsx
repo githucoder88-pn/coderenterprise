@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { Text, View } from 'react-native';
-import Svg, { Path, Circle, G, Rect, Polyline } from 'react-native-svg';
+import Svg, { Path, Circle, G, Rect, Polyline, Polygon } from 'react-native-svg';
 import { useTheme } from '@/theme/theme';
 
 type IconProps = { size?: number; color?: string; strokeWidth?: number; filled?: boolean };
