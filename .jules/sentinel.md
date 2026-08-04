@@ -1,0 +1,4 @@
+## 2025-02-04 - Timing Attack in Webhook Signature Verification
+**Vulnerability:** The `verifySignature` method in `WebhookService` used the `===` operator to compare the computed HMAC with the provided signature. This allows for a timing attack where an attacker could theoretically guess the signature byte by byte.
+**Learning:** Comparing cryptographic hashes using standard string equality operators is unsafe because the comparison short-circuits on the first mismatch, leaking information about the matching prefix length through execution time.
+**Prevention:** Always use `crypto.timingSafeEqual` from the `node:crypto` module (or equivalent constant-time comparison functions) when comparing cryptographic signatures or hashes. Note that `timingSafeEqual` throws if the buffer lengths are different, so it should be wrapped in a `try...catch` block.
