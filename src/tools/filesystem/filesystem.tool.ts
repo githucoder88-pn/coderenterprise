@@ -5,7 +5,7 @@
  */
 
 import { readFile, writeFile, mkdir, rename, rm, copyFile, stat, readdir } from 'node:fs/promises';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, relative, isAbsolute } from 'node:path';
 import type {
   Tool, ToolDefinition, ToolExecutionContext, ToolExecutionResult, ToolArtifact,
 } from '../types.js';
@@ -20,7 +20,12 @@ function makeResult(ctx: ToolExecutionContext, success: boolean, output: unknown
 
 function safePath(base: string, target: string): string {
   const resolved = resolve(base, target);
-  if (!resolved.startsWith(resolve(base))) throw new Error(`Path traversal detected: ${target}`);
+  const resolvedBase = resolve(base);
+
+  const rel = relative(resolvedBase, resolved);
+  if (rel.startsWith('..') || isAbsolute(rel)) {
+    throw new Error(`Path traversal detected: ${target}`);
+  }
   return resolved;
 }
 
