@@ -24,12 +24,9 @@ export class AuditRepository extends BaseRepository<AuditLog> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly AuditLog[]> {
-    const logs: AuditLog[] = [];
-    for (const id of ids) {
-      const log = await this.findById(id);
-      if (log) logs.push(log);
-    }
-    return logs;
+    const promises = ids.map((id) => this.findById(id));
+    const results = await Promise.all(promises);
+    return results.filter((log): log is AuditLog => log !== null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly AuditLog[]> {

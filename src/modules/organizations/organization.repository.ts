@@ -29,12 +29,9 @@ export class OrganizationRepository extends BaseRepository<Organization> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Organization[]> {
-    const orgs: Organization[] = [];
-    for (const id of ids) {
-      const org = await this.findById(id);
-      if (org) orgs.push(org);
-    }
-    return orgs;
+    const promises = ids.map((id) => this.findById(id));
+    const results = await Promise.all(promises);
+    return results.filter((org): org is Organization => org !== null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Organization[]> {
