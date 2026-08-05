@@ -1,0 +1,3 @@
+## 2025-01-20 - Ensure bare <button>s match shared ui/button.tsx keyboard accessibility
+**Learning:** Found multiple bare `<button>` tags in layout components (like topbar.tsx) that lacked `focus-visible` styling and comprehensive `aria-label`s, unlike the central `ui/button.tsx` component which standardizes these. Users navigating via keyboard can miss visual focus indicators on these interactive elements.
+**Action:** When working on top-level layout components (which often avoid `ui/button` to reduce dependency cycles or layout bugs), ensure I manually copy over focus states (`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]`) and verify `aria-label`s on icon-only variations.
