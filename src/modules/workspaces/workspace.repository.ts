@@ -19,9 +19,9 @@ export class WorkspaceRepository extends BaseRepository<Workspace> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Workspace[]> {
-    const results: Workspace[] = [];
-    for (const id of ids) { const ws = await this.findById(id); if (ws) results.push(ws); }
-    return results;
+    // ⚡ Bolt: Use Promise.all for concurrent fetching to avoid N+1 latency
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((ws): ws is Workspace => ws != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Workspace[]> {
@@ -65,7 +65,7 @@ export class WorkspaceRepository extends BaseRepository<Workspace> {
   }
 
   async count(filters?: readonly QueryFilter[]): Promise<number> { return (await (filters ? this.findWhere(filters) : this.findAll())).length; }
-  async exists(id: string): Promise<boolean> { return (await this.firestore.getDocument(this.collection, id)) !== null; }
+  async exists(id: string): Promise<boolean> { return (await this.firestore.getDocument(this.collection, id)) != null; }
 
   async findBySlug(slug: string): Promise<Workspace | null> {
     const results = await this.findWhere([{ field: 'slug', operator: '==', value: slug }]);

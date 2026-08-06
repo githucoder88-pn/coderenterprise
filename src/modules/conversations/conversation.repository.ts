@@ -20,9 +20,9 @@ export class ConversationRepository extends BaseRepository<Conversation> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Conversation[]> {
-    const results: Conversation[] = [];
-    for (const id of ids) { const c = await this.findById(id); if (c) results.push(c); }
-    return results;
+    // ⚡ Bolt: Use Promise.all for concurrent fetching to avoid N+1 latency
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((c): c is Conversation => c != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Conversation[]> {
@@ -66,7 +66,7 @@ export class ConversationRepository extends BaseRepository<Conversation> {
   }
 
   async count(filters?: readonly QueryFilter[]): Promise<number> { return (await (filters ? this.findWhere(filters) : this.findAll())).length; }
-  async exists(id: string): Promise<boolean> { return (await this.firestore.getDocument(this.collection, id)) !== null; }
+  async exists(id: string): Promise<boolean> { return (await this.firestore.getDocument(this.collection, id)) != null; }
 
   // Message operations
   async addMessage(conversationId: string, msg: Omit<ConversationMessage, 'id' | 'createdAt' | 'updatedAt'>): Promise<ConversationMessage> {
