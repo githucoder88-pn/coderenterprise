@@ -29,12 +29,9 @@ export class OrganizationRepository extends BaseRepository<Organization> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Organization[]> {
-    const orgs: Organization[] = [];
-    for (const id of ids) {
-      const org = await this.findById(id);
-      if (org) orgs.push(org);
-    }
-    return orgs;
+    // ⚡ Bolt: Use Promise.all for concurrent fetching to avoid N+1 latency
+    const orgs = await Promise.all(ids.map((id) => this.findById(id)));
+    return orgs.filter((org): org is Organization => org != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Organization[]> {
@@ -123,7 +120,7 @@ export class OrganizationRepository extends BaseRepository<Organization> {
   }
 
   async exists(id: string): Promise<boolean> {
-    return (await this.firestore.getDocument(this.collection, id)) !== null;
+    return (await this.firestore.getDocument(this.collection, id)) != null;
   }
 
   async findBySlug(slug: string): Promise<Organization | null> {

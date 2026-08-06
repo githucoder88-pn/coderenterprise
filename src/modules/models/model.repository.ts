@@ -19,9 +19,9 @@ export class ModelRepository extends BaseRepository<Model> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Model[]> {
-    const results: Model[] = [];
-    for (const id of ids) { const m = await this.findById(id); if (m) results.push(m); }
-    return results;
+    // ⚡ Bolt: Use Promise.all for concurrent fetching to avoid N+1 latency
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((m): m is Model => m != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Model[]> {
@@ -60,7 +60,7 @@ export class ModelRepository extends BaseRepository<Model> {
 
   async delete(id: string): Promise<void> { await this.firestore.deleteDocument(this.collection, id); }
   async count(filters?: readonly QueryFilter[]): Promise<number> { return (await (filters ? this.findWhere(filters) : this.findAll())).length; }
-  async exists(id: string): Promise<boolean> { return (await this.firestore.getDocument(this.collection, id)) !== null; }
+  async exists(id: string): Promise<boolean> { return (await this.firestore.getDocument(this.collection, id)) != null; }
 
   async findByModelId(modelId: string): Promise<Model | null> {
     const results = await this.findWhere([{ field: 'modelId', operator: '==', value: modelId }]);

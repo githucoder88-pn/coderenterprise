@@ -28,12 +28,9 @@ export class ApiKeyRepository extends BaseRepository<ApiKey> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly ApiKey[]> {
-    const keys: ApiKey[] = [];
-    for (const id of ids) {
-      const key = await this.findById(id);
-      if (key) keys.push(key);
-    }
-    return keys;
+    // ⚡ Bolt: Use Promise.all for concurrent fetching to avoid N+1 latency
+    const keys = await Promise.all(ids.map((id) => this.findById(id)));
+    return keys.filter((key): key is ApiKey => key != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly ApiKey[]> {
@@ -93,7 +90,7 @@ export class ApiKeyRepository extends BaseRepository<ApiKey> {
   }
 
   async exists(id: string): Promise<boolean> {
-    return (await this.firestore.getDocument(this.collection, id)) !== null;
+    return (await this.firestore.getDocument(this.collection, id)) != null;
   }
 
   async findByHashedKey(hashedKey: string): Promise<ApiKey | null> {
