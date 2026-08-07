@@ -29,12 +29,10 @@ export class OrganizationRepository extends BaseRepository<Organization> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Organization[]> {
-    const orgs: Organization[] = [];
-    for (const id of ids) {
-      const org = await this.findById(id);
-      if (org) orgs.push(org);
-    }
-    return orgs;
+    // ⚡ Bolt Performance Optimization:
+    // Replaced sequential `for...of` fetches with concurrent `Promise.all` mapping to eliminate N+1 query latency for bulk lookups.
+    const results = await Promise.all(ids.map(id => this.findById(id)));
+    return results.filter((item): item is Organization => item != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Organization[]> {
