@@ -1,0 +1,4 @@
+## 2024-05-18 - Prevent Timing Attacks in Signature Verification
+**Vulnerability:** Cryptographic signatures and CSRF tokens were being compared using direct string comparison (`===`) or custom JavaScript loops. This exposed the endpoints to timing attacks, where an attacker could deduce the signature character by character based on the time it takes the comparison to fail.
+**Learning:** Custom logic and standard string comparisons are not safe against V8 engine optimizations. Furthermore, when using `node:crypto.timingSafeEqual`, the buffers must be of the exact same length, otherwise it throws a `TypeError`.
+**Prevention:** Always use Node native `crypto.timingSafeEqual` with a buffer length check (`Buffer.from(a).length === Buffer.from(b).length`) to compare cryptographic signatures, tokens, or hashes to prevent timing attacks and avoid runtime errors.

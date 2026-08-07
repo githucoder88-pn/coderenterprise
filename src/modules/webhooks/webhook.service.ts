@@ -2,7 +2,7 @@
  * Webhook Processing Service
  */
 
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { BaseService } from '../../core/base-service.js';
 import type { IFirestoreClient } from '../../infrastructure/firebase/firestore-client.js';
 import type { ILogger } from '../../telemetry/logger.js';
@@ -94,7 +94,16 @@ export class WebhookService extends BaseService implements IWebhookService {
 
   verifySignature(payload: string, signature: string, secret: string): boolean {
     const expected = createHmac('sha256', secret).update(payload).digest('hex');
-    return signature === `sha256=${expected}`;
+    const expectedSignature = `sha256=${expected}`;
+
+    const sigBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+
+    if (sigBuffer.length !== expectedBuffer.length) {
+      return false;
+    }
+
+    return timingSafeEqual(sigBuffer, expectedBuffer);
   }
 
   private async deliver(id: string, webhook: Webhook, event: WebhookEvent): Promise<WebhookDelivery> {
