@@ -1,0 +1,4 @@
+## 2025-02-14 - Fix Timing Attack Vulnerabilities in Cryptographic Comparisons
+**Vulnerability:** Comparing cryptographic hashes (like Webhook and CSRF signatures) using regular strict equality (`===`) or custom JavaScript XOR loops introduces a timing side-channel attack vector.
+**Learning:** In JavaScript, the V8 engine can unpredictably optimize custom timing-safe loops, breaking the intended constant-time behavior. Furthermore, `crypto.timingSafeEqual` throws an error if buffers of mismatched lengths are provided, which requires an explicit length comparison preceding its usage.
+**Prevention:** Always use Node.js's native `crypto.timingSafeEqual` and compare the `length` properties of both `Buffer` instances beforehand rather than trusting string length comparisons or writing custom verification loops.
