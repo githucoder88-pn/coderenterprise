@@ -84,6 +84,12 @@ describe('EncryptionService', () => {
       expect(service.verifyHash('password', hash, salt)).toBe(true);
       expect(service.verifyHash('wrong', hash, salt)).toBe(false);
     });
+
+    it('should return false for hashes of differing lengths safely', () => {
+      const { salt } = service.hashWithSalt('password');
+      expect(service.verifyHash('password', 'a1', salt)).toBe(false);
+      expect(service.verifyHash('password', 'a'.repeat(130), salt)).toBe(false);
+    });
   });
 
   describe('generateSecureToken', () => {
