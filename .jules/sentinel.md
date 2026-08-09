@@ -1,0 +1,4 @@
+## 2024-05-18 - [HIGH] Fix timing attacks across security validations
+**Vulnerability:** Found multiple instances of string equality checks (`===`) and manual bitwise operations used for comparing cryptographic signatures and hashes, making the system vulnerable to timing attacks. Also found `timingSafeEqual` being used without first validating that buffer lengths match, which can cause unhandled `TypeError` exceptions leading to denial of service.
+**Learning:** `timingSafeEqual` should always be used over `===` or manual byte checking for comparing sensitive cryptographic material. Furthermore, `crypto.timingSafeEqual` in Node.js throws an error if the passed buffers differ in length.
+**Prevention:** Always compare buffer byte lengths (`buf1.length === buf2.length`) before calling `timingSafeEqual(buf1, buf2)` to ensure stable comparison without throwing exceptions.
