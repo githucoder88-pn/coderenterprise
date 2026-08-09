@@ -1,0 +1,4 @@
+## 2025-02-14 - Unhandled Exceptions in node:crypto timingSafeEqual
+**Vulnerability:** Calls to `crypto.timingSafeEqual` in `src/services/security/encryption.ts` threw a `RangeError` / `Error` when the input buffers were of different lengths. This can lead to unhandled exception crashes (Denial of Service) when an attacker supplies a malformed or correctly-formatted-but-wrong-length hash.
+**Learning:** Node's `timingSafeEqual` function strictly requires both input buffers to be exactly the same byte length. If they are not, it immediately throws an error rather than returning `false`, which can leak information or crash the application if unhandled.
+**Prevention:** Always compare the byte lengths of the buffers before passing them to `timingSafeEqual`. E.g., `if (hashBuffer.length !== computedBuffer.length) return false;`
