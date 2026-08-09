@@ -86,7 +86,18 @@ export class EncryptionService {
 
   verifyHash(plaintext: string, hash: string, salt: string): boolean {
     const { hash: computed } = this.hashWithSalt(plaintext, salt);
-    return timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(computed, 'hex'));
+
+    // Convert both hashes to buffers
+    const hashBuffer = Buffer.from(hash, 'hex');
+    const computedBuffer = Buffer.from(computed, 'hex');
+
+    // timingSafeEqual throws an error if buffer lengths do not match.
+    // We must check length first to fail securely without exposing internals or throwing RangeError
+    if (hashBuffer.length !== computedBuffer.length) {
+      return false;
+    }
+
+    return timingSafeEqual(hashBuffer, computedBuffer);
   }
 
   generateSecureToken(length = 32): string {
