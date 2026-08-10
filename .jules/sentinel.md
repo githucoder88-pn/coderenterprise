@@ -1,0 +1,4 @@
+## 2024-05-15 - Node.js timingSafeEqual Length Mismatch Vulnerability
+**Vulnerability:** Node.js `crypto.timingSafeEqual` throws a `TypeError` (or `RangeError` depending on Node version) if the byte lengths of the input buffers do not match exactly.
+**Learning:** In `src/services/security/encryption.ts`, when comparing computed password hashes with user input, the application was passing unvalidated lengths to `timingSafeEqual`. An attacker could potentially crash the process or determine the hash length via timing or error monitoring by sending manipulated hash strings.
+**Prevention:** Always compare buffer byte lengths before calling `timingSafeEqual`. If the lengths do not match, return false immediately rather than letting the function throw. Example: `if (bufferA.length !== bufferB.length) return false; return crypto.timingSafeEqual(bufferA, bufferB);`
