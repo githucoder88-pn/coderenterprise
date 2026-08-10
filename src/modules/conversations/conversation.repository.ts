@@ -20,9 +20,9 @@ export class ConversationRepository extends BaseRepository<Conversation> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Conversation[]> {
-    const results: Conversation[] = [];
-    for (const id of ids) { const c = await this.findById(id); if (c) results.push(c); }
-    return results;
+    // ⚡ Bolt: Use Promise.all for concurrent fetching to avoid N+1 queries
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((c): c is Conversation => c != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Conversation[]> {
