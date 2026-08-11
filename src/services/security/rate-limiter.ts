@@ -4,6 +4,8 @@
  * Multi-tier rate limiting with sliding windows, per-user, per-org, and global limits.
  */
 
+import crypto from 'node:crypto';
+
 import type { IRedisClient } from '../../infrastructure/redis/redis-client.js';
 
 interface RateLimitTier {
@@ -115,7 +117,7 @@ export class DistributedRateLimiter {
     // Use pipeline for atomic operations
     const pipeline = this.redis.getClient().pipeline();
     pipeline.zremrangebyscore(tierKey, 0, windowStart);
-    pipeline.zadd(tierKey, now, `${now}:${Math.random()}`);
+    pipeline.zadd(tierKey, now, `${now}:${crypto.randomUUID()}`);
     pipeline.zcard(tierKey);
     pipeline.expire(tierKey, windowSeconds);
     const results = await pipeline.exec();
