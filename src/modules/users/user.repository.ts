@@ -33,12 +33,8 @@ export class UserRepository extends BaseRepository<User> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly User[]> {
-    const users: User[] = [];
-    for (const id of ids) {
-      const user = await this.findById(id);
-      if (user) users.push(user);
-    }
-    return users;
+    const results = await Promise.all(ids.map(id => this.findById(id)));
+    return results.filter((r): r is NonNullable<typeof r> => r !== null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly User[]> {
