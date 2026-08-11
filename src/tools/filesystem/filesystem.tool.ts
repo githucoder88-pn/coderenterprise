@@ -5,7 +5,7 @@
  */
 
 import { readFile, writeFile, mkdir, rename, rm, copyFile, stat, readdir } from 'node:fs/promises';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, sep } from 'node:path';
 import type {
   Tool, ToolDefinition, ToolExecutionContext, ToolExecutionResult, ToolArtifact,
 } from '../types.js';
@@ -19,8 +19,16 @@ function makeResult(ctx: ToolExecutionContext, success: boolean, output: unknown
 }
 
 function safePath(base: string, target: string): string {
+  // 🛡️ Sentinel: Fix sibling directory traversal vulnerability
+  // Append path separator to base path check to prevent matching sibling directories
+  // (e.g. base "/foo/bar" and target "../bar-sibling" resolving to "/foo/bar-sibling"
+  // which wrongly starts with "/foo/bar").
+  const resolvedBase = resolve(base);
   const resolved = resolve(base, target);
-  if (!resolved.startsWith(resolve(base))) throw new Error(`Path traversal detected: ${target}`);
+  const prefix = resolvedBase.endsWith(sep) ? resolvedBase : resolvedBase + sep;
+  if (!resolved.startsWith(prefix) && resolved !== resolvedBase) {
+    throw new Error(`Path traversal detected: ${target}`);
+  }
   return resolved;
 }
 
