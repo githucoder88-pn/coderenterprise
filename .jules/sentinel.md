@@ -1,0 +1,4 @@
+## 2024-08-11 - Insecure Randomness in Security Contexts
+**Vulnerability:** Found `Math.random()` used to generate unique identifiers for Redis sorted set elements in `DistributedRateLimiter`.
+**Learning:** Standard PRNGs like `Math.random()` generate predictable sequences. In security components like rate limiters, predictable tokens could allow attackers to manipulate state, cause intentional collisions, or bypass limits.
+**Prevention:** Always use cryptographically secure random number generators (e.g., Node's `crypto.randomBytes()`) when generating unique identifiers or tokens in security-sensitive contexts.
