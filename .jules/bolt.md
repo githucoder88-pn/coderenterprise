@@ -1,0 +1,3 @@
+## 2024-08-12 - N+1 Query in findByIds
+**Learning:** The backend's IFirestoreClient adapter does not currently expose a native batch getAll() method. Various repository implementations of `findByIds` use a synchronous `for...of` loop calling `await this.findById(id)`, which results in N+1 query latency. Since a native batch fetch isn't exposed, we must use `Promise.all()` for concurrent document fetching by ID to prevent N+1 query latency in repositories.
+**Action:** Always use `Promise.all()` when mapping over an array of IDs to fetch documents in repository `findByIds` implementations to enable concurrent requests.
