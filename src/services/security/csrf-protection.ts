@@ -4,7 +4,7 @@
  * Double-submit cookie pattern with cryptographic tokens.
  */
 
-import { createHmac, randomBytes } from 'node:crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import type { ILogger } from '../../telemetry/logger.js';
 
 interface CsrfToken {
@@ -37,12 +37,11 @@ export class CsrfProtectionService {
       const expectedSignature = createHmac('sha256', this.secret).update(payload).digest('hex');
 
       // Timing-safe comparison
-      if (signature.length !== expectedSignature.length) return false;
-      let mismatch = 0;
-      for (let i = 0; i < signature.length; i++) {
-        mismatch |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
-      }
-      if (mismatch !== 0) return false;
+      const signatureBuf = Buffer.from(signature, 'hex');
+      const expectedSignatureBuf = Buffer.from(expectedSignature, 'hex');
+
+      if (signatureBuf.length !== expectedSignatureBuf.length) return false;
+      if (!timingSafeEqual(signatureBuf, expectedSignatureBuf)) return false;
 
       // Validate session ID
       const parts = payload.split(':');
