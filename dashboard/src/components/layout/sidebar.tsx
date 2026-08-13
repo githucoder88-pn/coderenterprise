@@ -1,14 +1,29 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { useUIStore } from '@/stores/ui-store';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useUIStore } from "@/stores/ui-store";
 import {
-  LayoutDashboard, MessageSquare, FolderOpen, FileText, Server, Cpu, Users,
-  CreditCard, Settings, Puzzle, Shield, ScrollText, User, ChevronLeft,
-  Search, Zap, BarChart3, type LucideIcon,
-} from 'lucide-react';
+  LayoutDashboard,
+  MessageSquare,
+  FolderOpen,
+  FileText,
+  Server,
+  Cpu,
+  Users,
+  CreditCard,
+  Settings,
+  Puzzle,
+  Shield,
+  ScrollText,
+  User,
+  ChevronLeft,
+  Search,
+  Zap,
+  BarChart3,
+  type LucideIcon,
+} from "lucide-react";
 
 interface NavItem {
   label: string;
@@ -24,42 +39,46 @@ interface NavGroup {
 
 const navigation: NavGroup[] = [
   {
-    label: 'Overview',
+    label: "Overview",
     items: [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
     ],
   },
   {
-    label: 'Workspace',
+    label: "Workspace",
     items: [
-      { label: 'Conversations', href: '/dashboard/conversations', icon: MessageSquare },
-      { label: 'Workspaces', href: '/dashboard/workspaces', icon: FolderOpen },
-      { label: 'Prompts', href: '/dashboard/prompts', icon: FileText },
+      {
+        label: "Conversations",
+        href: "/dashboard/conversations",
+        icon: MessageSquare,
+      },
+      { label: "Workspaces", href: "/dashboard/workspaces", icon: FolderOpen },
+      { label: "Prompts", href: "/dashboard/prompts", icon: FileText },
     ],
   },
   {
-    label: 'Infrastructure',
+    label: "Infrastructure",
     items: [
-      { label: 'Providers', href: '/dashboard/providers', icon: Server },
-      { label: 'Models', href: '/dashboard/models', icon: Cpu },
-      { label: 'Extensions', href: '/dashboard/extensions', icon: Puzzle },
+      { label: "Providers", href: "/dashboard/providers", icon: Server },
+      { label: "Models", href: "/dashboard/models", icon: Cpu },
+      { label: "Extensions", href: "/dashboard/extensions", icon: Puzzle },
     ],
   },
   {
-    label: 'Organization',
+    label: "Organization",
     items: [
-      { label: 'Team', href: '/dashboard/team', icon: Users },
-      { label: 'Billing', href: '/dashboard/billing', icon: CreditCard },
-      { label: 'Security', href: '/dashboard/security', icon: Shield },
+      { label: "Team", href: "/dashboard/team", icon: Users },
+      { label: "Billing", href: "/dashboard/billing", icon: CreditCard },
+      { label: "Security", href: "/dashboard/security", icon: Shield },
     ],
   },
   {
-    label: 'System',
+    label: "System",
     items: [
-      { label: 'Logs', href: '/dashboard/logs', icon: ScrollText },
-      { label: 'Settings', href: '/dashboard/settings', icon: Settings },
-      { label: 'Account', href: '/dashboard/account', icon: User },
+      { label: "Logs", href: "/dashboard/logs", icon: ScrollText },
+      { label: "Settings", href: "/dashboard/settings", icon: Settings },
+      { label: "Account", href: "/dashboard/account", icon: User },
     ],
   },
 ];
@@ -72,8 +91,8 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-subtle)] transition-all duration-200',
-        collapsed ? 'w-[60px]' : 'w-[240px]',
+        "flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-subtle)] transition-all duration-200",
+        collapsed ? "w-[60px]" : "w-[240px]",
       )}
     >
       {/* Logo */}
@@ -86,10 +105,15 @@ export function Sidebar() {
         )}
         <button
           onClick={toggle}
-          className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:ring-offset-2"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <ChevronLeft className={cn('h-4 w-4 transition-transform', collapsed && 'rotate-180')} />
+          <ChevronLeft
+            className={cn(
+              "h-4 w-4 transition-transform",
+              collapsed && "rotate-180",
+            )}
+          />
         </button>
       </div>
 
@@ -103,17 +127,19 @@ export function Sidebar() {
               </div>
             )}
             {group.items.map((item) => {
-              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/dashboard" && pathname.startsWith(item.href));
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'group flex items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-[13px] font-medium transition-colors',
+                    "group flex items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-[13px] font-medium transition-colors",
                     isActive
-                      ? 'bg-[var(--color-brand-subtle)] text-[var(--color-brand)]'
-                      : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]',
-                    collapsed && 'justify-center px-0',
+                      ? "bg-[var(--color-brand-subtle)] text-[var(--color-brand)]"
+                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]",
+                    collapsed && "justify-center px-0",
                   )}
                   title={collapsed ? item.label : undefined}
                 >
@@ -140,7 +166,9 @@ export function Sidebar() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13px] font-medium">User</div>
-              <div className="truncate text-[11px] text-[var(--color-text-tertiary)]">Free Plan</div>
+              <div className="truncate text-[11px] text-[var(--color-text-tertiary)]">
+                Free Plan
+              </div>
             </div>
           </div>
         </div>
