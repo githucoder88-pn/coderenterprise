@@ -86,7 +86,16 @@ export class EncryptionService {
 
   verifyHash(plaintext: string, hash: string, salt: string): boolean {
     const { hash: computed } = this.hashWithSalt(plaintext, salt);
-    return timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(computed, 'hex'));
+    // Omit 'hex' encoding for input hash to prevent silent truncation of invalid chars
+    const hashBuf = Buffer.from(hash);
+    const compBuf = Buffer.from(computed);
+
+    // Prevent TypeError/RangeError in timingSafeEqual by checking lengths first
+    if (hashBuf.length !== compBuf.length) {
+      return false;
+    }
+
+    return timingSafeEqual(hashBuf, compBuf);
   }
 
   generateSecureToken(length = 32): string {
