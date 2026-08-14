@@ -1,0 +1,4 @@
+## 2025-02-14 - timingSafeEqual crash when lengths don't match
+**Vulnerability:** In `EncryptionService.verifyHash`, `timingSafeEqual` is called on two buffers (`Buffer.from(hash, 'hex')` and `Buffer.from(computed, 'hex')`). If an attacker provides a hash of a different length than the computed one, `timingSafeEqual` throws a `TypeError: Input buffers must have the same byte length` or `RangeError` (depending on Node version).
+**Learning:** `timingSafeEqual` does not handle length mismatches safely. In worst case it leads to DoS via uncaught exceptions when user-provided input has incorrect length. It also bypasses timing-safety for length checks.
+**Prevention:** Always compare lengths of buffers before calling `timingSafeEqual` and return `false` if lengths mismatch. (e.g. `const a = Buffer.from(...); const b = Buffer.from(...); if (a.length !== b.length) return false; return timingSafeEqual(a, b);`)
