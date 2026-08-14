@@ -29,12 +29,9 @@ export class OrganizationRepository extends BaseRepository<Organization> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Organization[]> {
-    const orgs: Organization[] = [];
-    for (const id of ids) {
-      const org = await this.findById(id);
-      if (org) orgs.push(org);
-    }
-    return orgs;
+    // ⚡ Bolt: Use Promise.all to fetch documents concurrently and prevent N+1 query latency
+    const results = await Promise.all(ids.map(id => this.findById(id)));
+    return results.filter((result): result is Organization => result != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Organization[]> {
