@@ -1,0 +1,4 @@
+## 2025-02-20 - timingSafeEqual Length Validation & Truncation Bypass
+**Vulnerability:** Node's `crypto.timingSafeEqual` was used to verify hashes but lacked a byte length check before comparison and implicitly converted the user's input string to a buffer using the `'hex'` encoding `Buffer.from(hash, 'hex')`.
+**Learning:** `timingSafeEqual` throws uncaught `TypeError` or `RangeError` exceptions if the compared buffers differ in length, leading to potential DoS or error leakage. Further, specifying the `'hex'` encoding on `Buffer.from` causes Node.js to silently truncate or strip non-hex invalid characters from strings.
+**Prevention:** Always omit the encoding if the input string isn't guaranteed to be perfectly formed hex, and explicitly assert that the `.length` properties of the resulting buffers are identical before passing them to `timingSafeEqual`.
