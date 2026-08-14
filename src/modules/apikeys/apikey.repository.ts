@@ -28,12 +28,9 @@ export class ApiKeyRepository extends BaseRepository<ApiKey> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly ApiKey[]> {
-    const keys: ApiKey[] = [];
-    for (const id of ids) {
-      const key = await this.findById(id);
-      if (key) keys.push(key);
-    }
-    return keys;
+    // ⚡ Bolt: Use Promise.all to fetch documents concurrently and prevent N+1 query latency
+    const results = await Promise.all(ids.map(id => this.findById(id)));
+    return results.filter((result): result is ApiKey => result != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly ApiKey[]> {
