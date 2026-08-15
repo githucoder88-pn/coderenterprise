@@ -5,7 +5,7 @@
  */
 
 import { readFile, writeFile, mkdir, rename, rm, copyFile, stat, readdir } from 'node:fs/promises';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, sep } from 'node:path';
 import type {
   Tool, ToolDefinition, ToolExecutionContext, ToolExecutionResult, ToolArtifact,
 } from '../types.js';
@@ -20,7 +20,16 @@ function makeResult(ctx: ToolExecutionContext, success: boolean, output: unknown
 
 function safePath(base: string, target: string): string {
   const resolved = resolve(base, target);
-  if (!resolved.startsWith(resolve(base))) throw new Error(`Path traversal detected: ${target}`);
+  const resolvedBase = resolve(base);
+
+  // Prevent partial prefix path traversal vulnerabilities by appending a path separator
+  // to the base directory before using startsWith(), while still allowing exact matches.
+  const baseWithSep = resolvedBase.endsWith(sep) ? resolvedBase : resolvedBase + sep;
+
+  if (resolved !== resolvedBase && !resolved.startsWith(baseWithSep)) {
+    throw new Error(`Path traversal detected: ${target}`);
+  }
+
   return resolved;
 }
 
