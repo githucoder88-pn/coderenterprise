@@ -84,6 +84,14 @@ describe('EncryptionService', () => {
       expect(service.verifyHash('password', hash, salt)).toBe(true);
       expect(service.verifyHash('wrong', hash, salt)).toBe(false);
     });
+
+    it('should not throw if hashes are different lengths (DoS prevention)', () => {
+      const { salt } = service.hashWithSalt('password');
+      // Node.js crypto.timingSafeEqual throws if lengths differ
+      // We send an intentionally short hash to verify it returns false rather than throwing
+      expect(() => service.verifyHash('password', '1234', salt)).not.toThrow();
+      expect(service.verifyHash('password', '1234', salt)).toBe(false);
+    });
   });
 
   describe('generateSecureToken', () => {
