@@ -1,0 +1,4 @@
+## 2024-03-05 - DoS via Uncaught Exception in `timingSafeEqual`
+**Vulnerability:** The `verifyHash` function in `src/services/security/encryption.ts` called `crypto.timingSafeEqual()` directly with two buffers without checking if their lengths matched. Node's `timingSafeEqual` intentionally throws a `RangeError` (or `TypeError` in older versions) if the buffers have different lengths, which leads to an uncaught exception and crashes the application, enabling a Denial of Service (DoS) attack.
+**Learning:** Security APIs like `timingSafeEqual` can introduce side-channel issues like DoS if their strict requirements (like equal buffer length) are not handled defensively, especially when comparing against user-controlled input lengths.
+**Prevention:** Always compare the `.length` properties of `Buffer` instances and return false before passing them to `timingSafeEqual`.
