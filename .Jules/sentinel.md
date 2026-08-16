@@ -1,0 +1,4 @@
+## 2025-02-14 - Node.js `timingSafeEqual` throws TypeError on Buffer length mismatch
+**Vulnerability:** The `verifyHash` function in `src/services/security/encryption.ts` calls `crypto.timingSafeEqual` without verifying that the length of the input hash buffer matches the length of the computed hash buffer. If an attacker passes a hash of a different length, it throws a `TypeError: Input buffers must have the same byte length` instead of returning `false`. This can be exploited to cause a Denial of Service (DoS) by crashing the Node.js process (if unhandled) or at least filling logs/bypassing subsequent validation logic.
+**Learning:** `crypto.timingSafeEqual` in Node.js enforces strict length equality and does not return `false` on mismatch—it throws.
+**Prevention:** Always ensure the input buffers have the exact same byte length before passing them to `timingSafeEqual`. If the lengths mismatch, immediately return `false` without invoking `timingSafeEqual`.
