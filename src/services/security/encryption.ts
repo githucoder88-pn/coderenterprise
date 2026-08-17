@@ -86,7 +86,16 @@ export class EncryptionService {
 
   verifyHash(plaintext: string, hash: string, salt: string): boolean {
     const { hash: computed } = this.hashWithSalt(plaintext, salt);
-    return timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(computed, 'hex'));
+    const hashBuffer = Buffer.from(hash, 'hex');
+    const computedBuffer = Buffer.from(computed, 'hex');
+
+    // timingSafeEqual throws if lengths do not match, causing a DoS vulnerability.
+    // We return early instead. This is safe from timing attacks here because the computed hash length is fixed.
+    if (hashBuffer.length !== computedBuffer.length) {
+      return false;
+    }
+
+    return timingSafeEqual(hashBuffer, computedBuffer);
   }
 
   generateSecureToken(length = 32): string {
