@@ -33,12 +33,10 @@ export class UserRepository extends BaseRepository<User> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly User[]> {
-    const users: User[] = [];
-    for (const id of ids) {
-      const user = await this.findById(id);
-      if (user) users.push(user);
-    }
-    return users;
+    // ⚡ Bolt: Use Promise.all to fetch documents concurrently instead of sequentially
+    // This avoids the N+1 query latency problem for multi-ID queries.
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((user): user is User => user != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly User[]> {

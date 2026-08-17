@@ -19,9 +19,10 @@ export class ModelRepository extends BaseRepository<Model> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Model[]> {
-    const results: Model[] = [];
-    for (const id of ids) { const m = await this.findById(id); if (m) results.push(m); }
-    return results;
+    // ⚡ Bolt: Use Promise.all to fetch documents concurrently instead of sequentially
+    // This avoids the N+1 query latency problem for multi-ID queries.
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((m): m is Model => m != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Model[]> {
