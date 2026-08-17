@@ -84,6 +84,14 @@ describe('EncryptionService', () => {
       expect(service.verifyHash('password', hash, salt)).toBe(true);
       expect(service.verifyHash('wrong', hash, salt)).toBe(false);
     });
+
+    it('should handle invalid length hash safely without throwing', () => {
+      const { salt } = service.hashWithSalt('password');
+      // A string of incorrect length for the buffer
+      expect(service.verifyHash('password', 'short', salt)).toBe(false);
+      // A malformed hex string that might end up a different buffer length
+      expect(service.verifyHash('password', '123', salt)).toBe(false);
+    });
   });
 
   describe('generateSecureToken', () => {
