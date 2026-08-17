@@ -19,9 +19,10 @@ export class WorkspaceRepository extends BaseRepository<Workspace> {
   }
 
   async findByIds(ids: readonly string[]): Promise<readonly Workspace[]> {
-    const results: Workspace[] = [];
-    for (const id of ids) { const ws = await this.findById(id); if (ws) results.push(ws); }
-    return results;
+    // ⚡ Bolt: Use Promise.all to fetch documents concurrently instead of sequentially
+    // This avoids the N+1 query latency problem for multi-ID queries.
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((ws): ws is Workspace => ws != null);
   }
 
   async findAll(options?: FindOptions): Promise<readonly Workspace[]> {
