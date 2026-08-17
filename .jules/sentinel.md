@@ -1,0 +1,5 @@
+## 2025-02-12 - Prevent DoS in timingSafeEqual via Length Mismatch
+
+**Vulnerability:** A Denial of Service (DoS) vulnerability existed in `EncryptionService.verifyHash` where `timingSafeEqual(hash, computed)` was called without checking if the buffer lengths match. `crypto.timingSafeEqual` strictly requires arguments to be buffers of the same length and throws a `TypeError` otherwise, which crashes the process if unhandled. An attacker could intentionally submit a malformed hash of an incorrect length to trigger an application crash.
+**Learning:** Even built-in "safe" cryptographic functions can be used for DoS attacks if error cases (like mismatched lengths) crash the application.
+**Prevention:** Always compare buffer lengths before using `timingSafeEqual()`, or catch the error if dynamic lengths are expected. If expected sizes are constant (e.g. from hash outputs), early-returning `false` on a length mismatch does not introduce a problematic timing leak because the length of the expected hash is a known constant, not a secret.
