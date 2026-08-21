@@ -48,3 +48,18 @@ describe('Stat', () => {
     expect(screen.getByText('Activity')).toBeDefined();
   });
 });
+
+describe('Accessibility Attributes', () => {
+  it('should render topbar icons with accessibility labels', async () => {
+    const { TopBar } = await import('@/components/layout/topbar');
+    const { QueryClient, QueryClientProvider } = await import('@tanstack/react-query');
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TopBar />
+      </QueryClientProvider>
+    );
+    expect(screen.getByRole('button', { name: /Notifications/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Switch theme/i })).toBeDefined();
+  });
+});

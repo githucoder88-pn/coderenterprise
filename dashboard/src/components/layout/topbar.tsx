@@ -38,13 +38,16 @@ export function TopBar() {
         <button
           onClick={cycleTheme}
           className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]"
-          aria-label={`Theme: ${theme}`}
+          aria-label={`Switch theme (currently ${theme})`}
         >
           <ThemeIcon className="h-4 w-4" />
         </button>
 
         {/* Notifications */}
-        <button className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]">
+        <button
+          className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]"
+          aria-label="Notifications"
+        >
           <Bell className="h-4 w-4" />
           {(unread as any)?.count > 0 && (
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[var(--color-error)]" />
