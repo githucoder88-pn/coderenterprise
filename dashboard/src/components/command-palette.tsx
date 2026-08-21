@@ -66,6 +66,9 @@ export function CommandPalette() {
             onClick={() => setOpen(false)}
           />
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
             initial={{ opacity: 0, scale: 0.98, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: -8 }}
@@ -78,10 +81,15 @@ export function CommandPalette() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Type a command or search…"
+                aria-label="Search commands"
                 className="flex-1 bg-transparent px-3 py-3 text-[14px] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-tertiary)]"
                 autoFocus
               />
-              <button onClick={() => setOpen(false)} className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text)]">
+              <button
+                onClick={() => setOpen(false)}
+                className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text)]"
+                aria-label="Close command palette"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
