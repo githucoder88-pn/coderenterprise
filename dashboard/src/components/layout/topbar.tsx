@@ -24,7 +24,9 @@ export function TopBar() {
       {/* Search trigger */}
       <button
         onClick={toggleCmd}
-        className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-1.5 text-[13px] text-[var(--color-text-tertiary)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-text-secondary)]"
+        aria-label="Open command palette"
+        aria-keyshortcuts="Control+k Meta+k"
+        className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-1.5 text-[13px] text-[var(--color-text-tertiary)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
       >
         <Search className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Search or jump to…</span>
@@ -37,14 +39,17 @@ export function TopBar() {
         {/* Theme toggle */}
         <button
           onClick={cycleTheme}
-          className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]"
+          className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
           aria-label={`Theme: ${theme}`}
         >
           <ThemeIcon className="h-4 w-4" />
         </button>
 
         {/* Notifications */}
-        <button className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]">
+        <button
+          aria-label={(unread as any)?.count > 0 ? `Notifications (${(unread as any).count} unread)` : 'Notifications'}
+          className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
+        >
           <Bell className="h-4 w-4" />
           {(unread as any)?.count > 0 && (
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[var(--color-error)]" />
