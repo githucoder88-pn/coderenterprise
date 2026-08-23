@@ -16,6 +16,28 @@ describe('Badge', () => {
   });
 });
 
+import { vi } from 'vitest';
+import { TopBar } from '@/components/layout/topbar';
+
+vi.mock('@/hooks/use-api', () => ({
+  useUnreadCount: () => ({ data: { count: 3 } }),
+}));
+
+describe('TopBar', () => {
+  it('should render search trigger with proper aria-label and shortcuts', () => {
+    render(<TopBar />);
+    const searchBtn = screen.getByRole('button', { name: 'Open command palette' });
+    expect(searchBtn).toBeDefined();
+    expect(searchBtn.getAttribute('aria-keyshortcuts')).toBe('Control+k Meta+k');
+  });
+
+  it('should render notifications button with dynamic unread aria-label', () => {
+    render(<TopBar />);
+    const notifBtn = screen.getByRole('button', { name: 'Notifications (3 unread)' });
+    expect(notifBtn).toBeDefined();
+  });
+});
+
 describe('Stat', () => {
   it('should render label and value', () => {
     render(<Stat label="Total Users" value="1,234" />);
