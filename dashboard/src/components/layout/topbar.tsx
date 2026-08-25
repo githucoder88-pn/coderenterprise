@@ -25,6 +25,7 @@ export function TopBar() {
       <button
         onClick={toggleCmd}
         className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-1.5 text-[13px] text-[var(--color-text-tertiary)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-text-secondary)]"
+        aria-label="Open command palette"
       >
         <Search className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Search or jump to…</span>
@@ -44,7 +45,10 @@ export function TopBar() {
         </button>
 
         {/* Notifications */}
-        <button className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]">
+        <button
+          className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]"
+          aria-label={(unread as any)?.count > 0 ? `Notifications (${(unread as any).count} unread)` : 'Notifications'}
+        >
           <Bell className="h-4 w-4" />
           {(unread as any)?.count > 0 && (
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[var(--color-error)]" />
