@@ -48,3 +48,20 @@ describe('Stat', () => {
     expect(screen.getByText('Activity')).toBeDefined();
   });
 });
+
+describe('TopBar', () => {
+  it('should render accessible search and notification buttons', async () => {
+    const { TopBar } = await import('@/components/layout/topbar');
+    const { QueryClient, QueryClientProvider } = await import('@tanstack/react-query');
+    const queryClient = new QueryClient();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TopBar />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByRole('button', { name: /search or open command palette/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /notifications/i })).toBeDefined();
+  });
+});
