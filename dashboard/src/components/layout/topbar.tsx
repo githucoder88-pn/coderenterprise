@@ -10,6 +10,7 @@ export function TopBar() {
   const setTheme = useUIStore((s) => s.setTheme);
   const toggleCmd = useUIStore((s) => s.toggleCommandPalette);
   const { data: unread } = useUnreadCount();
+  const unreadCount = (unread as { count?: number } | undefined)?.count ?? 0;
 
   const cycleTheme = () => {
     const order: ('light' | 'dark' | 'system')[] = ['light', 'dark', 'system'];
@@ -24,7 +25,8 @@ export function TopBar() {
       {/* Search trigger */}
       <button
         onClick={toggleCmd}
-        className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-1.5 text-[13px] text-[var(--color-text-tertiary)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-text-secondary)]"
+        aria-label="Search or jump to page"
+        className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-1.5 text-[13px] text-[var(--color-text-tertiary)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
       >
         <Search className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Search or jump to…</span>
@@ -37,17 +39,23 @@ export function TopBar() {
         {/* Theme toggle */}
         <button
           onClick={cycleTheme}
-          className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]"
-          aria-label={`Theme: ${theme}`}
+          className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
+          aria-label={`Switch theme (currently ${theme})`}
         >
           <ThemeIcon className="h-4 w-4" />
         </button>
 
         {/* Notifications */}
-        <button className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)]">
+        <button
+          className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
+          aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
+        >
           <Bell className="h-4 w-4" />
-          {(unread as any)?.count > 0 && (
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[var(--color-error)]" />
+          {unreadCount > 0 && (
+            <span
+              className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[var(--color-error)]"
+              aria-hidden="true"
+            />
           )}
         </button>
       </div>

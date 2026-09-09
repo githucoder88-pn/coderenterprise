@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
+import { QueryProvider } from '@/providers/query-provider';
 import { Activity } from 'lucide-react';
 
 describe('Badge', () => {
@@ -46,5 +48,24 @@ describe('Stat', () => {
   it('should render with icon', () => {
     render(<Stat label="Activity" value={42} icon={Activity} />);
     expect(screen.getByText('Activity')).toBeDefined();
+  });
+});
+
+describe('TopBar accessibility', () => {
+  it('should render buttons with proper accessible names and aria-labels', () => {
+    render(
+      <QueryProvider>
+        <TopBar />
+      </QueryProvider>,
+    );
+
+    const searchButton = screen.getByRole('button', { name: /search or jump to page/i });
+    expect(searchButton).toBeDefined();
+
+    const themeButton = screen.getByRole('button', { name: /switch theme/i });
+    expect(themeButton).toBeDefined();
+
+    const notificationsButton = screen.getByRole('button', { name: /notifications/i });
+    expect(notificationsButton).toBeDefined();
   });
 });
