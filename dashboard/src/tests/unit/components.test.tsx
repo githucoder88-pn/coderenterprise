@@ -16,6 +16,37 @@ describe('Badge', () => {
   });
 });
 
+import { TopBar } from '@/components/layout/topbar';
+import { CommandPalette } from '@/components/command-palette';
+import { useUIStore } from '@/stores/ui-store';
+
+// Mock dependencies for TopBar and CommandPalette
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/dashboard',
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+vi.mock('@/hooks/use-api', () => ({
+  useUnreadCount: () => ({ data: { count: 3 } }),
+}));
+
+describe('TopBar Accessibility', () => {
+  it('should render search trigger and notification buttons with aria-labels', () => {
+    render(<TopBar />);
+    expect(screen.getByRole('button', { name: /search or jump to/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /notifications/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /theme:/i })).toBeDefined();
+  });
+});
+
+describe('CommandPalette Accessibility', () => {
+  it('should render close button with aria-label when open', () => {
+    useUIStore.getState().setCommandPaletteOpen(true);
+    render(<CommandPalette />);
+    expect(screen.getByRole('button', { name: /close command palette/i })).toBeDefined();
+  });
+});
+
 describe('Stat', () => {
   it('should render label and value', () => {
     render(<Stat label="Total Users" value="1,234" />);
