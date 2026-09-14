@@ -2,7 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
 import { Activity } from 'lucide-react';
+
+// Mock useUnreadCount
+vi.mock('@/hooks/use-api', () => ({
+  useUnreadCount: () => ({ data: { count: 3 } }),
+}));
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -46,5 +52,14 @@ describe('Stat', () => {
   it('should render with icon', () => {
     render(<Stat label="Activity" value={42} icon={Activity} />);
     expect(screen.getByText('Activity')).toBeDefined();
+  });
+});
+
+describe('TopBar', () => {
+  it('should render notifications button with aria-label containing unread count', () => {
+    render(<TopBar />);
+    const notificationsBtn = screen.getByRole('button', { name: /Notifications/i });
+    expect(notificationsBtn).toBeDefined();
+    expect(notificationsBtn.getAttribute('aria-label')).toBe('Notifications (3 unread)');
   });
 });
