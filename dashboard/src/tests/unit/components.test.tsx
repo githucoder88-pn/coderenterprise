@@ -1,8 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
 import { Activity } from 'lucide-react';
+
+vi.mock('@/hooks/use-api', () => ({
+  useUnreadCount: () => ({ data: { count: 3 } }),
+}));
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -46,5 +51,13 @@ describe('Stat', () => {
   it('should render with icon', () => {
     render(<Stat label="Activity" value={42} icon={Activity} />);
     expect(screen.getByText('Activity')).toBeDefined();
+  });
+});
+
+describe('TopBar Accessibility', () => {
+  it('should render accessible labels for search and notification buttons', () => {
+    render(<TopBar />);
+    expect(screen.getByRole('button', { name: 'Search or jump to...' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Notifications (3 unread)' })).toBeDefined();
   });
 });
