@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Activity } from 'lucide-react';
 
 describe('Badge', () => {
@@ -13,6 +15,20 @@ describe('Badge', () => {
   it('should apply variant styles', () => {
     const { container } = render(<Badge variant="success">OK</Badge>);
     expect(container.firstChild).toBeDefined();
+  });
+});
+
+describe('TopBar', () => {
+  it('should render interactive buttons with accessible aria labels', () => {
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TopBar />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole('button', { name: /search or jump to command palette/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /theme:/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /notifications/i })).toBeDefined();
   });
 });
 
