@@ -1,8 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
+import { CommandPalette } from '@/components/command-palette';
+import { useUIStore } from '@/stores/ui-store';
 import { Activity } from 'lucide-react';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+vi.mock('@/hooks/use-api', () => ({
+  useUnreadCount: () => ({ data: { count: 3 } }),
+}));
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -46,5 +57,24 @@ describe('Stat', () => {
   it('should render with icon', () => {
     render(<Stat label="Activity" value={42} icon={Activity} />);
     expect(screen.getByText('Activity')).toBeDefined();
+  });
+});
+
+describe('TopBar Accessibility', () => {
+  it('should render accessible labels on buttons', () => {
+    render(<TopBar />);
+    expect(screen.getByRole('button', { name: /search or jump to commands/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /switch theme, current mode:/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /notifications \(3 unread\)/i })).toBeDefined();
+  });
+});
+
+describe('CommandPalette Accessibility', () => {
+  it('should render aria-label and dialog attributes when open', () => {
+    useUIStore.setState({ commandPaletteOpen: true });
+    render(<CommandPalette />);
+    expect(screen.getByRole('dialog', { name: /command palette/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /close command palette/i })).toBeDefined();
+    expect(screen.getByRole('textbox', { name: /search commands/i })).toBeDefined();
   });
 });
