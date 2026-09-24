@@ -70,19 +70,27 @@ export function CommandPalette() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: -8 }}
             transition={{ duration: 0.15 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
             className="fixed left-1/2 top-[20%] z-50 w-full max-w-[520px] -translate-x-1/2 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] shadow-[var(--shadow-lg)]"
           >
             <div className="flex items-center border-b border-[var(--color-border)] px-4">
-              <Search className="h-4 w-4 text-[var(--color-text-tertiary)]" />
+              <Search className="h-4 w-4 text-[var(--color-text-tertiary)]" aria-hidden="true" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Type a command or search…"
                 className="flex-1 bg-transparent px-3 py-3 text-[14px] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-tertiary)]"
                 autoFocus
+                aria-label="Search commands"
               />
-              <button onClick={() => setOpen(false)} className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text)]">
-                <X className="h-4 w-4" />
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Close command palette"
+                className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text)]"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
             <div className="max-h-[300px] overflow-y-auto py-1">
@@ -95,7 +103,7 @@ export function CommandPalette() {
                     onClick={cmd.action}
                     className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[var(--color-bg-muted)]"
                   >
-                    <cmd.icon className="h-4 w-4 text-[var(--color-text-tertiary)]" />
+                    <cmd.icon className="h-4 w-4 text-[var(--color-text-tertiary)]" aria-hidden="true" />
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-medium text-[var(--color-text)]">{cmd.label}</div>
                       <div className="text-[12px] text-[var(--color-text-tertiary)]">{cmd.description}</div>
