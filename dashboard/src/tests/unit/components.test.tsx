@@ -1,8 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
+import { CommandPalette } from '@/components/command-palette';
+import { useUIStore } from '@/stores/ui-store';
 import { Activity } from 'lucide-react';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+vi.mock('@/hooks/use-api', () => ({
+  useUnreadCount: () => ({ data: { count: 3 } }),
+}));
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -46,5 +57,20 @@ describe('Stat', () => {
   it('should render with icon', () => {
     render(<Stat label="Activity" value={42} icon={Activity} />);
     expect(screen.getByText('Activity')).toBeDefined();
+  });
+});
+
+describe('Accessibility - Icon Buttons', () => {
+  it('should render TopBar notifications button with accessible aria-label and unread count', () => {
+    render(<TopBar />);
+    const notifButton = screen.getByRole('button', { name: /Notifications \(3 unread\)/i });
+    expect(notifButton).toBeDefined();
+  });
+
+  it('should render CommandPalette close button with accessible aria-label', () => {
+    useUIStore.setState({ commandPaletteOpen: true });
+    render(<CommandPalette />);
+    const closeButton = screen.getByRole('button', { name: /Close command palette/i });
+    expect(closeButton).toBeDefined();
   });
 });
