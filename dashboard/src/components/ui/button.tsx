@@ -28,8 +28,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     return (
-      <button ref={ref} className={cn(base, variants[variant], sizes[size], className)} disabled={disabled || loading} {...props}>
-        {loading && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />}
+      <button
+        ref={ref}
+        className={cn(base, variants[variant], sizes[size], className)}
+        disabled={disabled || loading}
+        aria-busy={loading ? 'true' : undefined}
+        {...props}
+      >
+        {loading && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />}
         {children}
       </button>
     );

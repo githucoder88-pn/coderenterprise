@@ -2,7 +2,22 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { Button } from '@/components/ui/button';
 import { Activity } from 'lucide-react';
+
+describe('Button', () => {
+  it('should render children', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByRole('button', { name: 'Click me' })).toBeDefined();
+  });
+
+  it('should set aria-busy when loading', () => {
+    render(<Button loading>Saving</Button>);
+    const button = screen.getByRole('button', { name: 'Saving' });
+    expect(button.getAttribute('aria-busy')).toBe('true');
+    expect(button.hasAttribute('disabled')).toBe(true);
+  });
+});
 
 describe('Badge', () => {
   it('should render with text', () => {
