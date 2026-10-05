@@ -48,3 +48,20 @@ describe('Stat', () => {
     expect(screen.getByText('Activity')).toBeDefined();
   });
 });
+
+describe('TopBar', () => {
+  it('should render notifications button with aria-label', async () => {
+    const { TopBar } = await import('@/components/layout/topbar');
+    const { QueryClient, QueryClientProvider } = await import('@tanstack/react-query');
+    const queryClient = new QueryClient();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TopBar />
+      </QueryClientProvider>
+    );
+
+    const button = screen.getByRole('button', { name: /Notifications/i });
+    expect(button).toBeDefined();
+  });
+});
