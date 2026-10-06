@@ -1,8 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
+import { CommandPalette } from '@/components/command-palette';
+import { useUIStore } from '@/stores/ui-store';
 import { Activity } from 'lucide-react';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => '/dashboard',
+}));
+
+vi.mock('@/hooks/use-api', () => ({
+  useUnreadCount: () => ({ data: { count: 3 } }),
+}));
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -46,5 +58,37 @@ describe('Stat', () => {
   it('should render with icon', () => {
     render(<Stat label="Activity" value={42} icon={Activity} />);
     expect(screen.getByText('Activity')).toBeDefined();
+  });
+});
+
+describe('TopBar', () => {
+  it('should render accessibility attributes on action buttons', () => {
+    render(<TopBar />);
+
+    const searchBtn = screen.getByRole('button', { name: /search or jump to commands/i });
+    expect(searchBtn).toBeDefined();
+
+    const themeBtn = screen.getByRole('button', { name: /switch theme/i });
+    expect(themeBtn).toBeDefined();
+
+    const notifyBtn = screen.getByRole('button', { name: /notifications \(3 unread\)/i });
+    expect(notifyBtn).toBeDefined();
+  });
+});
+
+describe('CommandPalette', () => {
+  it('should render dialog role and accessible close button when open', () => {
+    useUIStore.setState({ commandPaletteOpen: true });
+
+    render(<CommandPalette />);
+
+    const dialog = screen.getByRole('dialog', { name: /command palette/i });
+    expect(dialog).toBeDefined();
+
+    const closeBtn = screen.getByRole('button', { name: /close command palette/i });
+    expect(closeBtn).toBeDefined();
+
+    const searchInput = screen.getByRole('textbox', { name: /search commands/i });
+    expect(searchInput).toBeDefined();
   });
 });
