@@ -1,0 +1,3 @@
+## 2025-05-10 - Accessible Header Action Buttons and Command Palette Dialogs
+**Learning:** Icon-only navigation buttons in TopBar lacked `type="button"`, focus visible indicators, and dynamic `aria-label` context for notifications and theme status. Additionally, command palette overlays lacked ARIA dialog roles (`role="dialog"`, `aria-modal="true"`), causing poor screen reader navigation.
+**Action:** Always pair icon-only header buttons with explicit `type="button"`, focus-visible ring utilities, and dynamic `aria-label` descriptors, while marking command palette overlays with dialog attributes and decorative icons with `aria-hidden="true"`.

@@ -66,6 +66,9 @@ export function CommandPalette() {
             onClick={() => setOpen(false)}
           />
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
             initial={{ opacity: 0, scale: 0.98, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: -8 }}
@@ -73,16 +76,22 @@ export function CommandPalette() {
             className="fixed left-1/2 top-[20%] z-50 w-full max-w-[520px] -translate-x-1/2 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] shadow-[var(--shadow-lg)]"
           >
             <div className="flex items-center border-b border-[var(--color-border)] px-4">
-              <Search className="h-4 w-4 text-[var(--color-text-tertiary)]" />
+              <Search className="h-4 w-4 text-[var(--color-text-tertiary)]" aria-hidden="true" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Type a command or search…"
+                aria-label="Search commands"
                 className="flex-1 bg-transparent px-3 py-3 text-[14px] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-tertiary)]"
                 autoFocus
               />
-              <button onClick={() => setOpen(false)} className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text)]">
-                <X className="h-4 w-4" />
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close command palette"
+                className="rounded-[var(--radius-xs)] text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
             <div className="max-h-[300px] overflow-y-auto py-1">
