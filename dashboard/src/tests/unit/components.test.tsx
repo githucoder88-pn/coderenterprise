@@ -48,3 +48,19 @@ describe('Stat', () => {
     expect(screen.getByText('Activity')).toBeDefined();
   });
 });
+
+describe('TopBar accessibility', () => {
+  it('should render accessibility labels on header buttons', async () => {
+    const { TopBar } = await import('@/components/layout/topbar');
+    const { QueryClient, QueryClientProvider } = await import('@tanstack/react-query');
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TopBar />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Search or jump to…' })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Theme:/ })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Notifications/ })).toBeDefined();
+  });
+});
