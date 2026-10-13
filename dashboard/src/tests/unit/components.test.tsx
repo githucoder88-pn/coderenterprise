@@ -2,7 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Activity } from 'lucide-react';
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -13,6 +24,23 @@ describe('Badge', () => {
   it('should apply variant styles', () => {
     const { container } = render(<Badge variant="success">OK</Badge>);
     expect(container.firstChild).toBeDefined();
+  });
+});
+
+describe('TopBar', () => {
+  it('should render accessible search and notification buttons with ARIA labels', () => {
+    const queryClient = createTestQueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TopBar />
+      </QueryClientProvider>
+    );
+
+    const searchBtn = screen.getByRole('button', { name: /search or jump to command palette/i });
+    expect(searchBtn).toBeDefined();
+
+    const notificationsBtn = screen.getByRole('button', { name: /notifications/i });
+    expect(notificationsBtn).toBeDefined();
   });
 });
 
