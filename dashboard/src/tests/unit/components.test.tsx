@@ -48,3 +48,20 @@ describe('Stat', () => {
     expect(screen.getByText('Activity')).toBeDefined();
   });
 });
+
+describe('TopBar Accessibility', () => {
+  it('should render header buttons with accessible aria labels', async () => {
+    const { TopBar } = await import('@/components/layout/topbar');
+    const { QueryProvider } = await import('@/providers/query-provider');
+
+    render(
+      <QueryProvider>
+        <TopBar />
+      </QueryProvider>
+    );
+
+    expect(screen.getByRole('button', { name: /search or open command palette/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /switch theme/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /notifications/i })).toBeDefined();
+  });
+});
