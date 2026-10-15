@@ -2,7 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
 import { Activity } from 'lucide-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -46,5 +57,21 @@ describe('Stat', () => {
   it('should render with icon', () => {
     render(<Stat label="Activity" value={42} icon={Activity} />);
     expect(screen.getByText('Activity')).toBeDefined();
+  });
+});
+
+describe('TopBar', () => {
+  it('should render with accessible buttons and aria labels', () => {
+    render(<TopBar />, { wrapper: createWrapper() });
+
+    const searchBtn = screen.getByRole('button', { name: /search or jump to/i });
+    expect(searchBtn).toBeDefined();
+    expect(searchBtn.getAttribute('title')).toBe('Search or jump to (Cmd+K)');
+
+    const themeBtn = screen.getByRole('button', { name: /theme:/i });
+    expect(themeBtn).toBeDefined();
+
+    const notificationsBtn = screen.getByRole('button', { name: /notifications/i });
+    expect(notificationsBtn).toBeDefined();
   });
 });
