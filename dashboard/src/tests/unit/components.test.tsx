@@ -48,3 +48,21 @@ describe('Stat', () => {
     expect(screen.getByText('Activity')).toBeDefined();
   });
 });
+
+describe('TopBar', () => {
+  it('should render accessible action buttons', async () => {
+    const { TopBar } = await import('@/components/layout/topbar');
+    const { QueryClient, QueryClientProvider } = await import('@tanstack/react-query');
+    const queryClient = new QueryClient();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TopBar />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByRole('button', { name: /search or jump to/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /switch theme/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /notifications/i })).toBeInTheDocument();
+  });
+});
