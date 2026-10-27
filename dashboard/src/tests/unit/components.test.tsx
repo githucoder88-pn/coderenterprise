@@ -2,7 +2,19 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
 import { Activity } from 'lucide-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {ui}
+    </QueryClientProvider>
+  );
+}
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -46,5 +58,13 @@ describe('Stat', () => {
   it('should render with icon', () => {
     render(<Stat label="Activity" value={42} icon={Activity} />);
     expect(screen.getByText('Activity')).toBeDefined();
+  });
+});
+
+describe('TopBar', () => {
+  it('should render accessible notifications button', () => {
+    renderWithProviders(<TopBar />);
+    const notifButton = screen.getByRole('button', { name: /Notifications/i });
+    expect(notifButton).toBeDefined();
   });
 });
