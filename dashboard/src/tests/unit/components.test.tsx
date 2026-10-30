@@ -1,8 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Badge } from '@/components/ui/badge';
 import { Stat } from '@/components/ui/stat';
+import { TopBar } from '@/components/layout/topbar';
 import { Activity } from 'lucide-react';
+
+vi.mock('@/hooks/use-api', () => ({
+  useUnreadCount: () => ({ data: { count: 3 } }),
+}));
 
 describe('Badge', () => {
   it('should render with text', () => {
@@ -13,6 +18,22 @@ describe('Badge', () => {
   it('should apply variant styles', () => {
     const { container } = render(<Badge variant="success">OK</Badge>);
     expect(container.firstChild).toBeDefined();
+  });
+});
+
+describe('TopBar accessibility', () => {
+  it('renders buttons with accessible ARIA labels', () => {
+    render(<TopBar />);
+
+    expect(
+      screen.getByRole('button', { name: /search or jump to/i })
+    ).toBeDefined();
+    expect(
+      screen.getByRole('button', { name: /switch theme/i })
+    ).toBeDefined();
+    expect(
+      screen.getByRole('button', { name: /notifications \(3 unread\)/i })
+    ).toBeDefined();
   });
 });
 
